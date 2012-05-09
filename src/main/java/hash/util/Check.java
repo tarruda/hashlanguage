@@ -8,7 +8,7 @@ public class Check {
 			throw new IllegalArgCountException();
 	}
 
-	public static boolean integerResult(Object arg1, Object arg2) {
+	public static boolean isIntegerResult(Object arg1, Object arg2) {
 		return (arg1.getClass() == Long.class || arg1.getClass() == Integer.class)
 				&& (arg2.getClass() == Long.class || arg2.getClass() == Integer.class);
 	}

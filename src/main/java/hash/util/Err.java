@@ -9,12 +9,12 @@ public class Err {
 		return new HashException(
 				String.format(
 						"Operator '%s' is not implemented for objects of type '%s' and '%s'",
-						operator, Types.nameFor(arg1), Types.nameFor(arg2)));
+						operator, arg1.getClass().getName(), arg2.getClass()
+								.getName()));
 	}
 
 	public static InvalidReturnValueException invalidComparisonResult() {
 		return new InvalidReturnValueException(
 				"Comparison must return a number");
 	}
-
 }

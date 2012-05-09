@@ -1,13 +1,13 @@
 package hash.runtime.bridge;
 
-public class AsmLoader extends ClassLoader {
-	public static final AsmLoader instance;
+public class AdapterLoader extends ClassLoader {
+	public static final AdapterLoader instance;
 
 	static {
-		instance = new AsmLoader();
+		instance = new AdapterLoader();
 	}
 
-	private AsmLoader() {
+	private AdapterLoader() {
 
 	}
 

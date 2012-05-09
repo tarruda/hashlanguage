@@ -1,14 +1,13 @@
-package hash.runtime.classes;
+package hash.runtime.mixins;
 
-import hash.lang.Function;
-import hash.lang.Hash;
+import hash.runtime.functions.BinaryOperator;
 import hash.util.Check;
 import hash.util.Err;
 
-public class NumberMixin extends Hash {
+public class NumberMixin extends Mixin {
 
 	public NumberMixin() {
-		put("+##", new Function() {
+		installMethod(new BinaryOperator("+") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -17,12 +16,12 @@ public class NumberMixin extends Hash {
 					Err.binaryOperatorNotImplemented("+", self, other);
 				Number rv = ((Number) self).doubleValue()
 						+ ((Number) other).doubleValue();
-				if (Check.integerResult(self, other))
+				if (Check.isIntegerResult(self, other))
 					return rv.longValue();
 				return rv.doubleValue();
 			}
 		});
-		put("-##", new Function() {
+		installMethod(new BinaryOperator("-") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -31,12 +30,12 @@ public class NumberMixin extends Hash {
 					Err.binaryOperatorNotImplemented("-", self, other);
 				Number rv = ((Number) self).doubleValue()
 						- ((Number) other).doubleValue();
-				if (Check.integerResult(self, other))
+				if (Check.isIntegerResult(self, other))
 					return rv.longValue();
 				return rv.doubleValue();
 			}
 		});
-		put("*##", new Function() {
+		installMethod(new BinaryOperator("*") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -45,12 +44,12 @@ public class NumberMixin extends Hash {
 					Err.binaryOperatorNotImplemented("*", self, other);
 				Number rv = ((Number) self).doubleValue()
 						* ((Number) other).doubleValue();
-				if (Check.integerResult(self, other))
+				if (Check.isIntegerResult(self, other))
 					return rv.longValue();
 				return rv.doubleValue();
 			}
 		});
-		put("/##", new Function() {
+		installMethod(new BinaryOperator("/") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -59,12 +58,12 @@ public class NumberMixin extends Hash {
 					Err.binaryOperatorNotImplemented("/", self, other);
 				Number rv = ((Number) self).doubleValue()
 						/ ((Number) other).doubleValue();
-				if (Check.integerResult(self, other))
+				if (Check.isIntegerResult(self, other))
 					return rv.longValue();
 				return rv.doubleValue();
 			}
 		});
-		put("%##", new Function() {
+		installMethod(new BinaryOperator("%") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -73,7 +72,7 @@ public class NumberMixin extends Hash {
 					Err.binaryOperatorNotImplemented("+", self, other);
 				Number rv = ((Number) self).doubleValue()
 						% ((Number) other).doubleValue();
-				if (Check.integerResult(self, other))
+				if (Check.isIntegerResult(self, other))
 					return rv.longValue();
 				return rv.doubleValue();
 			}

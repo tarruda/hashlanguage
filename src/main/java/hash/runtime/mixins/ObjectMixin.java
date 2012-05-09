@@ -1,18 +1,17 @@
-package hash.runtime.classes;
+package hash.runtime.mixins;
 
-import hash.lang.Function;
-import hash.lang.Hash;
 import hash.runtime.Lookup;
+import hash.runtime.functions.BinaryOperator;
 import hash.util.Check;
 import hash.util.Err;
 
-public class ObjectMixin extends Hash {
+public class ObjectMixin extends Mixin {
 
 	private static final String COMPARE_TO = "compareTo";
-	
+
 	public ObjectMixin() {
-		
-		put("==##", new Function() {
+
+		installMethod(new BinaryOperator("==") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -29,7 +28,7 @@ public class ObjectMixin extends Hash {
 				return ((Number) resultadoComparacao).doubleValue() == 0;
 			}
 		});
-		put("!=##", new Function() {
+		installMethod(new BinaryOperator("!=") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -46,7 +45,7 @@ public class ObjectMixin extends Hash {
 				return ((Number) resultadoComparacao).doubleValue() != 0;
 			}
 		});
-		put(">=##", new Function() {
+		installMethod(new BinaryOperator(">=") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -63,7 +62,7 @@ public class ObjectMixin extends Hash {
 				return ((Number) resultadoComparacao).doubleValue() >= 0;
 			}
 		});
-		put(">##", new Function() {
+		installMethod(new BinaryOperator(">") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -80,7 +79,7 @@ public class ObjectMixin extends Hash {
 				return ((Number) resultadoComparacao).doubleValue() > 0;
 			}
 		});
-		put("<=##", new Function() {
+		installMethod(new BinaryOperator("<=") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
@@ -97,7 +96,7 @@ public class ObjectMixin extends Hash {
 				return ((Number) resultadoComparacao).doubleValue() <= 0;
 			}
 		});
-		put("<##", new Function() {
+		installMethod(new BinaryOperator("<") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];

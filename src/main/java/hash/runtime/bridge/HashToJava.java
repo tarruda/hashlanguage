@@ -15,9 +15,11 @@ import static org.objectweb.asm.Opcodes.IF_ICMPNE;
 import static org.objectweb.asm.Opcodes.V1_5;
 import hash.lang.Function;
 import hash.lang.Hash;
-import hash.runtime.classes.NumberMixin;
-import hash.runtime.classes.ObjectMixin;
+import hash.runtime.Lookup;
 import hash.runtime.exceptions.IncompatibleJavaMethodSignatureException;
+import hash.runtime.functions.JavaMethod;
+import hash.runtime.mixins.NumberMixin;
+import hash.runtime.mixins.ObjectMixin;
 import hash.util.Asm;
 
 import java.lang.reflect.Method;
@@ -31,9 +33,8 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
-public class HashResolver {
+public class HashToJava {
 
-	private static final String SUPER = "super";
 	private static final HashMap<Class<?>, Hash> classMap;
 	private static final HashMap<Class<?>, Hash> classMixins;
 	private static final String[] ignoredMethodNames = { "getClass" };
@@ -45,15 +46,15 @@ public class HashResolver {
 		classMixins.put(Number.class, new NumberMixin());
 	}
 
-	public static Hash getClassFor(Object object) {
+	public static Hash getClass(Object object) {
 		if (object instanceof Hash)
 			return (Hash) object;
-		return getSuperClassFor(object);
+		return getSuperclass(object);
 	}
 
-	public static Hash getSuperClassFor(Object object) {
+	public static Hash getSuperclass(Object object) {
 		if (object instanceof Hash) {
-			Object rv = ((Hash) object).get(SUPER);
+			Object rv = ((Hash) object).get(Lookup.SUPER);
 			if (rv instanceof Hash)
 				return (Hash) rv;
 			return null;
@@ -88,7 +89,7 @@ public class HashResolver {
 		// that will be responsible for delegating calls to the correct
 		// method based on the parameters received
 		for (String methodName : methodsByName.keySet()) {
-			Class<?> wrapperClass = createMethodGroupWrapper(cls, methodName,
+			Class<?> wrapperClass = createJavaMethodAdapter(cls, methodName,
 					methodsByName.get(methodName));
 			try {
 				Object instance = wrapperClass.getConstructor(String.class,
@@ -108,7 +109,7 @@ public class HashResolver {
 			for (Object key : mixin.keySet())
 				hashClass.put(key, mixin.get(key));
 		// if there is a superclass, then it must have already been loaded
-		hashClass.put(SUPER, classMap.get(superclass));
+		hashClass.put(Lookup.SUPER, classMap.get(superclass));
 		classMap.put(cls, hashClass);
 	}
 
@@ -119,36 +120,31 @@ public class HashResolver {
 		return false;
 	}
 
-	private static Class<?> createMethodGroupWrapper(Class<?> klass,
+	private static Class<?> createJavaMethodAdapter(Class<?> klass,
 			String name, List<Method> methods) {
 		String classNameSuffix = name + "Wrapper";
 		ClassWriter cw = Asm.newClassWriter();
 		cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER,
 				"hash/generated/" + Asm.internalName(klass) + "/"
 						+ classNameSuffix, null,
-				Asm.internalName(JavaMethodWrapper.class), null);
+				Asm.internalName(JavaMethod.class), null);
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_VARARGS,
 				Asm.singleMethodName(Function.class),
 				Asm.singleMethodDescriptor(Function.class), null, null);
 		mv.visitCode();
-		implementWrapper(mv, methods);
+		implementAdapter(mv, methods);
 		mv.visitMaxs(0, 0);
 		mv.visitEnd();
-		Asm.addConstructor(cw, JavaMethodWrapper.class, String.class,
+		Asm.addConstructor(cw, JavaMethod.class, String.class,
 				String.class, Boolean.TYPE);
 		cw.visitEnd();
-		byte[] classData = cw.toByteArray();
-		// try {
-		// new FileOutputStream("/tmp/classDump.class").write(classData);
-		// } catch (Exception e) {
-		// throw new RuntimeException(e);
-		// }
-		return AsmLoader.instance.defineClass(
+		byte[] classData = cw.toByteArray();		
+		return AdapterLoader.instance.defineClass(
 				"hash.generated." + klass.getCanonicalName() + "."
 						+ classNameSuffix, classData);
 	}
 
-	private static void implementWrapper(MethodVisitor mv, List<Method> methods) {
+	private static void implementAdapter(MethodVisitor mv, List<Method> methods) {
 		for (Method method : methods) {
 			// for each method overload we must test if the argument count
 			// and types match with the actual method signature

@@ -2,11 +2,13 @@ package hash.runtime;
 
 import hash.lang.Function;
 import hash.lang.Hash;
-import hash.runtime.bridge.HashResolver;
+import hash.runtime.bridge.HashToJava;
 import hash.runtime.exceptions.AttributeNotFoundException;
 import hash.runtime.exceptions.HashException;
 
 public class Lookup {
+
+	public static final String SUPER = "super";
 
 	public static Object invokeBinaryOperator(String operator, Object lhs,
 			Object rhs) {
@@ -29,12 +31,13 @@ public class Lookup {
 	}
 
 	public static Object getAttribute(Object target, String name) {
-		Hash cls = HashResolver.getClassFor(target);
+		Hash cls = HashToJava.getClass(target);
 		Object rv = null;
 		while (rv == null && cls != null) {
 			rv = cls.get(name);
-			cls = HashResolver.getSuperClassFor(cls);
+			cls = HashToJava.getSuperclass(cls);
 		}
 		return rv;
 	}
+
 }
