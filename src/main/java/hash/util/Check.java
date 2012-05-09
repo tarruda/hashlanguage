@@ -1,4 +1,4 @@
-package hash.runtime.util;
+package hash.util;
 
 import hash.runtime.exceptions.IllegalArgCountException;
 

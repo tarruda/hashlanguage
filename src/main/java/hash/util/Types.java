@@ -1,6 +1,6 @@
-package hash.runtime.util;
+package hash.util;
 
-public class Type {
+public class Types {
 	public static String nameFor(Object obj) {
 		return obj.getClass().getName();
 	}

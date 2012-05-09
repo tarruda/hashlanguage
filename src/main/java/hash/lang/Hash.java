@@ -13,7 +13,7 @@ import java.util.Set;
 public class Hash implements Map<Object, Object> {
 
 	// For now this class will delegate calls to an internal HashMap.
-	// TODO Find an implementation better suited for this application. 
+	// TODO Find an implementation better suited for this application.
 	private final HashMap<Object, Object> impl;
 
 	public Hash() {
@@ -66,5 +66,10 @@ public class Hash implements Map<Object, Object> {
 
 	public Set<java.util.Map.Entry<Object, Object>> entrySet() {
 		return impl.entrySet();
+	}
+
+	@Override
+	public String toString() {
+		return impl.toString();
 	}
 }

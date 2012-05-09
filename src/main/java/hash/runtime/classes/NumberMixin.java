@@ -2,8 +2,8 @@ package hash.runtime.classes;
 
 import hash.lang.Function;
 import hash.lang.Hash;
-import hash.runtime.util.Check;
-import hash.runtime.util.Err;
+import hash.util.Check;
+import hash.util.Err;
 
 public class NumberMixin extends Hash {
 

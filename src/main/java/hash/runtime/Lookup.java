@@ -2,6 +2,7 @@ package hash.runtime;
 
 import hash.lang.Function;
 import hash.lang.Hash;
+import hash.runtime.bridge.HashResolver;
 import hash.runtime.exceptions.AttributeNotFoundException;
 import hash.runtime.exceptions.HashException;
 
@@ -28,11 +29,11 @@ public class Lookup {
 	}
 
 	public static Object getAttribute(Object target, String name) {
-		Hash cls = JavaBridge.getClassFor(target);
+		Hash cls = HashResolver.getClassFor(target);
 		Object rv = null;
 		while (rv == null && cls != null) {
 			rv = cls.get(name);
-			cls = JavaBridge.getSuperClassFor(cls);
+			cls = HashResolver.getSuperClassFor(cls);
 		}
 		return rv;
 	}
