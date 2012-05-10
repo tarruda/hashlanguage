@@ -120,12 +120,12 @@ StringBuilder sb = new StringBuilder();
 
 fragment DQCHAR[StringBuilder sb]
   :
-  c=~('\\'|'"') {sb.appendCodePoint($c);}  
+  c=~('\\'|'"'|'\n') {sb.appendCodePoint($c);}  
   ;
 
 fragment SQCHAR[StringBuilder sb]
   :
-  c=~('\\'|'\'') {sb.appendCodePoint($c);}  
+  c=~('\\'|'\''|'\n') {sb.appendCodePoint($c);}  
   ;
 
 fragment ESC_SEQ[StringBuilder sb]

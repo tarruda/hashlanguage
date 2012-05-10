@@ -1,6 +1,5 @@
 package hash.parsing.visitors;
 
-
 import hash.parsing.visitors.nodes.Result;
 
 import org.antlr.runtime.tree.Tree;
@@ -10,8 +9,30 @@ public class LiteralEvaluator extends AstVisitor {
 	protected Tree visitInteger(Tree node) {
 		String txt = node.getText();
 		Long val = Long.parseLong(txt, 16);
-		if (val <= Integer.MAX_VALUE)
-			return new Result(val.intValue());
+		int iVal = val.intValue();
+		if (val.longValue() == iVal)
+			return new Result(iVal);
 		return new Result(val);
+	}
+
+	@Override
+	protected Tree visitFloat(Tree node) {
+		String txt = node.getText();
+		Double val = Double.parseDouble(txt);
+		float fVal = val.floatValue();
+		if (val.doubleValue() == fVal)
+			return new Result(fVal);
+		return new Result(val);
+	}
+
+	@Override
+	protected Tree visitString(Tree node) {
+		return new Result(node.getText());
+	}
+
+	@Override
+	protected Tree visitBoolean(Tree node) {
+		String txt = node.getText();
+		return new Result(Boolean.parseBoolean(txt));
 	}
 }

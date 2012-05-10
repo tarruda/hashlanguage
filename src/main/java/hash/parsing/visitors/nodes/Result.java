@@ -1,8 +1,11 @@
 package hash.parsing.visitors.nodes;
 
-import org.antlr.runtime.tree.CommonTree;
-
-public class Result extends CommonTree {
+/**
+ * Node for storing the result of evaluation
+ * @author Thiago de Arruda
+ *
+ */
+public class Result extends EmptyNode {
 	private Object evaluationResult;
 
 	public Result(Object evaluationResult) {

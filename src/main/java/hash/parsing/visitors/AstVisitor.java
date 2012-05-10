@@ -1,9 +1,25 @@
 package hash.parsing.visitors;
 
-import static hash.parsing.HashParser.*;
+import static hash.parsing.HashParser.BINARY;
+import static hash.parsing.HashParser.BOOLEAN;
+import static hash.parsing.HashParser.FLOAT;
+import static hash.parsing.HashParser.INTEGER;
+import static hash.parsing.HashParser.STRING;
+import static hash.parsing.HashParser.UNARY;
 
 import org.antlr.runtime.tree.Tree;
 
+/**
+ * Base class for all classes that need to process the AST. It can be used for
+ * translation, transformation, analysis, compilation, execution or any other
+ * processing of the AST.
+ * 
+ * The default behavior for the visitor methods is to simply return the 'Tree'
+ * instance passed as the first argument.
+ * 
+ * @author Thiago de Arruda
+ * 
+ */
 public abstract class AstVisitor {
 
 	public Tree visit(Tree node) {
