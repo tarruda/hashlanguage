@@ -7,7 +7,7 @@ public abstract class BinaryOperator extends BuiltinMethod {
 		return operator + "##";
 	}
 
-	private String op;
+	protected String op;
 
 	public BinaryOperator(String op) {
 		this.op = op;

@@ -77,8 +77,13 @@ addition
   ;
   
 multiplication
-  : (l=plusOrMinus -> $l)
-    ((o=MUL|o=DIV|o=MOD) r=plusOrMinus -> ^(BINARY[$o] $multiplication $r))*  
+  : (l=power -> $l)
+    ((o=MUL|o=DIV|o=MOD) r=power -> ^(BINARY[$o] $multiplication $r))*  
+  ;
+  
+power
+  : (l=plusOrMinus -> $l) 
+    ((o=POW) r=power -> ^(BINARY[$o] $l $r))?
   ;
 
 plusOrMinus

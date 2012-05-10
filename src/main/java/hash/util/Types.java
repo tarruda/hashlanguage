@@ -1,8 +1,8 @@
 package hash.util;
 
-public class Numbers {
+public class Types {
 
-	public static boolean isIntegerResult(Object arg1, Object arg2) {
+	public static boolean areIntegers(Object arg1, Object arg2) {
 		return isInteger(arg1) && isInteger(arg2);
 	}
 

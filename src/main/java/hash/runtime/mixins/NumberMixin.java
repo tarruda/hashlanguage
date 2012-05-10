@@ -1,10 +1,11 @@
 package hash.runtime.mixins;
 
+import hash.runtime.Lookup;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
 import hash.util.Check;
 import hash.util.Err;
-import hash.util.Numbers;
+import hash.util.Types;
 
 public class NumberMixin extends Mixin {
 
@@ -15,9 +16,9 @@ public class NumberMixin extends Mixin {
 				Check.numberOfArgs(args, 1);
 				Object self = args[0];
 				Number rv = -((Number) self).doubleValue();
-				if (Numbers.isInteger(self))
-					return Numbers.integerNumber(rv.longValue());
-				return Numbers.floatNumber(rv.doubleValue());
+				if (Types.isInteger(self))
+					return Types.integerNumber(rv.longValue());
+				return Types.floatNumber(rv.doubleValue());
 			}
 		});
 		installMethod(new BinaryOperator("+") {
@@ -26,12 +27,12 @@ public class NumberMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				if (!(other instanceof Number))
-					Err.binaryOperatorNotImplemented("+", self, other);
+					throw Err.binaryOperatorNotImplemented(op, self, other);
 				Number rv = ((Number) self).doubleValue()
 						+ ((Number) other).doubleValue();
-				if (Numbers.isIntegerResult(self, other))
-					return Numbers.integerNumber(rv.longValue());
-				return Numbers.floatNumber(rv.doubleValue());
+				if (Types.areIntegers(self, other))
+					return Types.integerNumber(rv.longValue());
+				return Types.floatNumber(rv.doubleValue());
 			}
 		});
 		installMethod(new BinaryOperator("-") {
@@ -40,12 +41,12 @@ public class NumberMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				if (!(other instanceof Number))
-					Err.binaryOperatorNotImplemented("-", self, other);
+					throw Err.binaryOperatorNotImplemented(op, self, other);
 				Number rv = ((Number) self).doubleValue()
 						- ((Number) other).doubleValue();
-				if (Numbers.isIntegerResult(self, other))
-					return Numbers.integerNumber(rv.longValue());
-				return Numbers.floatNumber(rv.doubleValue());
+				if (Types.areIntegers(self, other))
+					return Types.integerNumber(rv.longValue());
+				return Types.floatNumber(rv.doubleValue());
 			}
 		});
 		installMethod(new BinaryOperator("*") {
@@ -53,13 +54,15 @@ public class NumberMixin extends Mixin {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
+				if (other.getClass() == String.class)
+					return Lookup.invokeBinaryOperator(op, other, self);
 				if (!(other instanceof Number))
-					Err.binaryOperatorNotImplemented("*", self, other);
+					throw Err.binaryOperatorNotImplemented(op, self, other);
 				Number rv = ((Number) self).doubleValue()
 						* ((Number) other).doubleValue();
-				if (Numbers.isIntegerResult(self, other))
-					return Numbers.integerNumber(rv.longValue());
-				return Numbers.floatNumber(rv.doubleValue());
+				if (Types.areIntegers(self, other))
+					return Types.integerNumber(rv.longValue());
+				return Types.floatNumber(rv.doubleValue());
 			}
 		});
 		installMethod(new BinaryOperator("/") {
@@ -68,12 +71,12 @@ public class NumberMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				if (!(other instanceof Number))
-					Err.binaryOperatorNotImplemented("/", self, other);
+					throw Err.binaryOperatorNotImplemented(op, self, other);
 				Number rv = ((Number) self).doubleValue()
 						/ ((Number) other).doubleValue();
-				if (Numbers.isIntegerResult(self, other))
-					return Numbers.integerNumber(rv.longValue());
-				return Numbers.floatNumber(rv.doubleValue());
+				if (Types.areIntegers(self, other))
+					return Types.integerNumber(rv.longValue());
+				return Types.floatNumber(rv.doubleValue());
 			}
 		});
 		installMethod(new BinaryOperator("%") {
@@ -82,12 +85,26 @@ public class NumberMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				if (!(other instanceof Number))
-					Err.binaryOperatorNotImplemented("+", self, other);
+					throw Err.binaryOperatorNotImplemented(op, self, other);
 				Number rv = ((Number) self).doubleValue()
 						% ((Number) other).doubleValue();
-				if (Numbers.isIntegerResult(self, other))
-					return Numbers.integerNumber(rv.longValue());
-				return Numbers.floatNumber(rv.doubleValue());
+				if (Types.areIntegers(self, other))
+					return Types.integerNumber(rv.longValue());
+				return Types.floatNumber(rv.doubleValue());
+			}
+		});
+		installMethod(new BinaryOperator("**") {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				Object self = args[0];
+				Object other = args[1];
+				if (!(other instanceof Number))
+					throw Err.binaryOperatorNotImplemented(op, self, other);
+				Number rv = Math.pow(((Number) self).doubleValue(),
+						((Number) other).doubleValue());
+				if (Types.areIntegers(self, other))
+					return Types.integerNumber(rv.longValue());
+				return Types.floatNumber(rv.doubleValue());
 			}
 		});
 	}

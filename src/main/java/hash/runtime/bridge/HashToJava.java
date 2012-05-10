@@ -7,6 +7,7 @@ import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.IntegerMixin;
 import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
+import hash.runtime.mixins.StringMixin;
 import hash.util.Asm;
 import hash.util.Constants;
 
@@ -35,6 +36,7 @@ public class HashToJava implements Opcodes {
 		classMixins.put(Number.class, new NumberMixin());
 		classMixins.put(Integer.class, new IntegerMixin());
 		classMixins.put(Long.class, new IntegerMixin());
+		classMixins.put(String.class, new StringMixin());
 	}
 
 	public static Hash getClass(Object object) {

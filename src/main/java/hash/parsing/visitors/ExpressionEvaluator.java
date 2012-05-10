@@ -17,8 +17,11 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitUnaryExpression(Tree operator, Tree operand) {
+		String operatorTxt = operator.getText();
+		if (operatorTxt.equals("+"))// ignore
+			return visit(operand);
 		Result op = (Result) visit(operand);
-		return new Result(Lookup.invokeUnaryOperator(operator.getText(),
+		return new Result(Lookup.invokeUnaryOperator(operatorTxt,
 				op.getEvaluationResult()));
 	}
 }
