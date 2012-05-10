@@ -5,7 +5,8 @@ import static org.junit.Assert.fail;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.expression_return;
-import hash.parsing.visitors.Evaluator;
+import hash.parsing.visitors.ExpressionEvaluator;
+import hash.parsing.visitors.nodes.Result;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -14,13 +15,13 @@ import org.antlr.runtime.tree.Tree;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EvaluatorTest {
+public class ExpressionEvaluatorTest {
 
-	private Evaluator target;
+	private ExpressionEvaluator target;
 
 	@Before
 	public void setup() {
-		target = new Evaluator();
+		target = new ExpressionEvaluator();
 	}
 
 	private Object evaluate(String code) {
@@ -32,16 +33,16 @@ public class EvaluatorTest {
 		try {
 			psrReturn = parser.expression();
 			Tree t = (Tree) psrReturn.getTree();
-			return target.evaluate(t);
+			return ((Result) target.visit(t)).getEvaluationResult();
 		} catch (RecognitionException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 			return null;
-		}	
+		}
 	}
 
 	@Test
-	public void arithmetic1() {		
+	public void arithmetic1() {
 		assertEquals(25l, evaluate("10+15"));
 	}
 
