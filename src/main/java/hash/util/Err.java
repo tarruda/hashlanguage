@@ -8,9 +8,16 @@ public class Err {
 			Object arg1, Object arg2) {
 		return new HashException(
 				String.format(
-						"Operator '%s' is not implemented for objects of type '%s' and '%s'",
+						"Binary operator '%s' is not implemented for types '%s' and '%s'",
 						operator, arg1.getClass().getName(), arg2.getClass()
 								.getName()));
+	}
+
+	public static HashException unaryOperatorNotImplemented(String operator,
+			Object arg1) {
+		return new HashException(String.format(
+				"Unary operator '%s' is not implemented for type '%s'",
+				operator, arg1.getClass().getName()));
 	}
 
 	public static InvalidReturnValueException invalidComparisonResult() {

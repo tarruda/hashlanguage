@@ -1,4 +1,4 @@
-package hash.parsing.visitors;
+package hash;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.literal_return;
+import hash.parsing.visitors.LiteralEvaluator;
 import hash.parsing.visitors.nodes.Result;
 
 import org.antlr.runtime.ANTLRStringStream;
@@ -16,7 +17,7 @@ import org.antlr.runtime.tree.Tree;
 import org.junit.Before;
 import org.junit.Test;
 
-public class LiteralEvaluatorTest {
+public class LiteralTest {
 
 	private LiteralEvaluator target;
 

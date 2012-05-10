@@ -1,11 +1,11 @@
-package hash.parsing.visitors;
+package hash;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ ExpressionEvaluatorTest.class, LiteralEvaluatorTest.class })
+@SuiteClasses({ BinaryAndUnaryExpressionEvaluationTest.class, LiteralTest.class })
 public class AllTests {
 
 }

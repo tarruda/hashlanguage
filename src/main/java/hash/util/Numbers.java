@@ -3,8 +3,7 @@ package hash.util;
 public class Numbers {
 
 	public static boolean isIntegerResult(Object arg1, Object arg2) {
-		return (arg1.getClass() == Long.class || arg1.getClass() == Integer.class)
-				&& (arg2.getClass() == Long.class || arg2.getClass() == Integer.class);
+		return isInteger(arg1) && isInteger(arg2);
 	}
 
 	public static Object floatNumber(Double d) {
@@ -19,5 +18,9 @@ public class Numbers {
 		if (l.longValue() == iVal)
 			return iVal;
 		return l;
+	}
+
+	public static boolean isInteger(Object n) {
+		return n.getClass() == Long.class || n.getClass() == Integer.class;
 	}
 }

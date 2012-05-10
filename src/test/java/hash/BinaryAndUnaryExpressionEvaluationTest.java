@@ -1,31 +1,27 @@
-package hash.parsing.visitors;
+package hash;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.expression_return;
+import hash.parsing.visitors.ExpressionEvaluator;
 import hash.parsing.visitors.nodes.Result;
+import hash.testutils.BinaryAndUnaryExpressionTest;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
-import org.junit.Before;
-import org.junit.Test;
 
-public class ExpressionEvaluatorTest {
+public class BinaryAndUnaryExpressionEvaluationTest extends
+		BinaryAndUnaryExpressionTest {
 
-	private ExpressionEvaluator target;
-
-	@Before
-	public void setup() {
-		target = new ExpressionEvaluator();
-	}
-
-	private Object evaluate(String code) {
+	@Override
+	protected Object evaluate(String code) {
+		ExpressionEvaluator target = new ExpressionEvaluator();
+		HashLexer lexer = new HashLexer();
 		ANTLRStringStream source = new ANTLRStringStream(code);
-		HashLexer lexer = new HashLexer(source);
+		lexer.setCharStream(source);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		HashParser parser = new HashParser(tokens);
 		expression_return psrReturn = null;
@@ -38,11 +34,6 @@ public class ExpressionEvaluatorTest {
 			fail(e.getMessage());
 			return null;
 		}
-	}
-
-	@Test
-	public void arithmetic1() {
-		assertEquals(25, evaluate("10+15"));
 	}
 
 }

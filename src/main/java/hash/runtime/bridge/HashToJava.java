@@ -4,6 +4,7 @@ import hash.lang.Function;
 import hash.lang.Hash;
 import hash.runtime.exceptions.IncompatibleJavaMethodSignatureException;
 import hash.runtime.functions.JavaMethod;
+import hash.runtime.mixins.IntegerMixin;
 import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
 import hash.util.Asm;
@@ -32,6 +33,8 @@ public class HashToJava implements Opcodes {
 		classMixins = new HashMap<Class<?>, Hash>();
 		classMixins.put(Object.class, new ObjectMixin());
 		classMixins.put(Number.class, new NumberMixin());
+		classMixins.put(Integer.class, new IntegerMixin());
+		classMixins.put(Long.class, new IntegerMixin());
 	}
 
 	public static Hash getClass(Object object) {
@@ -56,14 +59,14 @@ public class HashToJava implements Opcodes {
 		return classMap.get(cls);
 	}
 
-	private static void constructHashClass(Class<?> cls) {
-		Class<?> superclass = cls.getSuperclass();
-		if (superclass != null)
+	private static void constructHashClass(Class<?> klass) {
+		Class<?> superclass = klass.getSuperclass();
+		if (superclass != null && !classMap.containsKey(superclass))
 			constructHashClass(superclass);
 		Hash hashClass = new Hash();
 		// group methods by name
 		HashMap<String, List<Method>> methodsByName = new HashMap<String, List<Method>>();
-		for (Method method : cls.getDeclaredMethods()) {
+		for (Method method : klass.getDeclaredMethods()) {
 			int mod = method.getModifiers();
 			if (Modifier.isAbstract(mod) || Modifier.isPrivate(mod)
 					|| Modifier.isProtected(mod) || isIgnored(method))
@@ -77,13 +80,13 @@ public class HashToJava implements Opcodes {
 		// that will be responsible for delegating calls to the correct
 		// method based on the parameters received
 		for (String methodName : methodsByName.keySet()) {
-			Class<?> wrapperClass = createJavaMethodAdapter(cls, methodName,
+			Class<?> wrapperClass = createJavaMethodAdapter(klass, methodName,
 					methodsByName.get(methodName));
 			try {
 				Object instance = wrapperClass.getConstructor(String.class,
 						String.class, Boolean.TYPE).newInstance(
 						methodName,
-						cls.getCanonicalName(),
+						klass.getCanonicalName(),
 						Modifier.isStatic(methodsByName.get(methodName).get(0)
 								.getModifiers()));
 				hashClass.put(methodName, instance);
@@ -92,13 +95,13 @@ public class HashToJava implements Opcodes {
 			}
 		}
 		// if we have defined a mixin for this class, the time to merge is now
-		Hash mixin = classMixins.get(cls);
+		Hash mixin = classMixins.get(klass);
 		if (mixin != null)
 			for (Object key : mixin.keySet())
 				hashClass.put(key, mixin.get(key));
 		// if there is a superclass, then it must have already been loaded
 		hashClass.put(Constants.SUPER, classMap.get(superclass));
-		classMap.put(cls, hashClass);
+		classMap.put(klass, hashClass);
 	}
 
 	private static boolean isIgnored(Method method) {

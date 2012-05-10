@@ -15,4 +15,10 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 				l.getEvaluationResult(), r.getEvaluationResult()));
 	}
 
+	@Override
+	protected Tree visitUnaryExpression(Tree operator, Tree operand) {
+		Result op = (Result) visit(operand);
+		return new Result(Lookup.invokeUnaryOperator(operator.getText(),
+				op.getEvaluationResult()));
+	}
 }

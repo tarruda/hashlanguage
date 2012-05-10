@@ -12,6 +12,10 @@ public class Lookup {
 			Object rhs) {
 		return invokeMethod(lhs, operator + "##", rhs);
 	}
+	
+	public static Object invokeUnaryOperator(String operator, Object operand) {
+		return invokeMethod(operand, operator + "#");
+	}
 
 	public static Object invokeMethod(Object target, String name,
 			Object... args) {
