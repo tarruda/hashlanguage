@@ -7,6 +7,10 @@ import org.antlr.runtime.RecognizerSharedState;
 
 @SuppressWarnings("serial")
 public abstract class AbstractHashLexer extends Lexer {
+	private static final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			+ "abcdefghijklmnopqrstuvwxyz" + "_$";
+	private static final String digits = "0123456789";
+	private static final String whiteSpaces = " \n\t\r";
 
 	public AbstractHashLexer() {
 	}
@@ -41,5 +45,43 @@ public abstract class AbstractHashLexer extends Lexer {
 			ex.charPositionInLine = input.getCharPositionInLine();
 			throw ex;
 		}
+	}
+
+	protected boolean isNumberAttributeAccess() {
+		// try to match a number following a dot following an identifier.
+		// if we fail to match, then we stop and return false immediately
+		int i = 1;
+		if (!isDigit(i))
+			return false;
+		while (isDigit(i))
+			i++;
+		while (isWhitespace(i))
+			i++;
+		if (!isDot(i))
+			return false;
+		i++;
+		while (isWhitespace(i))
+			i++;
+		return isLetter(i);
+	}
+
+	private boolean isDot(int i) {
+		return la(i) == '.';
+	}
+
+	private boolean isLetter(int i) {
+		return letters.indexOf(la(i)) != -1;
+	}
+
+	private boolean isWhitespace(int i) {
+		return whiteSpaces.indexOf(la(i)) != -1;
+	}
+
+	private boolean isDigit(int i) {
+		return digits.indexOf(la(i)) != -1;
+	}
+
+	private char la(int i) {		
+		return (char) input.LA(i);
 	}
 }

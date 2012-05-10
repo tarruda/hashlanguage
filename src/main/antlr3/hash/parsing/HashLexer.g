@@ -55,7 +55,8 @@ IDENTIFIER: LETTER (LETTER|DEC_DIGIT)*;
 
 // Literal tokens
 FLOAT_NORMAL
-  : ('0'..'9')+ '.' ('0'..'9')* EXPONENT? 
+  : { !isNumberAttributeAccess() }? =>   
+    DEC_DIGIT+ '.' DEC_DIGIT* EXPONENT? 
   ;
 
 DOT_FLOAT
@@ -159,5 +160,5 @@ COMMENT
   ;    
 WS  
   : 
-  (' '|'\r'|'\t'|'\u000C'|'\n') {$channel=HIDDEN;}
+  (' '|'\r'|'\t'|'\n') {$channel=HIDDEN;}
   ;

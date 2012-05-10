@@ -14,7 +14,10 @@ tokens {
     STRING;
     FLOAT;
     INTEGER;
-    BOOLEAN;    
+    BOOLEAN;
+    INVOCATION;
+    ARGS;
+    ATTRIBUTE;
 }
 
 @header {
@@ -97,16 +100,29 @@ invert
   ;
   
 primary
-  : atom
+  : (atom -> atom)
+    (
+      (
+        s=LROUND
+        (args+=expression (COMMA args+=expression)*)? 
+        RROUND
+        -> ^(INVOCATION[$s, "Invocation"] $primary ^(ARGS $args*))
+      )
+    | (
+        s=DOT name=identifier 
+        -> ^(ATTRIBUTE[$s, "Attribute"] $primary STRING[$name.start, $name.text])
+      )
+    )*
   ;
-
+  
 atom
   : enclosure
-  | literal  
+  | literal
+  | identifier
   ;
   
 enclosure
-  : LROUND disjunction RROUND -> disjunction
+  : LROUND expression RROUND -> expression
   ;
   
 identifier

@@ -21,7 +21,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 public class HashToJava implements Opcodes {
 
@@ -151,13 +150,18 @@ public class HashToJava implements Opcodes {
 				mv.visitVarInsn(ALOAD, 1);
 				mv.visitLdcInsn(i + 1);
 				mv.visitInsn(AALOAD);
-				try {
-					Asm.invokeVirtual(mv, Object.class.getMethod("getClass"));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-				mv.visitLdcInsn(Type.getType(params[i]));
-				mv.visitJumpInsn(IF_ACMPNE, nextTest);
+				// try {
+				//
+				// Asm.invokeVirtual(mv, Object.class.getMethod("getClass"));
+				// } catch (Exception e) {
+				// throw new RuntimeException(e);
+				// }
+				Class<?> kls = params[i];
+				if (kls.isPrimitive())
+					kls = Asm.getBoxedClass(kls);
+				mv.visitTypeInsn(INSTANCEOF, Asm.internalName(kls));
+				// mv.visitLdcInsn(Type.getType(params[i]));
+				mv.visitJumpInsn(IFEQ, nextTest);
 			}
 			// if the arguments match the signature, the method is invoked
 			implementMethodInvocation(mv, method);
