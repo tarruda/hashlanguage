@@ -1,10 +1,11 @@
-package hash.parsing.walkers;
+package hash.parsing.visitors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.expression_return;
+import hash.parsing.visitors.Evaluator;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;

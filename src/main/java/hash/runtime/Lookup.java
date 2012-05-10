@@ -8,8 +8,6 @@ import hash.runtime.exceptions.HashException;
 
 public class Lookup {
 
-	public static final String SUPER = "super";
-
 	public static Object invokeBinaryOperator(String operator, Object lhs,
 			Object rhs) {
 		return invokeMethod(lhs, operator + "##", rhs);

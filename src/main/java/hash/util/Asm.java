@@ -1,25 +1,13 @@
 package hash.util;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.DLOAD;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.FLOAD;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.LLOAD;
-import static org.objectweb.asm.Opcodes.NEW;
-import static org.objectweb.asm.Opcodes.RETURN;
-
 import java.lang.reflect.Method;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-public class Asm {
+public class Asm implements Opcodes {
 
 	public static ClassWriter newClassWriter() {
 		return new ClassWriter(ClassWriter.COMPUTE_MAXS
@@ -158,7 +146,7 @@ public class Asm {
 				Type.getMethodDescriptor(method));
 	}
 
-	public static void invokeDefaultConstructor(MethodVisitor mv, Class<?> klass) {
+	public static void constructAndInitialize(MethodVisitor mv, Class<?> klass) {
 		mv.visitTypeInsn(NEW, internalName(klass));
 		mv.visitInsn(DUP);
 		mv.visitMethodInsn(INVOKESPECIAL, internalName(klass), "<init>", "()V");

@@ -3,3 +3,4 @@
 /target/
 *.tokens
 *.class
+*.jpage

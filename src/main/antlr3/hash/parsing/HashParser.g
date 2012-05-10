@@ -8,10 +8,13 @@ options {
 }
 
 tokens {
-    // virtual tokens for the AST
+    // imaginary tokens for the AST
+    BINARY;
+    UNARY;
     STRING;
-    BOOLEAN;
+    FLOAT;
     INTEGER;
+    BOOLEAN;    
 }
 
 @header {
@@ -34,48 +37,57 @@ expression
   ;
 
 disjunction
-  : conjunction (OR^ conjunction)* 
+  : (l=conjunction -> $l) 
+    (o=OR r=conjunction -> ^(BINARY[$o] $disjunction $r))* 
   ;
 
 conjunction
-  : bitwiseOr (AND^ bitwiseOr)*
+  : (l=bitwiseOr -> $l) 
+    (o=AND r=bitwiseOr -> ^(BINARY[$o] $conjunction $r))*
   ;
   
 bitwiseOr
-  : bitwiseAnd (BIT_OR^ bitwiseAnd)*
+  : (l=bitwiseAnd -> $l)
+    (o=BIT_OR r=bitwiseAnd -> ^(BINARY[$o] $bitwiseOr $r))*
   ;
   
 bitwiseAnd
-  : equality (BIT_AND^ equality)*
+  : (l=equality -> $l) 
+    (o=BIT_AND r=equality -> ^(BINARY[$o] $bitwiseAnd $r))*
   ;
   
 equality
-  : comparison ((EQ|NEQ)^ comparison)*   
+  : (l=comparison -> $l) 
+    ((o=EQ|o=NEQ) r=comparison -> ^(BINARY[$o] $equality $r))*   
   ;
   
 comparison
-  : shift ((LE|LT|GE|GT)^ shift)?
+  : (l=shift -> $l)
+    ((o=LE|o=LT|o=GE|o=GT) r=shift -> ^(BINARY[$o] $l $r))?
   ;
   
 shift
-  : addition ((SHR|SHL)^ addition)*  
+  : (l=addition -> $l)
+    ((o=SHR|o=SHL) r=addition -> ^(BINARY[$o] $shift $r))*  
   ;
   
 addition
-  : multiplication ((PLUS|MINUS)^ multiplication)*
+  : (l=multiplication -> $l)
+    ((o=PLUS|o=MINUS) r=multiplication -> ^(BINARY[$o] $addition $r))*
   ;
   
 multiplication
-  : plusOrMinus ((MUL|DIV|MOD)^ plusOrMinus)* 
+  : (l=plusOrMinus -> $l)
+    ((o=MUL|o=DIV|o=MOD) r=plusOrMinus -> ^(BINARY[$o] $multiplication $r))*  
   ;
 
 plusOrMinus
-  : (INC|DEC|PLUS|MINUS)^ plusOrMinus
+  : (o=INC|o=DEC|o=PLUS|o=MINUS) op=plusOrMinus -> ^(UNARY[$o] $op)
   | invert 
   ;
   
 invert
-  : (NOT|BIT_NOT)^ invert
+  : (o=NOT|o=BIT_NOT) op=invert -> ^(UNARY[$o] $op)
   | primary
   ;
   
@@ -92,13 +104,29 @@ enclosure
   : LROUND disjunction RROUND -> disjunction
   ;
   
-literal
-  : STRING
-  | FLOAT
-  | INT
-  | BOOLEAN
-  ;
-
 identifier
   : IDENTIFIER
+  ;
+  
+literal
+  : stringLiteral
+  | floatLiteral
+  | integerLiteral
+  | booleanLiteral
+  ;
+
+stringLiteral
+  : (t=SQ_STRING|t=DQ_STRING) -> STRING[$t]
+  ;
+
+floatLiteral
+  : (t=FLOAT_NORMAL|t=DOT_FLOAT|t=FLOAT_EXP) -> FLOAT[$t]
+  ;
+  
+integerLiteral
+  : (t=HEX_INT|t=DEC_INT|t=OCT_INT|t=BIN_INT) -> INTEGER[$t]
+  ;
+  
+booleanLiteral
+  : (t=TRUE|t=FALSE) -> BOOLEAN[$t]
   ;

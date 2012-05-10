@@ -1,26 +1,13 @@
 package hash.runtime.bridge;
 
-import static org.objectweb.asm.Opcodes.AALOAD;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.ACC_VARARGS;
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.ARRAYLENGTH;
-import static org.objectweb.asm.Opcodes.ATHROW;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.IF_ACMPNE;
-import static org.objectweb.asm.Opcodes.IF_ICMPNE;
-import static org.objectweb.asm.Opcodes.V1_5;
 import hash.lang.Function;
 import hash.lang.Hash;
-import hash.runtime.Lookup;
 import hash.runtime.exceptions.IncompatibleJavaMethodSignatureException;
 import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
 import hash.util.Asm;
+import hash.util.Constants;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -31,9 +18,10 @@ import java.util.List;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-public class HashToJava {
+public class HashToJava implements Opcodes {
 
 	private static final HashMap<Class<?>, Hash> classMap;
 	private static final HashMap<Class<?>, Hash> classMixins;
@@ -54,7 +42,7 @@ public class HashToJava {
 
 	public static Hash getSuperclass(Object object) {
 		if (object instanceof Hash) {
-			Object rv = ((Hash) object).get(Lookup.SUPER);
+			Object rv = ((Hash) object).get(Constants.SUPER);
 			if (rv instanceof Hash)
 				return (Hash) rv;
 			return null;
@@ -109,7 +97,7 @@ public class HashToJava {
 			for (Object key : mixin.keySet())
 				hashClass.put(key, mixin.get(key));
 		// if there is a superclass, then it must have already been loaded
-		hashClass.put(Lookup.SUPER, classMap.get(superclass));
+		hashClass.put(Constants.SUPER, classMap.get(superclass));
 		classMap.put(cls, hashClass);
 	}
 
@@ -135,10 +123,10 @@ public class HashToJava {
 		implementAdapter(mv, methods);
 		mv.visitMaxs(0, 0);
 		mv.visitEnd();
-		Asm.addConstructor(cw, JavaMethod.class, String.class,
-				String.class, Boolean.TYPE);
+		Asm.addConstructor(cw, JavaMethod.class, String.class, String.class,
+				Boolean.TYPE);
 		cw.visitEnd();
-		byte[] classData = cw.toByteArray();		
+		byte[] classData = cw.toByteArray();
 		return AdapterLoader.instance.defineClass(
 				"hash.generated." + klass.getCanonicalName() + "."
 						+ classNameSuffix, classData);
@@ -171,7 +159,7 @@ public class HashToJava {
 			// if not, the execution continues from this label
 			mv.visitLabel(nextTest);
 		}
-		Asm.invokeDefaultConstructor(mv,
+		Asm.constructAndInitialize(mv,
 				IncompatibleJavaMethodSignatureException.class);
 		mv.visitInsn(ATHROW);
 	}

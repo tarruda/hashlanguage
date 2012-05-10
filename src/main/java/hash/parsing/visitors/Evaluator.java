@@ -1,11 +1,8 @@
-package hash.parsing.walkers;
+package hash.parsing.visitors;
 
-import static hash.parsing.HashParser.DIV;
-import static hash.parsing.HashParser.INT;
-import static hash.parsing.HashParser.MINUS;
-import static hash.parsing.HashParser.MOD;
-import static hash.parsing.HashParser.MUL;
-import static hash.parsing.HashParser.PLUS;
+import static hash.parsing.HashParser.BINARY;
+import static hash.parsing.HashParser.INTEGER;
+
 import hash.runtime.Lookup;
 
 import org.antlr.runtime.tree.Tree;
@@ -15,14 +12,10 @@ public class Evaluator {
 	public Object evaluate(Tree node) {
 		int nodeType = node.getType();
 		switch (nodeType) {
-		case PLUS:
-		case MINUS:
-		case MUL:
-		case DIV:
-		case MOD:
+		case BINARY:
 			return evaluateBinaryExpression(node, node.getChild(0),
 					node.getChild(1));
-		case INT:
+		case INTEGER:
 			return parseInteger(node);
 		default:
 			return null;

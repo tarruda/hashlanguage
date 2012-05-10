@@ -25,7 +25,8 @@ public abstract class AbstractHashLexer extends Lexer {
 		return Integer.parseInt(combined, 16);
 	}
 
-	protected void validateIntegerRange(int radix, String text) throws RecognitionException {
+	protected void validateInteger(int radix, String text)
+			throws RecognitionException {
 		try {
 			long l = Long.parseLong(text, radix);
 			setText(Long.toHexString(l));

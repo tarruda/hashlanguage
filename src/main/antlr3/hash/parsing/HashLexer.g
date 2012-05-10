@@ -10,7 +10,8 @@ package hash.parsing;
 }
 
 //keywords
-BOOLEAN: 'true' | 'false';
+TRUE: 'true'; 
+FALSE: 'false';
 
 //
 SCOLON: ';';
@@ -53,41 +54,39 @@ IS: 'is';
 IDENTIFIER: LETTER (LETTER|DEC_DIGIT)*;
 
 // Literal tokens
-FLOAT
+FLOAT_NORMAL
   : ('0'..'9')+ '.' ('0'..'9')* EXPONENT? 
-  | '.' ('0'..'9')+ EXPONENT? 
-  | ('0'..'9')+ EXPONENT  
+  ;
+
+DOT_FLOAT
+  : '.' ('0'..'9')+ EXPONENT? 
   ;
   
-INT
-  : HEX_INT
-  | DEC_INT
-  | OCT_INT
-  | BIN_INT  
+FLOAT_EXP
+  : ('0'..'9')+ EXPONENT  
   ;
-  
-fragment HEX_INT
+   
+HEX_INT
   : '0' ('x'|'X') HEX_DIGIT+
-    { validateIntegerRange(16, getText().substring(2)); }
+    { validateInteger(16, getText().substring(2)); }
   ;
-fragment DEC_INT
+  
+DEC_INT
   : DEC_DIGIT+
-    { validateIntegerRange(10, getText()); }
+    { validateInteger(10, getText()); }
   ;
-fragment OCT_INT
+  
+OCT_INT
   : '0' ('o'|'O') OCT_DIGIT+
-    { validateIntegerRange(8, getText().substring(2)); }
+    { validateInteger(8, getText().substring(2)); }
   ;
-fragment BIN_INT 
+  
+BIN_INT 
   : '0' ('b'|'B') BIN_DIGIT+
-    { validateIntegerRange(2, getText().substring(2)); }
+    { validateInteger(2, getText().substring(2)); }
   ; 
 
-STRING
-  : DQ_STRING | SQ_STRING
-  ;
-
-fragment DQ_STRING
+DQ_STRING
 @init { 
 StringBuilder sb = new StringBuilder(); 
 }
@@ -103,7 +102,7 @@ StringBuilder sb = new StringBuilder();
   {setText(sb.toString());}
   ;
 
-fragment SQ_STRING
+SQ_STRING
 @init { 
 StringBuilder sb = new StringBuilder(); 
 }

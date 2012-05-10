@@ -3,11 +3,10 @@ package hash.runtime.mixins;
 import hash.runtime.Lookup;
 import hash.runtime.functions.BinaryOperator;
 import hash.util.Check;
+import hash.util.Constants;
 import hash.util.Err;
 
 public class ObjectMixin extends Mixin {
-
-	private static final String COMPARE_TO = "compareTo";
 
 	public ObjectMixin() {
 
@@ -18,7 +17,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object resultadoComparacao = null;
 				try {
-					resultadoComparacao = Lookup.invokeMethod(self, COMPARE_TO,
+					resultadoComparacao = Lookup.invokeMethod(self, Constants.COMPARE_TO,
 							other);
 				} catch (Exception e) {
 					return self.equals(other);
@@ -35,7 +34,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object resultadoComparacao = null;
 				try {
-					resultadoComparacao = Lookup.invokeMethod(self, COMPARE_TO,
+					resultadoComparacao = Lookup.invokeMethod(self, Constants.COMPARE_TO,
 							other);
 				} catch (Exception e) {
 					return self.equals(other);
@@ -52,7 +51,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object resultadoComparacao = null;
 				try {
-					resultadoComparacao = Lookup.invokeMethod(self, COMPARE_TO,
+					resultadoComparacao = Lookup.invokeMethod(self, Constants.COMPARE_TO,
 							other);
 				} catch (Exception e) {
 					return self.equals(other);
@@ -69,7 +68,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object resultadoComparacao = null;
 				try {
-					resultadoComparacao = Lookup.invokeMethod(self, COMPARE_TO,
+					resultadoComparacao = Lookup.invokeMethod(self, Constants.COMPARE_TO,
 							other);
 				} catch (Exception e) {
 					return self.equals(other);
@@ -86,7 +85,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object resultadoComparacao = null;
 				try {
-					resultadoComparacao = Lookup.invokeMethod(self, COMPARE_TO,
+					resultadoComparacao = Lookup.invokeMethod(self, Constants.COMPARE_TO,
 							other);
 				} catch (Exception e) {
 					return self.equals(other);
@@ -103,7 +102,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object resultadoComparacao = null;
 				try {
-					resultadoComparacao = Lookup.invokeMethod(self, COMPARE_TO,
+					resultadoComparacao = Lookup.invokeMethod(self, Constants.COMPARE_TO,
 							other);
 				} catch (Exception e) {
 					return self.equals(other);
