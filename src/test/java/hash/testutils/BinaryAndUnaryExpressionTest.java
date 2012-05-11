@@ -33,6 +33,11 @@ public abstract class BinaryAndUnaryExpressionTest {
 	public void assignments() {
 		assertEquals(5, evaluate("x = 5"));
 		assertEquals(5, evaluate("x"));
+		assertEquals(10, evaluate("x+=5"));
+		assertEquals(30, evaluate("x*=3"));
+		assertEquals(0, evaluate("x%=3"));
+		assertEquals(1, evaluate("++x"));
+		assertEquals(2, evaluate("++x"));
 	}
 
 	@Test

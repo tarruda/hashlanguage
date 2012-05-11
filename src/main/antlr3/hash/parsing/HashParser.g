@@ -9,7 +9,6 @@ options {
 
 tokens {
     // imaginary tokens for the AST
-    ASSIGNMENT;
     BINARY;
     UNARY;
     OBJECT;
@@ -39,28 +38,28 @@ statement
   ;
     
 expression 
-  : (l=disjunction -> $l)
-    (
-      o=assignmentOperator r=expression
-      -> ^(ASSIGNMENT[$o.start, $o.text] $l $r)
+  : incOrDecExpression    
+  | (l=disjunction -> $l)
+    ( 
+      o=ASSIGN r=expression -> ^($o $l $r)
+    | o=PLUS_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l $r))
+    | o=MINUS_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l $r))
+    | o=MUL_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "*"] $l $r))
+    | o=DIV_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "/"] $l $r))
+    | o=MOD_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "\%"] $l $r))
+    | o=POW_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "**"] $l $r))
+    | o=AND_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "&"] $l $r))
+    | o=OR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "|"] $l $r))
+    | o=XOR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "^"] $l $r))
+    | o=SHL_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "<<"] $l $r))
+    | o=USHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>>"] $l $r))
+    | o=SHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>"] $l $r))    
     )?
   ;
-
-assignmentOperator
-  :   
-    ASSIGN
-  | PLUS_ASSIGN
-	|	MINUS_ASSIGN
-	|	MUL_ASSIGN
-	|	DIV_ASSIGN
-	|	MOD_ASSIGN
-	|	POW_ASSIGN
-	|	AND_ASSIGN
-	|	OR_ASSIGN
-	|	XOR_ASSIGN
-	|	SHL_ASSIGN
-	|	USHR_ASSIGN
-	|	SHR_ASSIGN	
+  
+incOrDecExpression
+  : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
+  | o=DEC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   
   ;
 
 disjunction

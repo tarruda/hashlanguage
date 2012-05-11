@@ -1,6 +1,6 @@
 package hash.parsing.visitors;
 
-import static hash.parsing.HashParser.ASSIGNMENT;
+import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BOOLEAN;
@@ -33,7 +33,7 @@ public abstract class AstVisitor {
 	public final Tree visit(Tree node) {
 		int nodeType = node.getType();
 		switch (nodeType) {
-		case ASSIGNMENT:
+		case ASSIGN:
 			Tree target = node.getChild(0);
 			if (!(target.getType() == ATTRIBUTE || target.getType() == ITEM || target
 					.getType() == IDENTIFIER))
