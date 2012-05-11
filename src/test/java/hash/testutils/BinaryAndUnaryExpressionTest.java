@@ -1,12 +1,38 @@
 package hash.testutils;
 
 import static org.junit.Assert.assertEquals;
+import hash.lang.Factory;
+
+import java.util.Map;
 
 import org.antlr.runtime.RecognitionException;
+import org.junit.Before;
 import org.junit.Test;
 
 public abstract class BinaryAndUnaryExpressionTest {
+
+	protected Map context;
+
 	protected abstract Object evaluate(String expression);
+
+	@Before
+	public void setup() {
+		context = Factory.createExecutionContext();
+	}
+
+	@Test
+	public void identifier() {
+		context.put("x", 255);
+		context.put("y", "Str");
+		assertEquals(255, evaluate("x"));
+		assertEquals("StrStrStrStrStr", evaluate("y * 5"));
+	}
+	
+	@Test
+	public void assignments() {
+		assertEquals(5, evaluate("x = 5"));
+		assertEquals(5, evaluate("x"));
+	}
 
 	@Test
 	public void bitInvert() {

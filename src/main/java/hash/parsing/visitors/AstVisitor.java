@@ -1,6 +1,7 @@
 package hash.parsing.visitors;
 
 import static hash.parsing.HashParser.ARGS;
+import static hash.parsing.HashParser.ASSIGNMENT;
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BOOLEAN;
@@ -11,13 +12,14 @@ import static hash.parsing.HashParser.INVOCATION;
 import static hash.parsing.HashParser.ITEM;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.UNARY;
+import hash.parsing.exceptions.TreeWalkException;
 
 import org.antlr.runtime.tree.Tree;
 
 /**
- * Base class for all classes that need to process the AST. It can be used for
- * translation, transformation, analysis, compilation, execution or any other
- * processing of the AST.
+ * Base class for all classes that need to do something with the AST. It can be
+ * used for translation, transformation, analysis, compilation, execution or any
+ * other processing of the AST.
  * 
  * The default behavior for the visitor methods is to simply return the 'Tree'
  * instance passed as the first argument.
@@ -27,9 +29,16 @@ import org.antlr.runtime.tree.Tree;
  */
 public abstract class AstVisitor {
 
-	public Tree visit(Tree node) {
+	public final Tree visit(Tree node) {
 		int nodeType = node.getType();
 		switch (nodeType) {
+		case ASSIGNMENT:
+			Tree target = node.getChild(0);
+			if (!(target.getType() == ATTRIBUTE || target.getType() == ITEM || target
+					.getType() == IDENTIFIER))
+				throw new TreeWalkException(
+						"Assignment target must be an identifier, attribute or index");
+			return visitAssignment(node, node.getChild(0), node.getChild(1));
 		case BINARY:
 			return visitBinaryExpression(node, node.getChild(0),
 					node.getChild(1));
@@ -57,6 +66,10 @@ public abstract class AstVisitor {
 		default:
 			return node;
 		}
+	}
+
+	protected Tree visitAssignment(Tree node, Tree target, Tree expression) {
+		return node;
 	}
 
 	protected Tree visitBinaryExpression(Tree node, Tree left, Tree right) {

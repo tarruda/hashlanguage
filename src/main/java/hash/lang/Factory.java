@@ -7,11 +7,15 @@ import java.util.Map;
 
 public class Factory {
 
-	public static Map createMap() {
+	public static Map createObject() {
 		return new HashMap();
 	}
 
 	public static List createList() {
 		return new ArrayList();
+	}
+
+	public static Map createExecutionContext() {
+		return new HashMap();
 	}
 }

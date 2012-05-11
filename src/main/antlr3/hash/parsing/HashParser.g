@@ -9,6 +9,7 @@ options {
 
 tokens {
     // imaginary tokens for the AST
+    ASSIGNMENT;
     BINARY;
     UNARY;
     STRING;
@@ -35,9 +36,30 @@ statement
   :
   expression SCOLON -> expression
   ;
-  
-expression
-  : disjunction
+    
+expression 
+  : (l=disjunction -> $l)
+    (
+      o=assignmentOperator r=expression
+      -> ^(ASSIGNMENT[$o.start, $o.text] $l $r)
+    )?
+  ;
+
+assignmentOperator
+  :   
+    ASSIGN
+  | PLUS_ASSIGN
+	|	MINUS_ASSIGN
+	|	MUL_ASSIGN
+	|	DIV_ASSIGN
+	|	MOD_ASSIGN
+	|	POW_ASSIGN
+	|	AND_ASSIGN
+	|	OR_ASSIGN
+	|	XOR_ASSIGN
+	|	SHL_ASSIGN
+	|	USHR_ASSIGN
+	|	SHR_ASSIGN	
   ;
 
 disjunction
@@ -96,7 +118,7 @@ power
   ;
 
 plusOrMinus
-  : (o=INC|o=DEC|o=PLUS|o=MINUS) op=plusOrMinus -> ^(UNARY[$o] $op)
+  : (o=PLUS|o=MINUS) op=plusOrMinus -> ^(UNARY[$o] $op)
   | invert 
   ;
   
@@ -142,7 +164,7 @@ enclosure
   ;
   
 identifier
-  : IDENTIFIER
+  : IDENTIFIER -> IDENTIFIER
   ;
   
 literal
@@ -167,3 +189,4 @@ integerLiteral
 booleanLiteral
   : (t=TRUE|t=FALSE) -> BOOLEAN[$t]
   ;
+  

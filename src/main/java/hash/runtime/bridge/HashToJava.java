@@ -76,7 +76,7 @@ public class HashToJava implements Opcodes {
 		Class<?> superclass = klass.getSuperclass();
 		if (superclass != null && !classMap.containsKey(superclass))
 			constructHashClass(superclass);
-		Map hashClass = Factory.createMap();
+		Map hashClass = Factory.createObject();
 		// group methods by name
 		HashMap<String, List<Method>> methodsByName = new HashMap<String, List<Method>>();
 		for (Method method : klass.getDeclaredMethods()) {

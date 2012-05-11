@@ -5,9 +5,35 @@ import static hash.parsing.HashParser.ITEM;
 import hash.parsing.visitors.nodes.Result;
 import hash.runtime.Lookup;
 
+import java.util.Map;
+
 import org.antlr.runtime.tree.Tree;
 
 public class ExpressionEvaluator extends LiteralEvaluator {
+
+	private Map context;
+
+	public ExpressionEvaluator(Map context) {
+		this.context = context;
+	}
+
+	@Override
+	protected Tree visitAssignment(Tree node, Tree target, Tree expression) {
+		Object value = ((Result) visit(expression)).getEvaluationResult();
+		if (target.getType() == ATTRIBUTE || target.getType() == ITEM) {
+			Object ownerObject = ((Result) visit(target.getChild(0)))
+					.getEvaluationResult();
+			Object key = ((Result) visit(target.getChild(1)))
+					.getEvaluationResult();
+			if (target.getType() == ATTRIBUTE)
+				Lookup.setAttribute(ownerObject, key, value);
+			else
+				Lookup.setItem(ownerObject, key, value);
+		} else
+			// target is an identifier
+			context.put(target.getText(), value);
+		return new Result(value);
+	}
 
 	@Override
 	protected Tree visitBinaryExpression(Tree operator, Tree left, Tree right) {
@@ -65,5 +91,10 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 		Object tgt = ((Result) visit(target)).getEvaluationResult();
 		Object key = ((Result) visit(itemKey)).getEvaluationResult();
 		return new Result(Lookup.getItem(tgt, key));
+	}
+
+	@Override
+	protected Tree visitIdentifier(Tree node) {
+		return new Result(context.get(node.getText()));
 	}
 }

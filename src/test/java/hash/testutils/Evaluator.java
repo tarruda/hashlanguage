@@ -7,6 +7,8 @@ import hash.parsing.HashParser.expression_return;
 import hash.parsing.visitors.ExpressionEvaluator;
 import hash.parsing.visitors.nodes.Result;
 
+import java.util.Map;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -14,8 +16,8 @@ import org.antlr.runtime.tree.Tree;
 
 public class Evaluator {
 
-	public static Object eval(String code) {
-		ExpressionEvaluator target = new ExpressionEvaluator();
+	public static Object eval(String code, Map context) {
+		ExpressionEvaluator target = new ExpressionEvaluator(context);
 		HashLexer lexer = new HashLexer();
 		ANTLRStringStream source = new ANTLRStringStream(code);
 		lexer.setCharStream(source);

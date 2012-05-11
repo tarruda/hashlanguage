@@ -1,11 +1,23 @@
 package hash.testutils;
 
 import static org.junit.Assert.assertEquals;
+import hash.lang.Factory;
 
+import java.util.Map;
+
+import org.junit.Before;
 import org.junit.Test;
 
 public abstract class PrimaryExpressionTest {
+
+	protected Map context;
+
 	protected abstract Object evaluate(String expression);
+
+	@Before
+	public void setup() {
+		context = Factory.createExecutionContext();
+	}
 
 	@Test
 	public void numberToString() {

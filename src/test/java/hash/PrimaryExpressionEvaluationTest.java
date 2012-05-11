@@ -7,6 +7,6 @@ public class PrimaryExpressionEvaluationTest extends PrimaryExpressionTest {
 
 	@Override
 	protected Object evaluate(String code) {
-		return Evaluator.eval(code);
+		return Evaluator.eval(code, context);
 	}
 }
