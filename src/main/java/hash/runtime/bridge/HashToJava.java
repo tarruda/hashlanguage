@@ -8,6 +8,8 @@ import hash.runtime.mixins.ArrayMixin;
 import hash.runtime.mixins.BooleanMixin;
 import hash.runtime.mixins.FloatMixin;
 import hash.runtime.mixins.IntegerMixin;
+import hash.runtime.mixins.ListMixin;
+import hash.runtime.mixins.MapMixin;
 import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
 import hash.runtime.mixins.StringMixin;
@@ -48,6 +50,8 @@ public class HashToJava implements Opcodes {
 		classMixins.put(Float.class, new Map[] { FloatMixin.INSTANCE });
 		classMixins.put(Double.class, new Map[] { FloatMixin.INSTANCE });
 		classMixins.put(String.class, new Map[] { StringMixin.INSTANCE });
+		classMixins.put(List.class, new Map[] { ListMixin.INSTANCE });
+		classMixins.put(Map.class, new Map[] { MapMixin.INSTANCE });
 	}
 
 	public static Map getClass(Object object) {

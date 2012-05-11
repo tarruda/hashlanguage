@@ -2,9 +2,11 @@ package hash.parsing.visitors;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.ITEM;
+import hash.lang.Factory;
 import hash.parsing.visitors.nodes.Result;
 import hash.runtime.Lookup;
 
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.tree.Tree;
@@ -53,8 +55,8 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitInvocation(Tree node, Tree expression, Tree arguments) {
-		Object[] args = (Object[]) ((Result) visit(arguments))
-				.getEvaluationResult();
+		Object[] args = ((List) ((Result) visit(arguments))
+				.getEvaluationResult()).toArray();
 		if (expression.getType() == ATTRIBUTE || expression.getType() == ITEM) {
 			// this is a method call
 			Object tgt = ((Result) visit(expression.getChild(0)))
@@ -70,11 +72,25 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
-	protected Tree visitArgs(Tree node) {
+	protected Tree visitObject(Tree node) {
+		Map rv = Factory.createObject();
 		int len = node.getChildCount();
-		Object[] rv = new Object[len];
+		for (int i = 0; i < len; i++) {
+			Object key = ((Result) visit(node.getChild(i)))
+					.getEvaluationResult();
+			Object value = ((Result) visit(node.getChild(i).getChild(0)))
+					.getEvaluationResult();
+			rv.put(key, value);
+		}
+		return new Result(rv);
+	}
+
+	@Override
+	protected Tree visitList(Tree node) {
+		int len = node.getChildCount();
+		List rv = Factory.createList();
 		for (int i = 0; i < len; i++)
-			rv[i] = ((Result) visit(node.getChild(i))).getEvaluationResult();
+			rv.add(((Result) visit(node.getChild(i))).getEvaluationResult());
 		return new Result(rv);
 	}
 

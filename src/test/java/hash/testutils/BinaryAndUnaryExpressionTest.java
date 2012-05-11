@@ -3,6 +3,7 @@ package hash.testutils;
 import static org.junit.Assert.assertEquals;
 import hash.lang.Factory;
 
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.RecognitionException;
@@ -27,7 +28,7 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(255, evaluate("x"));
 		assertEquals("StrStrStrStrStr", evaluate("y * 5"));
 	}
-	
+
 	@Test
 	public void assignments() {
 		assertEquals(5, evaluate("x = 5"));
@@ -140,6 +141,26 @@ public abstract class BinaryAndUnaryExpressionTest {
 	public void stringConcatenation() {
 		assertEquals("String concatenation",
 				evaluate("'String' + ' ' + 'concatenation'"));
+	}
+
+	@Test
+	public void objectExpression() {
+		Map obj = (Map) evaluate("{name:'Thiago','type':'Programmer',15.3:10,"
+				+ " 10:15.3,}");
+		assertEquals(4, obj.keySet().size());
+		assertEquals("Thiago", obj.get("name"));
+		assertEquals("Programmer", obj.get("type"));
+		assertEquals(10, obj.get(15.3));
+		assertEquals(15.3, obj.get(10));
+	}
+
+	@Test
+	public void listExpression() {
+		List obj = (List) evaluate("[1,3.3 , 'red',]");
+		assertEquals(3, obj.size());
+		assertEquals(1, obj.get(0));
+		assertEquals(3.3, obj.get(1));
+		assertEquals("red", obj.get(2));
 	}
 
 	@Test

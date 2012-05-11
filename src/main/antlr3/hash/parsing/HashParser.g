@@ -12,14 +12,15 @@ tokens {
     ASSIGNMENT;
     BINARY;
     UNARY;
+    OBJECT;
     STRING;
     FLOAT;
     INTEGER;
     BOOLEAN;
     INVOCATION;
-    ARGS;
+    LIST;
     ATTRIBUTE;
-    ITEM;
+    ITEM;  
 }
 
 @header {
@@ -134,7 +135,7 @@ primary
         s=LROUND
         {args=null;}(args=expressionList)?       
         RROUND
-        -> ^(INVOCATION[$s, "Invocation"] $primary ^(ARGS $args?))
+        -> ^(INVOCATION[$s, "Invocation"] $primary ^(LIST["Arguments"] $args?))
       )
     | (
         s=DOT name=identifier 
@@ -154,13 +155,36 @@ expressionList
   ;
   
 atom
-  : enclosure
+  : parenthesisExpression
+  | objectExpression
+  | listExpression
   | literal
   | identifier
   ;
   
-enclosure
+parenthesisExpression
   : LROUND expression RROUND -> expression
+  ;
+  
+objectExpression
+  : t=LCURLY
+    ( 
+      keyValuePair
+      (COMMA keyValuePair)*
+      COMMA?
+    )?
+    RCURLY
+    -> ^(OBJECT[$t, "Object"] keyValuePair+)
+  ;
+  
+listExpression
+  : t=LSQUARE (expressionList COMMA?)? RSQUARE
+    -> ^(LIST[$t, "List"] expressionList?)
+  ;
+  
+keyValuePair
+  : i=identifier COLON v=expression -> ^(STRING[$i.start, $i.text] $v)
+  | l=literal COLON v=expression -> ^($l $v)   
   ;
   
 identifier
