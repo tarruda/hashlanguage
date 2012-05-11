@@ -1,6 +1,7 @@
 package hash.parsing.visitors;
 
 import static hash.parsing.HashParser.ASSIGN;
+import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BOOLEAN;
@@ -41,6 +42,9 @@ public abstract class AstVisitor {
 						target.getCharPositionInLine(),
 						"Assignment target must be an identifier, attribute or index");
 			return visitAssignment(node, node.getChild(0), node.getChild(1));
+		case INCR:
+			return visitEvalAndIncrement(node, node.getChild(0),
+					node.getChild(1));
 		case BINARY:
 			return visitBinaryExpression(node, node.getChild(0),
 					node.getChild(1));
@@ -73,6 +77,10 @@ public abstract class AstVisitor {
 	}
 
 	protected Tree visitAssignment(Tree node, Tree target, Tree expression) {
+		return node;
+	}
+
+	protected Tree visitEvalAndIncrement(Tree node, Tree target, Tree assignment) {
 		return node;
 	}
 

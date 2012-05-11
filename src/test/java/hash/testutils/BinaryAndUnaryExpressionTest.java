@@ -38,6 +38,9 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(0, evaluate("x%=3"));
 		assertEquals(1, evaluate("++x"));
 		assertEquals(2, evaluate("++x"));
+		assertEquals(2, evaluate("x++"));
+		assertEquals(3, evaluate("x++"));
+		assertEquals(4, evaluate("x++"));
 	}
 
 	@Test

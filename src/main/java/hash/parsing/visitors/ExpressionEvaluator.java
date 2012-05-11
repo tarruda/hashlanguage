@@ -38,6 +38,13 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
+	protected Tree visitEvalAndIncrement(Tree node, Tree target, Tree assignment) {
+		Object rv = ((Result) visit(target)).getEvaluationResult();
+		visit(assignment);
+		return new Result(rv);
+	}
+
+	@Override
 	protected Tree visitBinaryExpression(Tree operator, Tree left, Tree right) {
 		Object l = ((Result) visit(left)).getEvaluationResult();
 		Object r = ((Result) visit(right)).getEvaluationResult();
