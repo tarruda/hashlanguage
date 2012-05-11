@@ -10,18 +10,39 @@ import java.util.Map;
 
 public class Lookup {
 
+	public static Object invokeFunction(Object f, Object... args) {
+		if (!(f instanceof Function))
+			throw new HashException(String.format(
+					"Object '%s' is not a function", f));
+		return ((Function) f).invoke(args);
+	}
+
 	public static Object invokeBinaryOperator(String operator, Object lhs,
 			Object rhs) {
-		return invokeMethod(lhs, operator + "##", rhs);
+		return invokeRealMethod(lhs, operator + "##", rhs);
 	}
 
 	public static Object invokeUnaryOperator(String operator, Object operand) {
-		return invokeMethod(operand, operator + "#");
+		return invokeRealMethod(operand, operator + "#");
 	}
 
 	public static Object invokeMethod(Object target, Object methodKey,
 			Object... args) {
 		Object f = getAttribute(target, methodKey);
+		return invokeMethodCore(f, target, methodKey, args);
+	}
+
+	/**
+	 * Invokes a method ignoring the 'getAttr/getItem' accessors.
+	 */
+	public static Object invokeRealMethod(Object target, Object methodKey,
+			Object... args) {
+		Object f = getRealAttribute(target, methodKey);
+		return invokeMethodCore(f, target, methodKey, args);
+	}
+
+	private static Object invokeMethodCore(Object f, Object target,
+			Object methodKey, Object... args) {
 		if (f == null)
 			throw new AttributeNotFoundException(methodKey.toString());
 		if (!(f instanceof Function))
@@ -34,52 +55,43 @@ public class Lookup {
 		return ((Function) f).invoke(methodArgs);
 	}
 
-	public static Object invokeFunction(Object f, Object... args) {
-		if (!(f instanceof Function))
-			throw new HashException(String.format(
-					"Object '%s' is not a function", f));
-		return ((Function) f).invoke(args);
-	}
-
-	/*
-	 * Objects in the Hash language can override the default behavior of the
-	 * attribute/item accessors.
-	 * 
-	 * The operations 'get', 'set', 'has' and 'del' are done through the
-	 * following which will directly search in the object 'class' hierarchy for
-	 * the corresponding accessor.
-	 */
 	public static Object getAttribute(Object target, Object key) {
-		return getAcessor(target, Constants.GET_ATTRIBUTE).invoke(target, key);
+		return getRealAttribute(target, Constants.GET_ATTRIBUTE).invoke(target,
+				key);
 	}
 
 	public static Object setAttribute(Object target, Object key, Object value) {
-		return getAcessor(target, Constants.SET_ATTRIBUTE).invoke(target, key,
-				value);
+		return getRealAttribute(target, Constants.SET_ATTRIBUTE).invoke(target,
+				key, value);
 	}
 
 	public static Object delAttribute(Object target, Object key) {
-		return getAcessor(target, Constants.DEL_ATTRIBUTE).invoke(target, key);
+		return getRealAttribute(target, Constants.DEL_ATTRIBUTE).invoke(target,
+				key);
 	}
 
 	public static Object getItem(Object target, Object key) {
-		return getAcessor(target, Constants.GET_ITEM).invoke(target, key);
+		return getRealAttribute(target, Constants.GET_ITEM).invoke(target, key);
 	}
 
 	public static Object setItem(Object target, Object key, Object value) {
-		return getAcessor(target, Constants.SET_ITEM)
-				.invoke(target, key, value);
+		return getRealAttribute(target, Constants.SET_ITEM).invoke(target, key,
+				value);
 	}
 
 	public static Object hasItem(Object target, Object key) {
-		return getAcessor(target, Constants.HAS_ITEM).invoke(target, key);
+		return getRealAttribute(target, Constants.HAS_ITEM).invoke(target, key);
 	}
 
 	public static Object delItem(Object target, Object key) {
-		return getAcessor(target, Constants.DEL_ITEM).invoke(target, key);
+		return getRealAttribute(target, Constants.DEL_ITEM).invoke(target, key);
 	}
 
-	public static Function getAcessor(Object obj, Object key) {
+	/**
+	 * Looks for an real attribute in an object(instead of first invoking its
+	 * 'get' accessor which may be override. *
+	 */
+	public static Function getRealAttribute(Object obj, Object key) {
 		Map cls = HashToJava.getClass(obj);
 		Object rv = null;
 		while (rv == null && cls != null) {

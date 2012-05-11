@@ -31,6 +31,12 @@ public class MapMixin extends Mixin {
 				return ((Map) args[0]).remove(args[1]);
 			}
 		});
+		installMethod(new BuiltinMethod(Constants.GET_ITEM) {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				return ((Map) args[0]).get(args[1]);
+			}
+		});
 		installMethod(new BuiltinMethod(Constants.SET_ITEM) {
 			public Object invoke(Object... args) {
 				return Lookup.invokeMethod(args[0], Constants.SET_ATTRIBUTE);

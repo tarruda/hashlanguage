@@ -36,6 +36,24 @@ public class ListMixin extends Mixin {
 				return ((List) list).set((Integer) key, value);
 			}
 		});
-
+		installMethod(new BuiltinMethod(Constants.HAS_ITEM) {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				Object list = args[0];
+				Object value = args[1];
+				return ((List) list).contains(value);
+			}
+		});
+		installMethod(new BuiltinMethod(Constants.DEL_ITEM) {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				Object list = args[0];
+				Object key = args[1];
+				if (key.getClass() != Integer.class)
+					throw Err.illegalArg(name,
+							Integer.class.getCanonicalName(), 1);
+				return ((List) list).remove(((Integer) key).intValue());
+			}
+		});
 	}
 }
