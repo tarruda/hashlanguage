@@ -17,7 +17,8 @@ tokens {
     BOOLEAN;
     INVOCATION;
     ARGS;
-    ATTRIBUTE;  
+    ATTRIBUTE;
+    ITEM;
 }
 
 @header {
@@ -119,7 +120,7 @@ primary
       )
     | (
         s=LSQUARE key=expression RSQUARE
-        -> ^(ATTRIBUTE[$s, "Attribute"] $primary $key)
+        -> ^(ITEM[$s, "Item"] $primary $key)
       )
     )*
   ;

@@ -1,6 +1,7 @@
 package hash.parsing.visitors;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
+import static hash.parsing.HashParser.ITEM;
 import hash.parsing.visitors.nodes.Result;
 import hash.runtime.Lookup;
 
@@ -28,7 +29,7 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	protected Tree visitInvocation(Tree node, Tree expression, Tree arguments) {
 		Object[] args = (Object[]) ((Result) visit(arguments))
 				.getEvaluationResult();
-		if (expression.getType() == ATTRIBUTE) {
+		if (expression.getType() == ATTRIBUTE || expression.getType() == ITEM) {
 			// this is a method call
 			Object tgt = ((Result) visit(expression.getChild(0)))
 					.getEvaluationResult();
@@ -57,5 +58,12 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 		Object tgt = ((Result) visit(target.getChild(0))).getEvaluationResult();
 		Object key = ((Result) visit(target.getChild(1))).getEvaluationResult();
 		return new Result(Lookup.getAttribute(tgt, key));
+	}
+
+	@Override
+	protected Tree visitItemAccess(Tree node, Tree target, Tree itemKey) {
+		Object tgt = ((Result) visit(target.getChild(0))).getEvaluationResult();
+		Object key = ((Result) visit(target.getChild(1))).getEvaluationResult();
+		return new Result(Lookup.getItem(tgt, key));
 	}
 }

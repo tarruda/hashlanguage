@@ -1,11 +1,14 @@
 package hash.runtime.mixins;
 
 import hash.runtime.Lookup;
+import hash.runtime.bridge.HashToJava;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
+
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class ObjectMixin extends Mixin {
@@ -121,6 +124,25 @@ public class ObjectMixin extends Mixin {
 		installMethod(new BuiltinMethod(Constants.BOOLEAN_VALUE) {
 			public Object invoke(Object... args) {
 				return true;
+			}
+		});
+		installMethod(new BuiltinMethod(Constants.GET_ATTRIBUTE) {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				Object self = args[0];
+				Object key = args[1];
+				Map cls = HashToJava.getClass(self);
+				Object rv = null;
+				while (rv == null && cls != null) {
+					rv = cls.get(key);
+					cls = HashToJava.getSuperclass(cls);
+				}
+				return rv;
+			}
+		});
+		installMethod(new BuiltinMethod(Constants.GET_ITEM) {
+			public Object invoke(Object... args) {
+				return Lookup.invokeMethod(args[0], Constants.GET_ATTRIBUTE);
 			}
 		});
 	}

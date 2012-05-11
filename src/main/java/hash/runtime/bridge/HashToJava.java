@@ -32,7 +32,7 @@ public class HashToJava implements Opcodes {
 
 	private static final String[] ignoredMethodNames = { "getClass" };
 
-	static {
+	static {		
 		classMap = new HashMap<Class<?>, Map>();
 		classMixins = new HashMap<Class<?>, Map[]>();
 		classMixins.put(Object.class, new Map[] { ObjectMixin.INSTANCE });

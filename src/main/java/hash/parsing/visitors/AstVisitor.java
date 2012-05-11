@@ -8,6 +8,7 @@ import static hash.parsing.HashParser.FLOAT;
 import static hash.parsing.HashParser.IDENTIFIER;
 import static hash.parsing.HashParser.INTEGER;
 import static hash.parsing.HashParser.INVOCATION;
+import static hash.parsing.HashParser.ITEM;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.UNARY;
 
@@ -37,6 +38,8 @@ public abstract class AstVisitor {
 		case ATTRIBUTE:
 			return visitAttributeAccess(node, node.getChild(0),
 					node.getChild(1));
+		case ITEM:
+			return visitItemAccess(node, node.getChild(0), node.getChild(1));
 		case INVOCATION:
 			return visitInvocation(node, node.getChild(0), node.getChild(1));
 		case ARGS:
@@ -77,7 +80,11 @@ public abstract class AstVisitor {
 		return node;
 	}
 
-	private Tree visitIdentifier(Tree node) {
+	protected Tree visitItemAccess(Tree node, Tree target, Tree itemKey) {
+		return node;
+	}
+
+	protected Tree visitIdentifier(Tree node) {
 		return node;
 	}
 

@@ -24,4 +24,21 @@ public class Err {
 		return new InvalidReturnValueException(
 				"Comparison must return a number");
 	}
+
+	public static IllegalArgumentException illegalArgCount() {
+		return new IllegalArgumentException(
+				"Function invoked with a wrong number of arguments");
+	}
+
+	public static IllegalArgumentException illegalArg(String fName,
+			String expectedType) {
+		return illegalArg(fName, expectedType, 0);
+	}
+
+	public static IllegalArgumentException illegalArg(String fName,
+			String expectedType, int argIdx) {
+		return new IllegalArgumentException(String.format(
+				"Function '%s' expecting argument %s of type '%s'", fName,
+				argIdx, expectedType));
+	}
 }

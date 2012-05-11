@@ -1,6 +1,5 @@
 package hash.runtime.mixins;
 
-import hash.runtime.exceptions.IllegalArgTypeException;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.functions.UnaryOperator;
@@ -21,7 +20,7 @@ public class IntegerMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				if (!(other instanceof Number))
-					throw new IllegalArgTypeException(name, Types.name(other));
+					throw Err.illegalArg(name, Types.name(other));
 				return Double.compare(((Number) self).doubleValue(),
 						((Number) other).doubleValue());
 			}
