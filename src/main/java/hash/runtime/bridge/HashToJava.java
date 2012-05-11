@@ -25,27 +25,27 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-
 public class HashToJava implements Opcodes {
 
 	private static final HashMap<Class<?>, Map> classMap;
-	private static final HashMap<Class<?>, Map> classMixins;
+	private static final HashMap<Class<?>, Map[]> classMixins;
+
 	private static final String[] ignoredMethodNames = { "getClass" };
 
 	static {
 		classMap = new HashMap<Class<?>, Map>();
-		classMixins = new HashMap<Class<?>, Map>();
-		classMixins.put(Object.class, ObjectMixin.INSTANCE);
-		classMixins.put(Boolean.class, BooleanMixin.INSTANCE);
-		classMixins.put(Number.class, NumberMixin.INSTANCE);
-		classMixins.put(Character.class, IntegerMixin.INSTANCE);
-		classMixins.put(Byte.class, IntegerMixin.INSTANCE);
-		classMixins.put(Short.class, IntegerMixin.INSTANCE);
-		classMixins.put(Integer.class, IntegerMixin.INSTANCE);
-		classMixins.put(Long.class, IntegerMixin.INSTANCE);
-		classMixins.put(Float.class, FloatMixin.INSTANCE);
-		classMixins.put(Double.class, FloatMixin.INSTANCE);
-		classMixins.put(String.class, StringMixin.INSTANCE);
+		classMixins = new HashMap<Class<?>, Map[]>();
+		classMixins.put(Object.class, new Map[] { ObjectMixin.INSTANCE });
+		classMixins.put(Boolean.class, new Map[] { BooleanMixin.INSTANCE });
+		classMixins.put(Number.class, new Map[] { NumberMixin.INSTANCE });
+		classMixins.put(Character.class, new Map[] { IntegerMixin.INSTANCE });
+		classMixins.put(Byte.class, new Map[] { IntegerMixin.INSTANCE });
+		classMixins.put(Short.class, new Map[] { IntegerMixin.INSTANCE });
+		classMixins.put(Integer.class, new Map[] { IntegerMixin.INSTANCE });
+		classMixins.put(Long.class, new Map[] { IntegerMixin.INSTANCE });
+		classMixins.put(Float.class, new Map[] { FloatMixin.INSTANCE });
+		classMixins.put(Double.class, new Map[] { FloatMixin.INSTANCE });
+		classMixins.put(String.class, new Map[] { StringMixin.INSTANCE });
 	}
 
 	public static Map getClass(Object object) {
@@ -56,7 +56,7 @@ public class HashToJava implements Opcodes {
 
 	public static Map getSuperclass(Object object) {
 		if (object instanceof Map) {
-			Object rv = ((Map) object).get(Constants.SUPER);
+			Object rv = ((Map) object).get(Constants.ISA);
 			if (rv instanceof Map)
 				return (Map) rv;
 			return null;
@@ -105,13 +105,26 @@ public class HashToJava implements Opcodes {
 				throw new RuntimeException(e);
 			}
 		}
-		// if we have defined a mixin for this class, the time to merge is now
-		Map mixin = classMixins.get(klass);
-		if (mixin != null)
-			for (Object key : mixin.keySet())
-				hashClass.put(key, mixin.get(key));
+
+		// If mixins have been defined for this class or any of its interfaces,
+		// the time to merge is now. Begin by merging the interfaces mixins, so
+		// classes mixins can override them
+		Class<?>[] interfaces = klass.getInterfaces();
+		for (Class<?> i : interfaces) {
+			Map[] interfaceMixins = classMixins.get(i);
+			if (interfaceMixins != null)
+				for (Map mixin : interfaceMixins)
+					for (Object key : mixin.keySet())
+						hashClass.put(key, mixin.get(key));
+		}
+		Map[] mixins = classMixins.get(klass);
+		if (mixins != null)
+			for (Map mixin : mixins)
+				for (Object key : mixin.keySet())
+					hashClass.put(key, mixin.get(key));
 		// if there is a superclass, then it must have already been loaded
-		hashClass.put(Constants.SUPER, classMap.get(superclass));
+		if (superclass != null)
+			hashClass.put(Constants.ISA, classMap.get(superclass));
 		classMap.put(klass, hashClass);
 	}
 

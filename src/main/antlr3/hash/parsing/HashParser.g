@@ -17,7 +17,7 @@ tokens {
     BOOLEAN;
     INVOCATION;
     ARGS;
-    ATTRIBUTE;
+    ATTRIBUTE;  
 }
 
 @header {

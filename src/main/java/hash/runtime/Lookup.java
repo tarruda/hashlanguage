@@ -43,10 +43,12 @@ public class Lookup {
 		Map cls = HashToJava.getClass(target);
 		Object rv = null;
 		while (rv == null && cls != null) {
-			rv = cls.get(key);
+			rv = cls.get(key);			
 			cls = HashToJava.getSuperclass(cls);
 		}
 		return rv;
 	}
+	
+	
 
 }
