@@ -1,7 +1,6 @@
 package hash.testutils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -16,8 +15,13 @@ public abstract class PrimaryExpressionTest {
 
 	@Test
 	public void equality() {
-		assertTrue((Boolean) evaluate("5.equals(5)"));
-		assertTrue((Boolean) evaluate("'ABCDE'.equals(\"AB\"+\"CDE\")"));
+		assertEquals(true, evaluate("5.equals(5)"));
+		assertEquals(true, evaluate("'ABCDE'.equals(\"AB\"+\"CDE\")"));
 	}
 
+	@Test
+	public void stringSplit() {
+		assertEquals("Key", evaluate("'Key=value'.split('=')[0]"));
+		assertEquals("value", evaluate("'Key=value'.split('=')[1]"));
+	}
 }

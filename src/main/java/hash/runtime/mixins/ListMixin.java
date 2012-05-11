@@ -12,7 +12,7 @@ public class ListMixin extends Mixin {
 
 	public static final ListMixin INSTANCE = new ListMixin();
 
-	private ListMixin() {
+	private ListMixin() {		
 		installMethod(new BuiltinMethod(Constants.GET_ITEM) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);

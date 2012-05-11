@@ -110,9 +110,9 @@ primary
     (
       (
         s=LROUND
-        (args+=expression (COMMA args+=expression)*)? 
+        {args=null;}(args=expressionList)?       
         RROUND
-        -> ^(INVOCATION[$s, "Invocation"] $primary ^(ARGS $args*))
+        -> ^(INVOCATION[$s, "Invocation"] $primary ^(ARGS $args?))
       )
     | (
         s=DOT name=identifier 
@@ -123,6 +123,12 @@ primary
         -> ^(ITEM[$s, "Item"] $primary $key)
       )
     )*
+  ;
+
+expressionList
+  :
+  expression (COMMA expression)* 
+  -> expression+  
   ;
   
 atom

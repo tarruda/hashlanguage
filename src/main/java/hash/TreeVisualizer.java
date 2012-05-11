@@ -18,6 +18,7 @@ class TreeVisualizer {
 	public static void main(String[] args) throws Exception {
 		//ANTLRStringStream source = new ANTLRStringStream("3+4+2+5+3*1;");
 		ANTLRStringStream source = new ANTLRStringStream("5.toString(2,3,4)['test'].abc;");
+			
 		HashLexer lexer = new HashLexer(source);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		HashParser parser = new HashParser(tokens);

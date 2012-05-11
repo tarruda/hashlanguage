@@ -4,6 +4,7 @@ import hash.lang.Factory;
 import hash.lang.Function;
 import hash.runtime.exceptions.IncompatibleJavaMethodSignatureException;
 import hash.runtime.functions.JavaMethod;
+import hash.runtime.mixins.ArrayMixin;
 import hash.runtime.mixins.BooleanMixin;
 import hash.runtime.mixins.FloatMixin;
 import hash.runtime.mixins.IntegerMixin;
@@ -13,6 +14,7 @@ import hash.runtime.mixins.StringMixin;
 import hash.util.Asm;
 import hash.util.Constants;
 
+import java.io.FileOutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public class HashToJava implements Opcodes {
 
 	private static final String[] ignoredMethodNames = { "getClass" };
 
-	static {		
+	static {
 		classMap = new HashMap<Class<?>, Map>();
 		classMixins = new HashMap<Class<?>, Map[]>();
 		classMixins.put(Object.class, new Map[] { ObjectMixin.INSTANCE });
@@ -122,6 +124,11 @@ public class HashToJava implements Opcodes {
 			for (Map mixin : mixins)
 				for (Object key : mixin.keySet())
 					hashClass.put(key, mixin.get(key));
+		// If this is an array class, explicitly merge the array mixin
+		if (klass.isArray())
+			for (Object key : ArrayMixin.INSTANCE.keySet())
+				hashClass.put(key, ArrayMixin.INSTANCE.get(key));
+
 		// if there is a superclass, then it must have already been loaded
 		if (superclass != null)
 			hashClass.put(Constants.ISA, classMap.get(superclass));
@@ -154,6 +161,12 @@ public class HashToJava implements Opcodes {
 				Boolean.TYPE);
 		cw.visitEnd();
 		byte[] classData = cw.toByteArray();
+		if (klass == Object.class && name.equals("toString"))
+			try {
+				new FileOutputStream("/tmp/object.class").write(classData);
+			} catch (Exception ex) {
+
+			}
 		return AdapterLoader.instance.defineClass(
 				"hash.generated." + klass.getCanonicalName() + "."
 						+ classNameSuffix, classData);
@@ -173,17 +186,10 @@ public class HashToJava implements Opcodes {
 				mv.visitVarInsn(ALOAD, 1);
 				mv.visitLdcInsn(i + 1);
 				mv.visitInsn(AALOAD);
-				// try {
-				//
-				// Asm.invokeVirtual(mv, Object.class.getMethod("getClass"));
-				// } catch (Exception e) {
-				// throw new RuntimeException(e);
-				// }
 				Class<?> kls = params[i];
 				if (kls.isPrimitive())
 					kls = Asm.getBoxedClass(kls);
 				mv.visitTypeInsn(INSTANCEOF, Asm.internalName(kls));
-				// mv.visitLdcInsn(Type.getType(params[i]));
 				mv.visitJumpInsn(IFEQ, nextTest);
 			}
 			// if the arguments match the signature, the method is invoked

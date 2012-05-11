@@ -55,15 +55,15 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	@Override
 	protected Tree visitAttributeAccess(Tree node, Tree target,
 			Tree attributeKey) {
-		Object tgt = ((Result) visit(target.getChild(0))).getEvaluationResult();
-		Object key = ((Result) visit(target.getChild(1))).getEvaluationResult();
+		Object tgt = ((Result) visit(target)).getEvaluationResult();
+		Object key = ((Result) visit(attributeKey)).getEvaluationResult();
 		return new Result(Lookup.getAttribute(tgt, key));
 	}
 
 	@Override
 	protected Tree visitItemAccess(Tree node, Tree target, Tree itemKey) {
-		Object tgt = ((Result) visit(target.getChild(0))).getEvaluationResult();
-		Object key = ((Result) visit(target.getChild(1))).getEvaluationResult();
+		Object tgt = ((Result) visit(target)).getEvaluationResult();
+		Object key = ((Result) visit(itemKey)).getEvaluationResult();
 		return new Result(Lookup.getItem(tgt, key));
 	}
 }
