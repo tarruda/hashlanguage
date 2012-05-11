@@ -2,14 +2,24 @@ package hash.runtime.mixins;
 
 import hash.runtime.Lookup;
 import hash.runtime.functions.BinaryOperator;
+import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.functions.UnaryOperator;
 import hash.util.Check;
+import hash.util.Constants;
 import hash.util.Err;
 import hash.util.Types;
 
 public class NumberMixin extends Mixin {
 
-	public NumberMixin() {
+	public static final NumberMixin INSTANCE = new NumberMixin();
+
+	private NumberMixin() {
+		installMethod(new BuiltinMethod(Constants.BOOLEAN_VALUE) {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 1);
+				return ((Number) args[0]).doubleValue() != 0;
+			}
+		});
 		// TODO optimize these operations later
 		installMethod(new UnaryOperator("-") {
 			public Object invoke(Object... args) {

@@ -4,6 +4,8 @@ import hash.lang.Function;
 import hash.lang.Hash;
 import hash.runtime.exceptions.IncompatibleJavaMethodSignatureException;
 import hash.runtime.functions.JavaMethod;
+import hash.runtime.mixins.BooleanMixin;
+import hash.runtime.mixins.FloatMixin;
 import hash.runtime.mixins.IntegerMixin;
 import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
@@ -31,11 +33,17 @@ public class HashToJava implements Opcodes {
 	static {
 		classMap = new HashMap<Class<?>, Hash>();
 		classMixins = new HashMap<Class<?>, Hash>();
-		classMixins.put(Object.class, new ObjectMixin());
-		classMixins.put(Number.class, new NumberMixin());
-		classMixins.put(Integer.class, new IntegerMixin());
-		classMixins.put(Long.class, new IntegerMixin());
-		classMixins.put(String.class, new StringMixin());
+		classMixins.put(Object.class, ObjectMixin.INSTANCE);
+		classMixins.put(Boolean.class, BooleanMixin.INSTANCE);
+		classMixins.put(Number.class, NumberMixin.INSTANCE);
+		classMixins.put(Character.class, IntegerMixin.INSTANCE);
+		classMixins.put(Byte.class, IntegerMixin.INSTANCE);
+		classMixins.put(Short.class, IntegerMixin.INSTANCE);
+		classMixins.put(Integer.class, IntegerMixin.INSTANCE);
+		classMixins.put(Long.class, IntegerMixin.INSTANCE);
+		classMixins.put(Float.class, FloatMixin.INSTANCE);
+		classMixins.put(Double.class, FloatMixin.INSTANCE);
+		classMixins.put(String.class, StringMixin.INSTANCE);
 	}
 
 	public static Hash getClass(Object object) {

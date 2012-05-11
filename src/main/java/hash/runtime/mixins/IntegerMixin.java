@@ -1,14 +1,30 @@
 package hash.runtime.mixins;
 
+import hash.runtime.exceptions.IllegalArgTypeException;
 import hash.runtime.functions.BinaryOperator;
+import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.functions.UnaryOperator;
 import hash.util.Check;
+import hash.util.Constants;
 import hash.util.Err;
 import hash.util.Types;
 
 public class IntegerMixin extends Mixin {
 
-	public IntegerMixin() {
+	public static final IntegerMixin INSTANCE = new IntegerMixin();
+
+	private IntegerMixin() {
+		installMethod(new BuiltinMethod(Constants.COMPARE_TO) {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				Object self = args[0];
+				Object other = args[1];
+				if (!(other instanceof Number))
+					throw new IllegalArgTypeException(name, Types.name(other));
+				return Double.compare(((Number) self).doubleValue(),
+						((Number) other).doubleValue());
+			}
+		});
 		installMethod(new UnaryOperator("~") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 1);

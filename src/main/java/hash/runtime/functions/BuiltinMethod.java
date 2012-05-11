@@ -1,8 +1,20 @@
 package hash.runtime.functions;
 
-import hash.lang.Function;
+public abstract class BuiltinMethod extends Method {
 
-public abstract class BuiltinMethod implements Function {
+	protected String name;
 
-	public abstract String getName();	
+	public BuiltinMethod(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Builtin method '%s'", name);
+	}
 }

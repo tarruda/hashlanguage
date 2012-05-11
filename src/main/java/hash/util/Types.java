@@ -2,6 +2,10 @@ package hash.util;
 
 public class Types {
 
+	public static String name(Object obj){
+		return obj.getClass().getCanonicalName();
+	}
+	
 	public static boolean areIntegers(Object arg1, Object arg2) {
 		return isInteger(arg1) && isInteger(arg2);
 	}

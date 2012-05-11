@@ -50,15 +50,20 @@ conjunction
   ;
   
 bitwiseOr
-  : (l=bitwiseAnd -> $l)
-    (o=BIT_OR r=bitwiseAnd -> ^(BINARY[$o] $bitwiseOr $r))*
-  ;
+  : (l=bitwiseXor -> $l)
+    (o=BIT_OR r=bitwiseXor -> ^(BINARY[$o] $bitwiseOr $r))*
+  ;  
+  
+bitwiseXor
+  : (l=bitwiseAnd -> $l) 
+    (o=BIT_XOR r=bitwiseAnd -> ^(BINARY[$o] $bitwiseXor $r))*
+  ;  
   
 bitwiseAnd
   : (l=equality -> $l) 
     (o=BIT_AND r=equality -> ^(BINARY[$o] $bitwiseAnd $r))*
   ;
-  
+
 equality
   : (l=comparison -> $l) 
     ((o=EQ|o=NEQ) r=comparison -> ^(BINARY[$o] $equality $r))*   
