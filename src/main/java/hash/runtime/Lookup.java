@@ -1,10 +1,11 @@
 package hash.runtime;
 
 import hash.lang.Function;
-import hash.lang.Hash;
 import hash.runtime.bridge.HashToJava;
 import hash.runtime.exceptions.AttributeNotFoundException;
 import hash.runtime.exceptions.HashException;
+
+import java.util.Map;
 
 public class Lookup {
 
@@ -23,8 +24,8 @@ public class Lookup {
 		if (f == null)
 			throw new AttributeNotFoundException(methodKey.toString());
 		if (!(f instanceof Function))
-			throw new HashException(String.format("Attribute '%s' is not a function",
-					methodKey));
+			throw new HashException(String.format(
+					"Attribute '%s' is not a function", methodKey));
 		Object[] methodArgs = new Object[args.length + 1];
 		methodArgs[0] = target;
 		for (int i = 0; i < args.length; i++)
@@ -39,7 +40,7 @@ public class Lookup {
 	}
 
 	public static Object getAttribute(Object target, Object key) {
-		Hash cls = HashToJava.getClass(target);
+		Map cls = HashToJava.getClass(target);
 		Object rv = null;
 		while (rv == null && cls != null) {
 			rv = cls.get(key);

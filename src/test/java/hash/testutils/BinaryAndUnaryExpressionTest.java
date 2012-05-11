@@ -126,10 +126,10 @@ public abstract class BinaryAndUnaryExpressionTest {
 
 	@Test
 	public void boolValues() {
-		assertEquals(true, evaluate("'str'.boolValue()"));
-		assertEquals(false, evaluate("''.boolValue()"));
-		assertEquals(true, evaluate("4.boolValue()"));
-		assertEquals(false, evaluate("0.boolValue()"));
+		assertEquals(true, evaluate("'str'['|bool|']()"));
+		assertEquals(false, evaluate("''['|bool|']()"));
+		assertEquals(true, evaluate("4['|bool|']()"));
+		assertEquals(false, evaluate("0['|bool|']()"));
 		assertEquals(5, evaluate("'' || 5"));
 		assertEquals(0, evaluate("''&&0"));
 		assertEquals(10, evaluate("''|| 10 || 5"));

@@ -4,6 +4,7 @@ import hash.runtime.functions.BuiltinMethod;
 import hash.util.Check;
 import hash.util.Constants;
 
+@SuppressWarnings("serial")
 public class BooleanMixin extends Mixin {
 
 	public static final BooleanMixin INSTANCE = new BooleanMixin();

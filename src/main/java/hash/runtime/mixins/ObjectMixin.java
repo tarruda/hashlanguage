@@ -7,6 +7,7 @@ import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
 
+@SuppressWarnings("serial")
 public class ObjectMixin extends Mixin {
 
 	public static final ObjectMixin INSTANCE = new ObjectMixin();

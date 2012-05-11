@@ -7,6 +7,7 @@ import hash.util.Constants;
 import hash.util.Err;
 import hash.util.StringHelpers;
 
+@SuppressWarnings("serial")
 public class StringMixin extends Mixin {
 
 	public static final StringMixin INSTANCE = new StringMixin();

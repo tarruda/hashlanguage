@@ -1,7 +1,7 @@
 package hash.runtime.bridge;
 
+import hash.lang.Factory;
 import hash.lang.Function;
-import hash.lang.Hash;
 import hash.runtime.exceptions.IncompatibleJavaMethodSignatureException;
 import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.BooleanMixin;
@@ -18,21 +18,23 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+
 public class HashToJava implements Opcodes {
 
-	private static final HashMap<Class<?>, Hash> classMap;
-	private static final HashMap<Class<?>, Hash> classMixins;
+	private static final HashMap<Class<?>, Map> classMap;
+	private static final HashMap<Class<?>, Map> classMixins;
 	private static final String[] ignoredMethodNames = { "getClass" };
 
 	static {
-		classMap = new HashMap<Class<?>, Hash>();
-		classMixins = new HashMap<Class<?>, Hash>();
+		classMap = new HashMap<Class<?>, Map>();
+		classMixins = new HashMap<Class<?>, Map>();
 		classMixins.put(Object.class, ObjectMixin.INSTANCE);
 		classMixins.put(Boolean.class, BooleanMixin.INSTANCE);
 		classMixins.put(Number.class, NumberMixin.INSTANCE);
@@ -46,17 +48,17 @@ public class HashToJava implements Opcodes {
 		classMixins.put(String.class, StringMixin.INSTANCE);
 	}
 
-	public static Hash getClass(Object object) {
-		if (object instanceof Hash)
-			return (Hash) object;
+	public static Map getClass(Object object) {
+		if (object instanceof Map)
+			return (Map) object;
 		return getSuperclass(object);
 	}
 
-	public static Hash getSuperclass(Object object) {
-		if (object instanceof Hash) {
-			Object rv = ((Hash) object).get(Constants.SUPER);
-			if (rv instanceof Hash)
-				return (Hash) rv;
+	public static Map getSuperclass(Object object) {
+		if (object instanceof Map) {
+			Object rv = ((Map) object).get(Constants.SUPER);
+			if (rv instanceof Map)
+				return (Map) rv;
 			return null;
 		}
 		Class<?> cls = object.getClass();
@@ -72,7 +74,7 @@ public class HashToJava implements Opcodes {
 		Class<?> superclass = klass.getSuperclass();
 		if (superclass != null && !classMap.containsKey(superclass))
 			constructHashClass(superclass);
-		Hash hashClass = new Hash();
+		Map hashClass = Factory.createMap();
 		// group methods by name
 		HashMap<String, List<Method>> methodsByName = new HashMap<String, List<Method>>();
 		for (Method method : klass.getDeclaredMethods()) {
@@ -104,7 +106,7 @@ public class HashToJava implements Opcodes {
 			}
 		}
 		// if we have defined a mixin for this class, the time to merge is now
-		Hash mixin = classMixins.get(klass);
+		Map mixin = classMixins.get(klass);
 		if (mixin != null)
 			for (Object key : mixin.keySet())
 				hashClass.put(key, mixin.get(key));

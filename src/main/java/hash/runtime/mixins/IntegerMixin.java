@@ -9,6 +9,7 @@ import hash.util.Constants;
 import hash.util.Err;
 import hash.util.Types;
 
+@SuppressWarnings("serial")
 public class IntegerMixin extends Mixin {
 
 	public static final IntegerMixin INSTANCE = new IntegerMixin();

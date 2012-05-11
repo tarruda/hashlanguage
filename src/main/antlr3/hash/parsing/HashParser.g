@@ -117,6 +117,10 @@ primary
         s=DOT name=identifier 
         -> ^(ATTRIBUTE[$s, "Attribute"] $primary STRING[$name.start, $name.text])
       )
+    | (
+        s=LSQUARE key=expression RSQUARE
+        -> ^(ATTRIBUTE[$s, "Attribute"] $primary $key)
+      )
     )*
   ;
   

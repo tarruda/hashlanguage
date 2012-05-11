@@ -6,6 +6,7 @@ import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Types;
 
+@SuppressWarnings("serial")
 public class FloatMixin extends Mixin {
 
 	public static final FloatMixin INSTANCE = new FloatMixin();
