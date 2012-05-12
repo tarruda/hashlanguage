@@ -1,6 +1,6 @@
 package hash.runtime.mixins;
 
-import hash.runtime.Lookup;
+import hash.runtime.Runtime;
 import hash.runtime.bridge.HashToJava;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
@@ -23,7 +23,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object comparisonResult = null;
 				try {
-					comparisonResult = Lookup.invokeMethod(self,
+					comparisonResult = Runtime.invokeMethod(self,
 							Constants.COMPARE_TO, other);
 				} catch (Exception e) {
 					return self.equals(other);
@@ -40,7 +40,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object comparisonResult = null;
 				try {
-					comparisonResult = Lookup.invokeMethod(self,
+					comparisonResult = Runtime.invokeMethod(self,
 							Constants.COMPARE_TO, other);
 				} catch (Exception e) {
 					return !self.equals(other);
@@ -56,7 +56,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Lookup.invokeMethod(self,
+				comparisonResult = Runtime.invokeMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Number))
 					throw Err.invalidComparisonResult();
@@ -69,7 +69,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Lookup.invokeMethod(self,
+				comparisonResult = Runtime.invokeMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Number))
 					throw Err.invalidComparisonResult();
@@ -82,7 +82,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Lookup.invokeMethod(self,
+				comparisonResult = Runtime.invokeMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Number))
 					throw Err.invalidComparisonResult();
@@ -95,7 +95,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Lookup.invokeMethod(self,
+				comparisonResult = Runtime.invokeMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Number))
 					throw Err.invalidComparisonResult();
@@ -113,7 +113,7 @@ public class ObjectMixin extends Mixin {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
-				Object selfValue = Lookup.invokeMethod(self,
+				Object selfValue = Runtime.invokeMethod(self,
 						Constants.BOOLEAN_VALUE);
 				if (selfValue.getClass() == Boolean.class
 						&& ((Boolean) selfValue).booleanValue())
@@ -140,9 +140,9 @@ public class ObjectMixin extends Mixin {
 				return rv;
 			}
 		});
-		installMethod(new BuiltinMethod(Constants.GET_ITEM) {
+		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
 			public Object invoke(Object... args) {
-				return Lookup.invokeMethod(args[0], Constants.GET_ATTRIBUTE);
+				return Runtime.invokeMethod(args[0], Constants.GET_ATTRIBUTE);
 			}
 		});
 	}

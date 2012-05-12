@@ -11,8 +11,9 @@ public class Constants {
 	public static final String SET_ATTRIBUTE = "|setAttr|";
 	public static final String HAS_ATTRIBUTE = "|hasAttr|";
 	public static final String DEL_ATTRIBUTE = "|delAttr|";
-	public static final String GET_ITEM = "|getItem|";
-	public static final String SET_ITEM = "|setItem|";
-	public static final String HAS_ITEM = "|hasItem|";
-	public static final String DEL_ITEM = "|delItem|";
+	public static final String GET_INDEX = "|getIndex|";
+	public static final String SET_INDEX = "|setIndex|";
+	public static final String HAS_INDEX = "|hasIndex|";
+	public static final String DEL_INDEX = "|delIndex|";
+	public static final String GET_SLICE = "|getSlice|";
 }

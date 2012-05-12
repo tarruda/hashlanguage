@@ -35,4 +35,9 @@ public class LiteralEvaluator extends AstVisitor {
 		String txt = node.getText();
 		return new Result(Boolean.parseBoolean(txt));
 	}
+	
+	@Override
+	protected Tree visitNull(Tree node) {
+		return new Result(null);
+	}
 }

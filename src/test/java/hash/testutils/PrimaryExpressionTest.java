@@ -36,4 +36,21 @@ public abstract class PrimaryExpressionTest {
 		assertEquals("Key", evaluate("'Key=value'.split('=')[0]"));
 		assertEquals("value", evaluate("'Key=value'.split('=')[1]"));
 	}
+
+	@Test
+	public void listOperations() {
+		evaluate("l=[]");
+		evaluate("l.add(5)");
+		evaluate("l.add(10)");
+		assertEquals("[5, 10]", evaluate("l.toString()"));
+		evaluate("l[0]= 'Test'");
+		assertEquals("[Test, 10]", evaluate("l.toString()"));
+	}
+
+	@Test
+	public void listSlice() {
+		evaluate("l=[1,2,3,4,5,6,7,8,9,10]");
+		assertEquals("[1, 2, 3, 4, 5]", evaluate("l[0:4].toString()"));
+
+	}
 }

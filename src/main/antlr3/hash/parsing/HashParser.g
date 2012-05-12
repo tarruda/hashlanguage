@@ -20,7 +20,8 @@ tokens {
     INVOCATION;
     LIST;
     ATTRIBUTE;
-    ITEM;  
+    INDEX;
+    SLICE;
 }
 
 @header {
@@ -29,13 +30,11 @@ tokens {
 
 
 program
-  :
-  statement*
+  : statement*
   ;
   
 statement
-  :
-  expression SCOLON -> expression
+  : expression SCOLON!   
   ;
     
 expression 
@@ -59,7 +58,7 @@ expression
     | o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
     )?
   ;
-  
+    
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
   | o=DEC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   
@@ -142,11 +141,23 @@ primary
     | (
         s=DOT name=identifier 
         -> ^(ATTRIBUTE[$s, "Attribute"] $primary STRING[$name.start, $name.text])
-      )
-    | (
-        s=LSQUARE key=expression RSQUARE
-        -> ^(ITEM[$s, "Item"] $primary $key)
-      )
+      )            
+    | ( (LSQUARE expression RSQUARE) =>
+        (
+          s=LSQUARE key=expression RSQUARE
+          -> ^(INDEX[$s, "Item"] $primary $key)
+        )
+      | (
+          s=LSQUARE 
+          {lb=null;}(lb=expression)? 
+          COLON 
+          {ub=null;}(ub=expression)? 
+          {step=null;}(COLON step=expression)? 
+          RSQUARE
+          -> ^(SLICE[$s, "Slice"] $primary 
+              ^(LIST["Args"] {nodeOrNull(lb)} {nodeOrNull(ub)} {nodeOrNull(step)}))
+        )
+	    )     
     )*
   ;
 

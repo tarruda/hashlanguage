@@ -1,6 +1,6 @@
 package hash.runtime.mixins;
 
-import hash.runtime.Lookup;
+import hash.runtime.Runtime;
 import hash.runtime.functions.BuiltinMethod;
 import hash.util.Check;
 import hash.util.Constants;
@@ -31,25 +31,25 @@ public class MapMixin extends Mixin {
 				return ((Map) args[0]).remove(args[1]);
 			}
 		});
-		installMethod(new BuiltinMethod(Constants.GET_ITEM) {
+		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				return ((Map) args[0]).get(args[1]);
 			}
 		});
-		installMethod(new BuiltinMethod(Constants.SET_ITEM) {
+		installMethod(new BuiltinMethod(Constants.SET_INDEX) {
 			public Object invoke(Object... args) {
-				return Lookup.invokeMethod(args[0], Constants.SET_ATTRIBUTE);
+				return Runtime.invokeMethod(args[0], Constants.SET_ATTRIBUTE);
 			}
 		});
-		installMethod(new BuiltinMethod(Constants.HAS_ITEM) {
+		installMethod(new BuiltinMethod(Constants.HAS_INDEX) {
 			public Object invoke(Object... args) {
-				return Lookup.invokeMethod(args[0], Constants.HAS_ATTRIBUTE);
+				return Runtime.invokeMethod(args[0], Constants.HAS_ATTRIBUTE);
 			}
 		});
-		installMethod(new BuiltinMethod(Constants.DEL_ITEM) {
+		installMethod(new BuiltinMethod(Constants.DEL_INDEX) {
 			public Object invoke(Object... args) {
-				return Lookup.invokeMethod(args[0], Constants.DEL_ATTRIBUTE);
+				return Runtime.invokeMethod(args[0], Constants.DEL_ATTRIBUTE);
 			}
 		});
 	}

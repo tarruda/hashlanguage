@@ -1,10 +1,10 @@
 package hash.parsing.visitors;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
-import static hash.parsing.HashParser.ITEM;
+import static hash.parsing.HashParser.INDEX;
 import hash.lang.Factory;
 import hash.parsing.visitors.nodes.Result;
-import hash.runtime.Lookup;
+import hash.runtime.Runtime;
 
 import java.util.List;
 import java.util.Map;
@@ -22,15 +22,15 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	@Override
 	protected Tree visitAssignment(Tree node, Tree target, Tree expression) {
 		Object value = ((Result) visit(expression)).getEvaluationResult();
-		if (target.getType() == ATTRIBUTE || target.getType() == ITEM) {
+		if (target.getType() == ATTRIBUTE || target.getType() == INDEX) {
 			Object ownerObject = ((Result) visit(target.getChild(0)))
 					.getEvaluationResult();
 			Object key = ((Result) visit(target.getChild(1)))
 					.getEvaluationResult();
 			if (target.getType() == ATTRIBUTE)
-				Lookup.setAttribute(ownerObject, key, value);
+				Runtime.setAttribute(ownerObject, key, value);
 			else
-				Lookup.setItem(ownerObject, key, value);
+				Runtime.setIndex(ownerObject, key, value);
 		} else
 			// target is an identifier
 			context.put(target.getText(), value);
@@ -48,7 +48,7 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	protected Tree visitBinaryExpression(Tree operator, Tree left, Tree right) {
 		Object l = ((Result) visit(left)).getEvaluationResult();
 		Object r = ((Result) visit(right)).getEvaluationResult();
-		return new Result(Lookup.invokeBinaryOperator(operator.getText(), l, r));
+		return new Result(Runtime.invokeBinaryOperator(operator.getText(), l, r));
 	}
 
 	@Override
@@ -57,24 +57,24 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 		if (operatorTxt.equals("+"))// ignore
 			return visit(operand);
 		Object op = ((Result) visit(operand)).getEvaluationResult();
-		return new Result(Lookup.invokeUnaryOperator(operatorTxt, op));
+		return new Result(Runtime.invokeUnaryOperator(operatorTxt, op));
 	}
 
 	@Override
 	protected Tree visitInvocation(Tree node, Tree expression, Tree arguments) {
 		Object[] args = ((List) ((Result) visit(arguments))
 				.getEvaluationResult()).toArray();
-		if (expression.getType() == ATTRIBUTE || expression.getType() == ITEM) {
+		if (expression.getType() == ATTRIBUTE || expression.getType() == INDEX) {
 			// this is a method call
 			Object tgt = ((Result) visit(expression.getChild(0)))
 					.getEvaluationResult();
 			Object methodKey = ((Result) visit(expression.getChild(1)))
 					.getEvaluationResult();
-			return new Result(Lookup.invokeMethod(tgt, methodKey, args));
+			return new Result(Runtime.invokeMethod(tgt, methodKey, args));
 		} else {
 			// normal function call
 			Object exp = ((Result) visit(arguments)).getEvaluationResult();
-			return new Result(Lookup.invokeFunction(exp, args));
+			return new Result(Runtime.invokeFunction(exp, args));
 		}
 	}
 
@@ -106,14 +106,22 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 			Tree attributeKey) {
 		Object tgt = ((Result) visit(target)).getEvaluationResult();
 		Object key = ((Result) visit(attributeKey)).getEvaluationResult();
-		return new Result(Lookup.getAttribute(tgt, key));
+		return new Result(Runtime.getAttribute(tgt, key));
 	}
 
 	@Override
-	protected Tree visitItemAccess(Tree node, Tree target, Tree itemKey) {
+	protected Tree visitIndexAccess(Tree node, Tree target, Tree itemKey) {
 		Object tgt = ((Result) visit(target)).getEvaluationResult();
 		Object key = ((Result) visit(itemKey)).getEvaluationResult();
-		return new Result(Lookup.getItem(tgt, key));
+		return new Result(Runtime.getIndex(tgt, key));
+	}
+
+	@Override
+	protected Tree visitSlice(Tree node, Tree target, Tree sliceArgs) {
+		Object tgt = ((Result) visit(target)).getEvaluationResult();
+		List args = (List) ((Result) visit(sliceArgs)).getEvaluationResult();
+		return new Result(Runtime.getSlice(tgt, args.get(0), args.get(1),
+				args.get(2)));
 	}
 
 	@Override

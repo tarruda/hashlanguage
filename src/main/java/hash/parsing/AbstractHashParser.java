@@ -1,9 +1,12 @@
 package hash.parsing;
 
+import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Parser;
+import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
+import org.antlr.runtime.tree.CommonTree;
 
 /**
  * The super class of the generated parser. It is extended by the generated code
@@ -61,4 +64,11 @@ public abstract class AbstractHashParser extends Parser {
 		//
 		super.displayRecognitionError(tokenNames, e);
 	}
+
+	protected Object nodeOrNull(ParserRuleReturnScope parserReturn) {
+		if (parserReturn != null)
+			return parserReturn.getTree();
+		return new CommonTree(new CommonToken(HashParser.NULL, "null"));
+	}
+
 }

@@ -10,8 +10,12 @@ package hash.parsing;
 }
 
 //keywords
+FUNCTION: 'function';
+CLASS: 'class';
+NEW: 'new';
 TRUE: 'true'; 
 FALSE: 'false';
+NULL: 'null';
 
 //
 SCOLON: ';';

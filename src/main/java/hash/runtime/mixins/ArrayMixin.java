@@ -13,7 +13,7 @@ public class ArrayMixin extends Mixin {
 	public static final ArrayMixin INSTANCE = new ArrayMixin();
 
 	private ArrayMixin() {
-		installMethod(new BuiltinMethod(Constants.GET_ITEM) {
+		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				Object array = args[0];
@@ -24,7 +24,7 @@ public class ArrayMixin extends Mixin {
 				return Array.get(array, (Integer) key);
 			}
 		});
-		installMethod(new BuiltinMethod(Constants.SET_ITEM) {
+		installMethod(new BuiltinMethod(Constants.SET_INDEX) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 3);
 				Object array = args[0];

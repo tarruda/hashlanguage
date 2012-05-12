@@ -37,8 +37,16 @@ public class Err {
 
 	public static IllegalArgumentException illegalArg(String fName,
 			String expectedType, int argIdx) {
-		return new IllegalArgumentException(String.format(
+		return illegalArg(String.format(
 				"Function '%s' expecting argument %s of type '%s'", fName,
 				argIdx, expectedType));
+	}
+
+	public static IllegalArgumentException illegalArg(String msg) {
+		return new IllegalArgumentException(msg);
+	}
+
+	public static IndexOutOfBoundsException outOfBounds() {
+		return new IndexOutOfBoundsException();
 	}
 }

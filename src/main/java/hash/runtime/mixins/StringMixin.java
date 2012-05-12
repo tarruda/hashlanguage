@@ -1,11 +1,11 @@
 package hash.runtime.mixins;
 
+import hash.runtime.Operations;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
-import hash.util.StringHelpers;
 
 @SuppressWarnings("serial")
 public class StringMixin extends Mixin {
@@ -36,7 +36,7 @@ public class StringMixin extends Mixin {
 				Object other = args[1];
 				if (other.getClass() != Integer.class)
 					Err.binaryOperatorNotImplemented(op, self, other);
-				return StringHelpers.multiplicateString((String) self,
+				return Operations.multiplicateString((String) self,
 						(Integer) other);
 			}
 		});

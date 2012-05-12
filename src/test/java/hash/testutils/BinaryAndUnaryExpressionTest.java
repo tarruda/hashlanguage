@@ -26,7 +26,8 @@ public abstract class BinaryAndUnaryExpressionTest {
 		context.put("x", 255);
 		context.put("y", "Str");
 		assertEquals(255, evaluate("x"));
-		assertEquals("StrStrStrStrStr", evaluate("y * 5"));
+		assertEquals("StrStrStrStrStr", evaluate("y*=5"));
+		assertEquals("StrStrStrStrStrStrStrStrStrStr", evaluate("2 * y"));
 	}
 
 	@Test
@@ -41,6 +42,9 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(2, evaluate("x++"));
 		assertEquals(3, evaluate("x++"));
 		assertEquals(4, evaluate("x++"));
+		assertEquals(5, evaluate("z = y = x"));
+		assertEquals(5, evaluate("y"));
+		assertEquals(5, evaluate("z"));
 	}
 
 	@Test
@@ -185,6 +189,8 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(false, evaluate("''['|bool|']()"));
 		assertEquals(true, evaluate("4['|bool|']()"));
 		assertEquals(false, evaluate("0['|bool|']()"));
+		assertEquals(true, evaluate("[1,2,3]['|bool|']()"));
+		assertEquals(false, evaluate("[]['|bool|']()"));
 		assertEquals(5, evaluate("'' || 5"));
 		assertEquals(0, evaluate("''&&0"));
 		assertEquals(10, evaluate("''|| 10 || 5"));
@@ -236,6 +242,5 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(true, evaluate("false==true==(1-2==3))"));
 		assertEquals(true, evaluate("false==false==true==false==false"));
 		assertEquals(false, evaluate("1<2==(3>4)==false==(12<=3*4)==false"));
-
 	}
 }

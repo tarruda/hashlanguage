@@ -1,6 +1,6 @@
 package hash.runtime.mixins;
 
-import hash.runtime.Lookup;
+import hash.runtime.Runtime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.functions.UnaryOperator;
@@ -66,7 +66,7 @@ public class NumberMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				if (other.getClass() == String.class)
-					return Lookup.invokeBinaryOperator(op, other, self);
+					return Runtime.invokeBinaryOperator(op, other, self);
 				if (!(other instanceof Number))
 					throw Err.binaryOperatorNotImplemented(op, self, other);
 				Number rv = ((Number) self).doubleValue()
