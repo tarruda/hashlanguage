@@ -14,8 +14,16 @@ public class Factory {
 	public static List createList() {
 		return new ArrayList();
 	}
+	
+	public static List createList(int initialCapacity) {
+		return new ArrayList(initialCapacity);
+	}
 
-	public static Map createExecutionContext() {
-		return new HashMap();
+	public static Scope createExecutionScope() {
+		return new HashScope();
+	}
+	
+	public static Scope createExecutionScope(Scope parent) {
+		return new HashScope(parent);
 	}
 }

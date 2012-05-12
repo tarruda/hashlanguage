@@ -209,6 +209,7 @@ literal
   | floatLiteral
   | integerLiteral
   | booleanLiteral
+  | NULL
   ;
 
 stringLiteral
@@ -226,4 +227,3 @@ integerLiteral
 booleanLiteral
   : (t=TRUE|t=FALSE) -> BOOLEAN[$t]
   ;
-  

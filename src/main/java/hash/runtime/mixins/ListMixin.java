@@ -1,7 +1,8 @@
 package hash.runtime.mixins;
 
-import hash.runtime.Operations;
 import hash.runtime.functions.BuiltinMethod;
+import hash.runtime.operations.Common;
+import hash.runtime.operations.ListOperations;
 import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
@@ -23,43 +24,35 @@ public class ListMixin extends Mixin {
 		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
-				Object list = args[0];
-				Object key = args[1];
-				if (key.getClass() != Integer.class)
-					throw Err.illegalArg(name,
-							Integer.class.getCanonicalName(), 1);
-				return ((List) list).get((Integer) key);
+				List list = (List) args[0];
+				if (args[1] == null)
+					throw Err.nullIndex();
+				int idx = (Integer) args[1];
+				return list
+						.get(Common.calculateAbsoluteIndex(idx, list.size()));
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.SET_INDEX) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 3);
-				Object list = args[0];
-				Object key = args[1];
+				List list = (List) args[0];
+				if (args[1] == null)
+					throw Err.nullIndex();
+				int idx = (Integer) args[1];
 				Object value = args[2];
-				if (!(key instanceof Integer))
-					throw Err.illegalArg(name,
-							Integer.class.getCanonicalName(), 1);
-				return ((List) list).set((Integer) key, value);
-			}
-		});
-		installMethod(new BuiltinMethod(Constants.HAS_INDEX) {
-			public Object invoke(Object... args) {
-				Check.numberOfArgs(args, 2);
-				Object list = args[0];
-				Object value = args[1];
-				return ((List) list).contains(value);
+				return list.set(
+						Common.calculateAbsoluteIndex(idx, list.size()), value);
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.DEL_INDEX) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
-				Object list = args[0];
-				Object key = args[1];
-				if (key.getClass() != Integer.class)
-					throw Err.illegalArg(name,
-							Integer.class.getCanonicalName(), 1);
-				return ((List) list).remove(((Integer) key).intValue());
+				List list = (List) args[0];
+				if (args[1] == null)
+					throw Err.nullIndex();
+				int idx = (Integer) args[1];
+				return list.remove(Common.calculateAbsoluteIndex(idx,
+						list.size()));
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.GET_SLICE) {
@@ -78,7 +71,7 @@ public class ListMixin extends Mixin {
 					end = (Integer) upperBound;
 				if (step instanceof Integer)
 					inc = (Integer) step;
-				return Operations.listSlice(list, start, end, inc);
+				return ListOperations.slice(list, start, end, inc);
 			}
 		});
 	}

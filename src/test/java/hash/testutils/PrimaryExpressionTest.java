@@ -16,7 +16,7 @@ public abstract class PrimaryExpressionTest {
 
 	@Before
 	public void setup() {
-		context = Factory.createExecutionContext();
+		context = Factory.createExecutionScope();
 	}
 
 	@Test
@@ -32,13 +32,22 @@ public abstract class PrimaryExpressionTest {
 	}
 
 	@Test
-	public void stringSplit() {
-		assertEquals("Key", evaluate("'Key=value'.split('=')[0]"));
-		assertEquals("value", evaluate("'Key=value'.split('=')[1]"));
+	public void stringMethods() {
+		evaluate("s='Key=value'.split('=')");
+		assertEquals("Key", evaluate("s[0]"));
+		assertEquals("value", evaluate("s[1]"));
 	}
 
 	@Test
-	public void listOperations() {
+	public void stringSlice() {
+		evaluate("s='abcdefgh'");
+		assertEquals("abcd", evaluate("s[:3]"));
+		assertEquals("efgh", evaluate("s[-4:]"));
+		assertEquals("aceg", evaluate("s[::2]"));
+	}
+
+	@Test
+	public void listMethods() {
 		evaluate("l=[]");
 		evaluate("l.add(5)");
 		evaluate("l.add(10)");
@@ -48,9 +57,40 @@ public abstract class PrimaryExpressionTest {
 	}
 
 	@Test
+	public void listIndex() {
+		evaluate("l=[5,10]");		
+		evaluate("l[-1]= 'Test'");
+		assertEquals("[5, Test]", evaluate("l.toString()"));
+	}
+	
+	@Test(expected=ClassCastException.class)
+	public void nullArgument() {
+		evaluate("l=[5,10]");		
+		evaluate("l[1.2]");		
+	}
+
+	@Test
 	public void listSlice() {
 		evaluate("l=[1,2,3,4,5,6,7,8,9,10]");
-		assertEquals("[1, 2, 3, 4, 5]", evaluate("l[0:4].toString()"));
+		assertEquals("[1, 2, 3, 4, 5]", evaluate("l[:4].toString()"));
+		assertEquals("[6, 7, 8, 9, 10]", evaluate("l[5:].toString()"));
+		assertEquals("[3, 4, 5, 6, 7, 8]", evaluate("l[2:7].toString()"));
+		assertEquals("[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+				evaluate("l[:].toString()"));
+		assertEquals("[1, 3, 5, 7, 9]", evaluate("l[::2].toString()"));
+		assertEquals("[3, 6, 9]", evaluate("l[2::3].toString()"));
+		assertEquals("[3, 6, 9]", evaluate("l[2::3].toString()"));
+		assertEquals("[9, 10]", evaluate("l[-2:].toString()"));
+		assertEquals("[9, 6, 3]", evaluate("l[-2:0:3].toString()"));
+		assertEquals("[10, 9, 8, 7, 6, 5, 4, 3, 2, 1]",
+				evaluate("l[-1:0].toString()"));
+	}
 
+	@Test
+	public void arraySlice() {
+		evaluate("a='1,2,3,4,5,6,7,8,9,10'.split(',')[-2:0:3]");
+		assertEquals("9", evaluate("a[0]"));
+		assertEquals("6", evaluate("a[1]"));
+		assertEquals("3", evaluate("a[2]"));
 	}
 }

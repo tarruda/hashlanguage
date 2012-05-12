@@ -2,11 +2,10 @@ package hash.runtime;
 
 import hash.lang.Function;
 import hash.runtime.bridge.HashToJava;
-import hash.runtime.exceptions.AttributeNotFoundException;
-import hash.runtime.exceptions.HashException;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
 import hash.util.Constants;
+import hash.util.Err;
 
 import java.util.Map;
 
@@ -14,7 +13,7 @@ public class Runtime {
 
 	public static Object invokeFunction(Object f, Object... args) {
 		if (!(f instanceof Function))
-			throw new HashException(String.format(
+			Err.illegalArg(String.format(
 					"Object '%s' is not a function", f));
 		return ((Function) f).invoke(args);
 	}
@@ -46,9 +45,9 @@ public class Runtime {
 	private static Object invokeMethodCore(Object f, Object target,
 			Object methodKey, Object... args) {
 		if (f == null)
-			throw new AttributeNotFoundException(methodKey.toString());
+			throw Err.attributeNotDefined(methodKey.toString());
 		if (!(f instanceof Function))
-			throw new HashException(String.format(
+			throw Err.illegalArg(String.format(
 					"Attribute '%s' is not a function", methodKey));
 		Object[] methodArgs = new Object[args.length + 1];
 		methodArgs[0] = target;
@@ -66,10 +65,6 @@ public class Runtime {
 				value);
 	}
 
-	public static Object delAttribute(Object target, Object key) {
-		return getMethod(target, Constants.DEL_ATTRIBUTE).invoke(target, key);
-	}
-
 	public static Object getIndex(Object target, Object key) {
 		return getMethod(target, Constants.GET_INDEX).invoke(target, key);
 	}
@@ -77,14 +72,6 @@ public class Runtime {
 	public static Object setIndex(Object target, Object key, Object value) {
 		return getMethod(target, Constants.SET_INDEX)
 				.invoke(target, key, value);
-	}
-
-	public static Object hasIndex(Object target, Object key) {
-		return getMethod(target, Constants.HAS_INDEX).invoke(target, key);
-	}
-
-	public static Object delIndex(Object target, Object key) {
-		return getMethod(target, Constants.DEL_INDEX).invoke(target, key);
 	}
 
 	public static Object getSlice(Object target, Object lowerBound,
@@ -106,7 +93,7 @@ public class Runtime {
 		}
 		if (rv instanceof Function)
 			return (Function) rv;
-		throw new HashException(String.format(
+		throw Err.attributeNotDefined(String.format(
 				"This object is missing the '%s' accessor", key));
 	}
 }

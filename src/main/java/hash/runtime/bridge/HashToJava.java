@@ -2,10 +2,10 @@ package hash.runtime.bridge;
 
 import hash.lang.Factory;
 import hash.lang.Function;
-import hash.runtime.exceptions.IncompatibleJavaMethodSignatureException;
 import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.ArrayMixin;
 import hash.runtime.mixins.BooleanMixin;
+import hash.runtime.mixins.CharacterMixin;
 import hash.runtime.mixins.FloatMixin;
 import hash.runtime.mixins.IntegerMixin;
 import hash.runtime.mixins.ListMixin;
@@ -15,6 +15,7 @@ import hash.runtime.mixins.ObjectMixin;
 import hash.runtime.mixins.StringMixin;
 import hash.util.Asm;
 import hash.util.Constants;
+import hash.util.Err;
 
 import java.io.FileOutputStream;
 import java.lang.reflect.Method;
@@ -42,7 +43,8 @@ public class HashToJava implements Opcodes {
 		classMixins.put(Object.class, new Map[] { ObjectMixin.INSTANCE });
 		classMixins.put(Boolean.class, new Map[] { BooleanMixin.INSTANCE });
 		classMixins.put(Number.class, new Map[] { NumberMixin.INSTANCE });
-		classMixins.put(Character.class, new Map[] { IntegerMixin.INSTANCE });
+		classMixins.put(Character.class, new Map[] { IntegerMixin.INSTANCE,
+				CharacterMixin.INSTANCE });
 		classMixins.put(Byte.class, new Map[] { IntegerMixin.INSTANCE });
 		classMixins.put(Short.class, new Map[] { IntegerMixin.INSTANCE });
 		classMixins.put(Integer.class, new Map[] { IntegerMixin.INSTANCE });
@@ -201,8 +203,11 @@ public class HashToJava implements Opcodes {
 			// if not, the execution continues from this label
 			mv.visitLabel(nextTest);
 		}
-		Asm.constructAndInitialize(mv,
-				IncompatibleJavaMethodSignatureException.class);
+		try {
+			Asm.invokeStatic(mv, Err.class.getMethod("illegalJavaArgs"));
+		} catch (Exception e) {
+			throw Err.ex(e);
+		}
 		mv.visitInsn(ATHROW);
 	}
 

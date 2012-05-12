@@ -1,52 +1,81 @@
 package hash.util;
 
-import hash.runtime.exceptions.HashException;
-import hash.runtime.exceptions.InvalidReturnValueException;
 
 public class Err {
-	public static HashException binaryOperatorNotImplemented(String operator,
-			Object arg1, Object arg2) {
-		return new HashException(
+
+	public static RuntimeException ex(Throwable cause) {
+		return new RuntimeException(cause);
+	}
+
+	public static RuntimeException ex(String msg) {
+		return new RuntimeException(msg);
+	}
+
+	public static RuntimeException binaryOperatorNotImplemented(
+			String operator, Object leftOperand, Object rightOperand) {
+		return new RuntimeException(
 				String.format(
 						"Binary operator '%s' is not implemented for types '%s' and '%s'",
-						operator, arg1.getClass().getName(), arg2.getClass()
-								.getName()));
+						operator, leftOperand.getClass().getName(),
+						rightOperand.getClass().getName()));
 	}
 
-	public static HashException unaryOperatorNotImplemented(String operator,
-			Object arg1) {
-		return new HashException(String.format(
+	public static RuntimeException unaryOperatorNotImplemented(String operator,
+			Object operand) {
+		return new RuntimeException(String.format(
 				"Unary operator '%s' is not implemented for type '%s'",
-				operator, arg1.getClass().getName()));
+				operator, operand.getClass().getName()));
 	}
 
-	public static InvalidReturnValueException invalidComparisonResult() {
-		return new InvalidReturnValueException(
-				"Comparison must return a number");
+	public static RuntimeException invalidComparisonResult() {
+		return new RuntimeException("Comparison must return a number");
 	}
 
-	public static IllegalArgumentException illegalArgCount() {
+	public static RuntimeException illegalJavaArgs() {
+		return new IllegalArgumentException(
+				"Arguments passed are invalid for this java method");
+	}
+
+	public static RuntimeException illegalArgCount() {
 		return new IllegalArgumentException(
 				"Function invoked with a wrong number of arguments");
 	}
 
-	public static IllegalArgumentException illegalArg(String fName,
-			String expectedType) {
+	public static RuntimeException illegalArg(String fName, String expectedType) {
 		return illegalArg(fName, expectedType, 0);
 	}
 
-	public static IllegalArgumentException illegalArg(String fName,
+	public static RuntimeException illegalArg(String fName,
 			String expectedType, int argIdx) {
 		return illegalArg(String.format(
 				"Function '%s' expecting argument %s of type '%s'", fName,
 				argIdx, expectedType));
 	}
 
-	public static IllegalArgumentException illegalArg(String msg) {
+	public static RuntimeException nullIndex() {	
+		return new IllegalArgumentException("Index argument is a null referece");
+	}
+	
+	public static RuntimeException illegalArg(String msg) {	
 		return new IllegalArgumentException(msg);
 	}
 
-	public static IndexOutOfBoundsException outOfBounds() {
+	public static RuntimeException illegalReturnVal() {
+		return new IllegalArgumentException(
+				"Function returned an invalid value");
+	}
+
+	public static RuntimeException outOfBounds() {
 		return new IndexOutOfBoundsException();
+	}
+
+	public static RuntimeException nameNotDefined(Object name) {
+		return new RuntimeException(String.format(
+				"Name '%s' is not defined in any enclosing scope", name));
+	}
+
+	public static RuntimeException attributeNotDefined(Object name) {
+		return new RuntimeException(String.format(
+				"Attribute '%s' is not defined", name));
 	}
 }

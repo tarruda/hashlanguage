@@ -18,7 +18,7 @@ public abstract class BinaryAndUnaryExpressionTest {
 
 	@Before
 	public void setup() {
-		context = Factory.createExecutionContext();
+		context = Factory.createExecutionScope();
 	}
 
 	@Test
