@@ -1,7 +1,7 @@
 package hash.testutils;
 
 import static org.junit.Assert.assertEquals;
-import hash.lang.Factory;
+import hash.runtime.Factory;
 
 import java.util.List;
 import java.util.Map;
@@ -159,7 +159,6 @@ public abstract class BinaryAndUnaryExpressionTest {
 	public void objectExpression() {
 		Map obj = (Map) evaluate("{name:'Thiago','type':'Programmer',15.3:10,"
 				+ " 10:15.3,}");
-		assertEquals(4, obj.keySet().size());
 		assertEquals("Thiago", obj.get("name"));
 		assertEquals("Programmer", obj.get("type"));
 		assertEquals(10, obj.get(15.3));

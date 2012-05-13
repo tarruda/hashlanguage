@@ -10,7 +10,7 @@ public abstract class BinaryOperator extends Method {
 	protected String op;
 
 	public BinaryOperator(String op) {
-		this.op = op;
+		this.op = op;		
 	}
 
 	@Override

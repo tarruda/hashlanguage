@@ -33,12 +33,12 @@ public class MapMixin extends Mixin {
 		});
 		installMethod(new BuiltinMethod(Constants.SET_INDEX) {
 			public Object invoke(Object... args) {
-				return Runtime.invokeMethod(args[0], Constants.SET_ATTRIBUTE);
+				return Runtime.invokeNormalMethod(args[0], Constants.SET_ATTRIBUTE);
 			}
 		});		
 		installMethod(new BuiltinMethod(Constants.DEL_INDEX) {
 			public Object invoke(Object... args) {
-				return Runtime.invokeMethod(args[0], Constants.DEL_ATTRIBUTE);
+				return Runtime.invokeNormalMethod(args[0], Constants.DEL_ATTRIBUTE);
 			}
 		});
 	}

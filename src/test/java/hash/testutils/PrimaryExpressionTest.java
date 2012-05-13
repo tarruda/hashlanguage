@@ -1,7 +1,7 @@
 package hash.testutils;
 
 import static org.junit.Assert.assertEquals;
-import hash.lang.Factory;
+import hash.runtime.Factory;
 
 import java.util.Map;
 
@@ -58,15 +58,15 @@ public abstract class PrimaryExpressionTest {
 
 	@Test
 	public void listIndex() {
-		evaluate("l=[5,10]");		
+		evaluate("l=[5,10]");
 		evaluate("l[-1]= 'Test'");
 		assertEquals("[5, Test]", evaluate("l.toString()"));
 	}
-	
-	@Test(expected=ClassCastException.class)
+
+	@Test(expected = ClassCastException.class)
 	public void nullArgument() {
-		evaluate("l=[5,10]");		
-		evaluate("l[1.2]");		
+		evaluate("l=[5,10]");
+		evaluate("l[1.2]");
 	}
 
 	@Test
@@ -92,5 +92,15 @@ public abstract class PrimaryExpressionTest {
 		assertEquals("9", evaluate("a[0]"));
 		assertEquals("6", evaluate("a[1]"));
 		assertEquals("3", evaluate("a[2]"));
+	}
+
+	@Test
+	public void objectAttributes() {
+		evaluate("m={name:'mongo','type':'db'}");
+		assertEquals("mongo", evaluate("m.name"));
+		assertEquals("db", evaluate("m.type"));
+		assertEquals("mongo", evaluate("m.put('name', 'Thiago')"));
+		assertEquals("db", evaluate("m.put('type', 'Programmer')"));
+		assertEquals("{name=Thiago, type=Programmer}", evaluate("m.toString()"));
 	}
 }

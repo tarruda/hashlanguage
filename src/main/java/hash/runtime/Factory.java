@@ -1,4 +1,7 @@
-package hash.lang;
+package hash.runtime;
+
+import hash.lang.HashScope;
+import hash.lang.Scope;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,14 +10,18 @@ import java.util.Map;
 
 public class Factory {
 
-	public static Map createObject() {
+	public static HashObject createObject() {
+		return new HashObject();
+	}
+
+	public static Map createMap() {
 		return new HashMap();
 	}
 
 	public static List createList() {
 		return new ArrayList();
 	}
-	
+
 	public static List createList(int initialCapacity) {
 		return new ArrayList(initialCapacity);
 	}
@@ -22,8 +29,9 @@ public class Factory {
 	public static Scope createExecutionScope() {
 		return new HashScope();
 	}
-	
+
 	public static Scope createExecutionScope(Scope parent) {
 		return new HashScope(parent);
 	}
+
 }

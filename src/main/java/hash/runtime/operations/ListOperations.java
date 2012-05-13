@@ -1,6 +1,6 @@
 package hash.runtime.operations;
 
-import hash.lang.Factory;
+import hash.runtime.Factory;
 
 import java.util.List;
 

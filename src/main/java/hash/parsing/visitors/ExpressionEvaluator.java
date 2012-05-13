@@ -2,8 +2,8 @@ package hash.parsing.visitors;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;
-import hash.lang.Factory;
 import hash.parsing.visitors.nodes.Result;
+import hash.runtime.Factory;
 import hash.runtime.Runtime;
 
 import java.util.List;
@@ -48,7 +48,8 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	protected Tree visitBinaryExpression(Tree operator, Tree left, Tree right) {
 		Object l = ((Result) visit(left)).getEvaluationResult();
 		Object r = ((Result) visit(right)).getEvaluationResult();
-		return new Result(Runtime.invokeBinaryOperator(operator.getText(), l, r));
+		return new Result(
+				Runtime.invokeBinaryOperator(operator.getText(), l, r));
 	}
 
 	@Override
@@ -70,7 +71,7 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 					.getEvaluationResult();
 			Object methodKey = ((Result) visit(expression.getChild(1)))
 					.getEvaluationResult();
-			return new Result(Runtime.invokeMethod(tgt, methodKey, args));
+			return new Result(Runtime.invokeNormalMethod(tgt, methodKey, args));
 		} else {
 			// normal function call
 			Object exp = ((Result) visit(arguments)).getEvaluationResult();
@@ -79,8 +80,8 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
-	protected Tree visitObject(Tree node) {
-		Map rv = Factory.createObject();
+	protected Tree visitMap(Tree node) {
+		Map rv = Factory.createMap();
 		int len = node.getChildCount();
 		for (int i = 0; i < len; i++) {
 			Object key = ((Result) visit(node.getChild(i)))
@@ -88,7 +89,7 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 			Object value = ((Result) visit(node.getChild(i).getChild(0)))
 					.getEvaluationResult();
 			rv.put(key, value);
-		}
+		}		
 		return new Result(rv);
 	}
 

@@ -11,8 +11,8 @@ import static hash.parsing.HashParser.INDEX;
 import static hash.parsing.HashParser.INTEGER;
 import static hash.parsing.HashParser.INVOCATION;
 import static hash.parsing.HashParser.LIST;
+import static hash.parsing.HashParser.MAP;
 import static hash.parsing.HashParser.NULL;
-import static hash.parsing.HashParser.OBJECT;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.UNARY;
@@ -61,8 +61,8 @@ public abstract class AstVisitor {
 			return visitSlice(node, node.getChild(0), node.getChild(1));
 		case INVOCATION:
 			return visitInvocation(node, node.getChild(0), node.getChild(1));
-		case OBJECT:
-			return visitObject(node);
+		case MAP:
+			return visitMap(node);
 		case LIST:
 			return visitList(node);
 		case IDENTIFIER:
@@ -102,7 +102,7 @@ public abstract class AstVisitor {
 		return node;
 	}
 
-	protected Tree visitObject(Tree node) {
+	protected Tree visitMap(Tree node) {
 		return node;
 	}
 

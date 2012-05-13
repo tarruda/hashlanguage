@@ -1,6 +1,5 @@
-package hash.runtime.bridge;
+package hash.runtime;
 
-import hash.lang.Factory;
 import hash.lang.Function;
 import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.ArrayMixin;
@@ -14,7 +13,6 @@ import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
 import hash.runtime.mixins.StringMixin;
 import hash.util.Asm;
-import hash.util.Constants;
 import hash.util.Err;
 
 import java.io.FileOutputStream;
@@ -30,15 +28,15 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public class HashToJava implements Opcodes {
+public class HashAdapter implements Opcodes {
 
-	private static final HashMap<Class<?>, Map> classMap;
+	private static final HashMap<Class<?>, HashObject> classMap;
 	private static final HashMap<Class<?>, Map[]> classMixins;
 
 	private static final String[] ignoredMethodNames = { "getClass" };
 
 	static {
-		classMap = new HashMap<Class<?>, Map>();
+		classMap = new HashMap<Class<?>, HashObject>();
 		classMixins = new HashMap<Class<?>, Map[]>();
 		classMixins.put(Object.class, new Map[] { ObjectMixin.INSTANCE });
 		classMixins.put(Boolean.class, new Map[] { BooleanMixin.INSTANCE });
@@ -56,20 +54,7 @@ public class HashToJava implements Opcodes {
 		classMixins.put(Map.class, new Map[] { MapMixin.INSTANCE });
 	}
 
-	public static Map getClass(Object object) {
-		if (object instanceof Map)
-			return (Map) object;
-		return getSuperclass(object);
-	}
-
-	public static Map getSuperclass(Object object) {
-		if (object instanceof Map) {
-			Object rv = ((Map) object).get(Constants.ISA);
-			if (rv instanceof Map)
-				return (Map) rv;
-			return null;
-		}
-		Class<?> cls = object.getClass();
+	public static HashObject getHashClass(Class<?> cls) {
 		if (!classMap.containsKey(cls))
 			synchronized (classMap) {
 				if (!classMap.containsKey(cls))
@@ -82,7 +67,7 @@ public class HashToJava implements Opcodes {
 		Class<?> superclass = klass.getSuperclass();
 		if (superclass != null && !classMap.containsKey(superclass))
 			constructHashClass(superclass);
-		Map hashClass = Factory.createObject();
+		HashObject hashClass = Factory.createObject();
 		// group methods by name
 		HashMap<String, List<Method>> methodsByName = new HashMap<String, List<Method>>();
 		for (Method method : klass.getDeclaredMethods()) {
@@ -137,7 +122,7 @@ public class HashToJava implements Opcodes {
 
 		// if there is a superclass, then it must have already been loaded
 		if (superclass != null)
-			hashClass.put(Constants.ISA, classMap.get(superclass));
+			hashClass.setIsa(classMap.get(superclass));
 		classMap.put(klass, hashClass);
 	}
 

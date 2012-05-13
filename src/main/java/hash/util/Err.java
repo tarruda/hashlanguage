@@ -78,4 +78,9 @@ public class Err {
 		return new RuntimeException(String.format(
 				"Attribute '%s' is not defined", name));
 	}
+	
+	public static RuntimeException attributeNotFunction(Object name) {
+		return new RuntimeException(String.format(
+				"Attribute '%s' is not a function", name));
+	}
 }

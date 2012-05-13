@@ -1,4 +1,4 @@
-package hash.runtime.bridge;
+package hash.runtime;
 
 public class AdapterLoader extends ClassLoader {
 	public static final AdapterLoader instance;

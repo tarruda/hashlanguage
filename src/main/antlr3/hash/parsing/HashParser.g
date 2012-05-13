@@ -12,7 +12,7 @@ tokens {
     INCR;    
     BINARY;
     UNARY;
-    OBJECT;
+    MAP;
     STRING;
     FLOAT;
     INTEGER;
@@ -169,7 +169,7 @@ expressionList
   
 atom
   : parenthesisExpression
-  | objectExpression
+  | mapExpression
   | listExpression
   | literal
   | identifier
@@ -179,7 +179,7 @@ parenthesisExpression
   : LROUND expression RROUND -> expression
   ;
   
-objectExpression
+mapExpression
   : t=LCURLY
     ( 
       keyValuePair
@@ -187,7 +187,7 @@ objectExpression
       COMMA?
     )?
     RCURLY
-    -> ^(OBJECT[$t, "Object"] keyValuePair+)
+    -> ^(MAP[$t, "Map"] keyValuePair+)
   ;
   
 listExpression
