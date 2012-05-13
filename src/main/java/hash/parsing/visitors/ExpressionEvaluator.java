@@ -74,7 +74,7 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 			return new Result(Runtime.invokeNormalMethod(tgt, methodKey, args));
 		} else {
 			// normal function call
-			Object exp = ((Result) visit(arguments)).getEvaluationResult();
+			Object exp = ((Result) visit(expression)).getEvaluationResult();
 			return new Result(Runtime.invokeFunction(exp, args));
 		}
 	}

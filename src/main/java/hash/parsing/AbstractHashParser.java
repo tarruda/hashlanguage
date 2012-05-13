@@ -2,6 +2,8 @@ package hash.parsing;
 
 import hash.util.Constants;
 
+import java.util.List;
+
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.ParserRuleReturnScope;
@@ -9,6 +11,7 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
 
 /**
  * The super class of the generated parser. It is extended by the generated code
@@ -75,5 +78,24 @@ public abstract class AbstractHashParser extends Parser {
 
 	protected String getConstructorId() {
 		return Constants.CONSTRUCTOR;
+	}
+
+	protected String getImportFunctionId() {
+		return Constants.IMPORT;
+	}
+
+	protected String getImportTargetId(List parts) {
+		Tree t = (Tree) parts.get(parts.size() - 1);
+		return t.getText();
+	}
+
+	protected String getImportString(List parts) {
+		StringBuilder sb = new StringBuilder();
+		for (Object object : parts) {
+			sb.append(((Tree) object).getText());
+			sb.append(".");
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
 	}
 }

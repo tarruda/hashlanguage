@@ -10,6 +10,7 @@ package hash.parsing;
 }
 
 //keywords
+IMPORT: 'import';
 FUNCTION: 'function';
 CLASS: 'class';
 NEW: 'new';

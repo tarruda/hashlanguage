@@ -37,9 +37,10 @@ program
 statement
   : expression SCOLON!   
   ;
-    
+      
 expression
-  : incOrDecExpression    
+  : importExpression
+  | incOrDecExpression    
   | (l=disjunction -> $l)
     ( 
       o=ASSIGN r=expression -> ^($o $l $r)
@@ -58,6 +59,13 @@ expression
     | o=INC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "+"] $l INTEGER["1"])))
     | o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
     )?
+  ;
+  
+importExpression
+  : t=IMPORT parts+=identifier (DOT parts+=identifier)*
+    -> ^(ASSIGN[$t, "="] IDENTIFIER[getImportTargetId($parts)]
+        ^(INVOCATION["Invocation"] IDENTIFIER[getImportFunctionId()]
+         ^(LIST["Arguments"] NULL STRING[getImportString($parts)])))
   ;
       
 incOrDecExpression

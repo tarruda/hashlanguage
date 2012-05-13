@@ -1,7 +1,7 @@
 package hash.runtime.functions;
 
 
-public abstract class BinaryOperator extends Method {
+public abstract class BinaryOperator extends BuiltinFunction {
 
 	public static String getSlotName(String operator) {
 		return operator + "##";

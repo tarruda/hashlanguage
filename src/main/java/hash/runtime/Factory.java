@@ -2,6 +2,7 @@ package hash.runtime;
 
 import hash.lang.HashScope;
 import hash.lang.Scope;
+import hash.runtime.functions.Import;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,11 +28,12 @@ public class Factory {
 	}
 
 	public static Scope createExecutionScope() {
-		return new HashScope();
+		HashScope rv = new HashScope();
+		rv.installBuiltin(new Import());
+		return rv;
 	}
 
 	public static Scope createExecutionScope(Scope parent) {
 		return new HashScope(parent);
 	}
-
 }

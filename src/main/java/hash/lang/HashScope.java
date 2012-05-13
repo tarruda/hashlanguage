@@ -1,5 +1,6 @@
 package hash.lang;
 
+import hash.runtime.functions.BuiltinFunction;
 import hash.util.Err;
 
 import java.util.HashMap;
@@ -28,5 +29,9 @@ public class HashScope extends HashMap implements Scope {
 			else
 				throw Err.nameNotDefined(key);
 		return super.get(key);
+	}
+
+	public void installBuiltin(BuiltinFunction f) {
+		put(f.getName(), f);		
 	}
 }

@@ -1,6 +1,6 @@
 package hash.runtime.functions;
 
-public abstract class BuiltinMethod extends Method {
+public abstract class BuiltinMethod extends BuiltinFunction {
 
 	protected String name;
 
