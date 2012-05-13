@@ -3,6 +3,7 @@ package hash.runtime;
 import hash.lang.Function;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
+import hash.runtime.generators.HashAdapter;
 import hash.util.Constants;
 import hash.util.Err;
 

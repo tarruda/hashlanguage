@@ -60,7 +60,7 @@ public abstract class AstVisitor {
 		case SLICE:
 			return visitSlice(node, node.getChild(0), node.getChild(1));
 		case INVOCATION:
-			return visitInvocation(node, node.getChild(0), node.getChild(1));
+			return visitInvocation(node, node.getChild(0), node.getChild(1));		
 		case MAP:
 			return visitMap(node);
 		case LIST:

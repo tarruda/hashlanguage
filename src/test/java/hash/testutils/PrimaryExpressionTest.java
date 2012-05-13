@@ -2,6 +2,7 @@ package hash.testutils;
 
 import static org.junit.Assert.assertEquals;
 import hash.runtime.Factory;
+import hash.runtime.generators.HashAdapter;
 
 import java.util.Map;
 
@@ -102,5 +103,11 @@ public abstract class PrimaryExpressionTest {
 		assertEquals("mongo", evaluate("m.put('name', 'Thiago')"));
 		assertEquals("db", evaluate("m.put('type', 'Programmer')"));
 		assertEquals("{name=Thiago, type=Programmer}", evaluate("m.toString()"));
+	}
+
+	@Test
+	public void constructingInstances() {
+		context.put("Integer", HashAdapter.getHashClass(Integer.class));
+		assertEquals(5, evaluate("new Integer('5')"));
 	}
 }

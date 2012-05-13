@@ -25,9 +25,9 @@ public class ObjectMixin extends Mixin {
 				} catch (Exception e) {
 					return self.equals(other);
 				}
-				if (!(comparisonResult instanceof Number))
+				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
-				return ((Number) comparisonResult).doubleValue() == 0;
+				return ((Integer) comparisonResult) == 0;
 			}
 		});
 		installMethod(new BinaryOperator("!=") {
@@ -42,9 +42,9 @@ public class ObjectMixin extends Mixin {
 				} catch (Exception e) {
 					return !self.equals(other);
 				}
-				if (!(comparisonResult instanceof Number))
+				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
-				return ((Number) comparisonResult).doubleValue() != 0;
+				return ((Integer) comparisonResult) != 0;
 			}
 		});
 		installMethod(new BinaryOperator(">=") {
@@ -55,9 +55,9 @@ public class ObjectMixin extends Mixin {
 				Object comparisonResult = null;
 				comparisonResult = Runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
-				if (!(comparisonResult instanceof Number))
+				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
-				return ((Number) comparisonResult).doubleValue() >= 0;
+				return ((Integer) comparisonResult) >= 0;
 			}
 		});
 		installMethod(new BinaryOperator(">") {
@@ -68,9 +68,9 @@ public class ObjectMixin extends Mixin {
 				Object comparisonResult = null;
 				comparisonResult = Runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
-				if (!(comparisonResult instanceof Number))
+				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
-				return ((Number) comparisonResult).doubleValue() > 0;
+				return ((Integer) comparisonResult) > 0;
 			}
 		});
 		installMethod(new BinaryOperator("<=") {
@@ -81,9 +81,9 @@ public class ObjectMixin extends Mixin {
 				Object comparisonResult = null;
 				comparisonResult = Runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
-				if (!(comparisonResult instanceof Number))
+				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
-				return ((Number) comparisonResult).doubleValue() <= 0;
+				return ((Integer) comparisonResult) <= 0;
 			}
 		});
 		installMethod(new BinaryOperator("<") {
@@ -94,9 +94,9 @@ public class ObjectMixin extends Mixin {
 				Object comparisonResult = null;
 				comparisonResult = Runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
-				if (!(comparisonResult instanceof Number))
+				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
-				return ((Number) comparisonResult).doubleValue() < 0;
+				return ((Integer) comparisonResult) < 0;
 			}
 		});
 		installMethod(new BinaryOperator("&&") {
@@ -131,7 +131,8 @@ public class ObjectMixin extends Mixin {
 		});
 		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
 			public Object invoke(Object... args) {
-				return Runtime.invokeNormalMethod(args[0], Constants.GET_ATTRIBUTE);
+				return Runtime.invokeNormalMethod(args[0],
+						Constants.GET_ATTRIBUTE);
 			}
 		});
 	}

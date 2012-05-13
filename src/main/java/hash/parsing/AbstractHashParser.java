@@ -1,5 +1,7 @@
 package hash.parsing;
 
+import hash.util.Constants;
+
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.ParserRuleReturnScope;
@@ -71,4 +73,7 @@ public abstract class AbstractHashParser extends Parser {
 		return new CommonTree(new CommonToken(HashParser.NULL, "null"));
 	}
 
+	protected String getConstructorId() {
+		return Constants.CONSTRUCTOR;
+	}
 }

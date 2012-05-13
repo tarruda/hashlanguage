@@ -1,5 +1,6 @@
 package hash.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.objectweb.asm.ClassWriter;
@@ -196,6 +197,13 @@ public class Asm implements Opcodes {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static void invokeInit(MethodVisitor mv, Constructor constructor) {
+		String descriptor = Type.getConstructorDescriptor(constructor);
+		mv.visitMethodInsn(INVOKESPECIAL,
+				Asm.internalName(constructor.getDeclaringClass()), "<init>",
+				descriptor);
 	}
 
 }

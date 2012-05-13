@@ -1,6 +1,8 @@
-package hash.runtime;
+package hash.runtime.generators;
 
 import hash.lang.Function;
+import hash.runtime.Factory;
+import hash.runtime.HashObject;
 import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.ArrayMixin;
 import hash.runtime.mixins.BooleanMixin;
@@ -13,11 +15,9 @@ import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
 import hash.runtime.mixins.StringMixin;
 import hash.util.Asm;
+import hash.util.Constants;
 import hash.util.Err;
 
-import java.io.FileOutputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +32,6 @@ public class HashAdapter implements Opcodes {
 
 	private static final HashMap<Class<?>, HashObject> classMap;
 	private static final HashMap<Class<?>, Map[]> classMixins;
-
-	private static final String[] ignoredMethodNames = { "getClass" };
 
 	static {
 		classMap = new HashMap<Class<?>, HashObject>();
@@ -69,15 +67,12 @@ public class HashAdapter implements Opcodes {
 			constructHashClass(superclass);
 		HashObject hashClass = Factory.createObject();
 		// group methods by name
-		HashMap<String, List<Method>> methodsByName = new HashMap<String, List<Method>>();
-		for (Method method : klass.getDeclaredMethods()) {
-			int mod = method.getModifiers();
-			if (Modifier.isAbstract(mod) || Modifier.isPrivate(mod)
-					|| Modifier.isProtected(mod) || isIgnored(method))
-				continue;
+		HashMap<String, List<MethodOrConstructor>> methodsByName = new HashMap<String, List<MethodOrConstructor>>();
+		for (MethodOrConstructor method : MethodOrConstructor
+				.getDeclaredMethods(klass)) {
 			String name = method.getName();
 			if (!methodsByName.containsKey(name))
-				methodsByName.put(name, new ArrayList<Method>());
+				methodsByName.put(name, new ArrayList<MethodOrConstructor>());
 			methodsByName.get(name).add(method);
 		}
 		// for each method group, create a wrapper function class
@@ -88,12 +83,26 @@ public class HashAdapter implements Opcodes {
 					methodsByName.get(methodName));
 			try {
 				Object instance = wrapperClass.getConstructor(String.class,
-						String.class, Boolean.TYPE).newInstance(
-						methodName,
+						String.class, Boolean.TYPE).newInstance(methodName,
 						klass.getCanonicalName(),
-						Modifier.isStatic(methodsByName.get(methodName).get(0)
-								.getModifiers()));
+						methodsByName.get(methodName).get(0).isStatic());
 				hashClass.put(methodName, instance);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		// do the same for all constructors
+		List<MethodOrConstructor> constructors = MethodOrConstructor
+				.getDeclaredConstructors(klass);
+		if (constructors.size() > 0) {
+			Class<?> constructorWrapperClass = createJavaMethodAdapter(klass,
+					"Constructors", constructors);
+			try {
+				Object instance = constructorWrapperClass.getConstructor(
+						String.class, String.class, Boolean.TYPE).newInstance(
+						"Constructors", klass.getCanonicalName(), true);
+				hashClass.put(Constants.CONSTRUCTOR, instance);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -126,15 +135,8 @@ public class HashAdapter implements Opcodes {
 		classMap.put(klass, hashClass);
 	}
 
-	private static boolean isIgnored(Method method) {
-		for (String mName : ignoredMethodNames)
-			if (mName.equals(method.getName()))
-				return true;
-		return false;
-	}
-
 	private static Class<?> createJavaMethodAdapter(Class<?> klass,
-			String name, List<Method> methods) {
+			String name, List<MethodOrConstructor> methods) {
 		String classNameSuffix = name + "Wrapper";
 		ClassWriter cw = Asm.newClassWriter();
 		cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER,
@@ -152,19 +154,14 @@ public class HashAdapter implements Opcodes {
 				Boolean.TYPE);
 		cw.visitEnd();
 		byte[] classData = cw.toByteArray();
-		if (klass == Object.class && name.equals("toString"))
-			try {
-				new FileOutputStream("/tmp/object.class").write(classData);
-			} catch (Exception ex) {
-
-			}
 		return AdapterLoader.instance.defineClass(
 				"hash.generated." + klass.getCanonicalName() + "."
 						+ classNameSuffix, classData);
 	}
 
-	private static void implementAdapter(MethodVisitor mv, List<Method> methods) {
-		for (Method method : methods) {
+	private static void implementAdapter(MethodVisitor mv,
+			List<MethodOrConstructor> methods) {
+		for (MethodOrConstructor method : methods) {
 			// for each method overload we must test if the argument count
 			// and types match with the actual method signature
 			Label nextTest = new Label();
@@ -197,8 +194,11 @@ public class HashAdapter implements Opcodes {
 	}
 
 	private static void implementMethodInvocation(MethodVisitor mv,
-			Method method) {
-		if (!Modifier.isStatic(method.getModifiers())) {
+			MethodOrConstructor method) {
+		if (method.isConstructor()) {
+			mv.visitTypeInsn(NEW, Asm.internalName(method.getDeclaringClass()));
+			mv.visitInsn(DUP);
+		} else if (!method.isStatic()) {
 			// load and cast the instance since we are dealing with normal
 			// methods
 			mv.visitVarInsn(ALOAD, 1);
@@ -221,10 +221,7 @@ public class HashAdapter implements Opcodes {
 				mv.visitTypeInsn(CHECKCAST, Asm.internalName(param));
 		}
 		// invoke the actual method
-		if (!Modifier.isStatic(method.getModifiers()))
-			Asm.invokeVirtual(mv, method);
-		else
-			Asm.invokeStatic(mv, method);
+		method.implementInvocation(mv);
 		Class<?> returnClass = method.getReturnType();
 		if (returnClass.isPrimitive()) {
 			Class<?> wrapperClass = null;

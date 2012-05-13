@@ -18,6 +18,7 @@ tokens {
     INTEGER;
     BOOLEAN;
     INVOCATION;
+    NEWINSTANCE;
     LIST;
     ATTRIBUTE;
     INDEX;
@@ -37,7 +38,7 @@ statement
   : expression SCOLON!   
   ;
     
-expression 
+expression
   : incOrDecExpression    
   | (l=disjunction -> $l)
     ( 
@@ -58,7 +59,7 @@ expression
     | o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
     )?
   ;
-    
+      
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
   | o=DEC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   
@@ -168,15 +169,23 @@ expressionList
   ;
   
 atom
-  : parenthesisExpression
+  : parenthesisExpression  
+  | constructorExpression
   | mapExpression
   | listExpression
   | literal
   | identifier
   ;
-  
+   
 parenthesisExpression
   : LROUND expression RROUND -> expression
+  ;
+  
+constructorExpression
+  : t=NEW klass=identifier LROUND (args=expressionList)? RROUND
+    -> ^(INVOCATION[$t, "New Instance"] 
+          ^(ATTRIBUTE["Attribute"] $klass STRING[getConstructorId()])
+          ^(LIST["Arguments"] $args?))    
   ;
   
 mapExpression

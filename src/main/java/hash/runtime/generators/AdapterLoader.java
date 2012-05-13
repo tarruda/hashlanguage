@@ -1,4 +1,4 @@
-package hash.runtime;
+package hash.runtime.generators;
 
 public class AdapterLoader extends ClassLoader {
 	public static final AdapterLoader instance;
