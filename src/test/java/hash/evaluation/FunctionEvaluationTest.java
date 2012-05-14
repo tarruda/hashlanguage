@@ -1,9 +1,9 @@
-package hash;
+package hash.evaluation;
 
-import hash.testutils.BuiltinFunctionsTest;
 import hash.testutils.Evaluator;
+import hash.testutils.FunctionTest;
 
-public class BuiltinFunctionsEvaluationTest extends BuiltinFunctionsTest {
+public class FunctionEvaluationTest extends FunctionTest {
 
 	@Override
 	protected Object evaluate(String code) {

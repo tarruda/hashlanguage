@@ -1,6 +1,7 @@
 package hash.testutils;
 
 import static org.junit.Assert.assertEquals;
+import hash.lang.Scope;
 import hash.runtime.Factory;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import org.junit.Test;
 
 public abstract class BinaryAndUnaryExpressionTest {
 
-	protected Map context;
+	protected Scope context;
 
 	protected abstract Object evaluate(String expression);
 

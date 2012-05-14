@@ -16,9 +16,13 @@ public class Runtime {
 	}
 
 	public static Object invokeFunction(Object f, Object... args) {
+		Object[] fArgs = new Object[args.length + 1];
+		fArgs[0] = null;
+		for (int i = 0; i < args.length; i++)
+			fArgs[i + 1] = args[i];
 		if (!(f instanceof Function))
 			Err.illegalArg(String.format("Object '%s' is not a function", f));
-		return ((Function) f).invoke(args);
+		return ((Function) f).invoke(fArgs);
 	}
 
 	public static Object invokeBinaryOperator(String operator,

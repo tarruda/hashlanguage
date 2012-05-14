@@ -1,5 +1,6 @@
 package hash.parsing;
 
+import hash.parsing.HashParser.compoundStatement_return;
 import hash.util.Constants;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
+import org.antlr.runtime.tree.TreeAdaptor;
 
 /**
  * The super class of the generated parser. It is extended by the generated code
@@ -98,4 +100,17 @@ public abstract class AbstractHashParser extends Parser {
 		sb.deleteCharAt(sb.length() - 1);
 		return sb.toString();
 	}
+
+	public abstract TreeAdaptor getTreeAdaptor();
+
+	protected Object functionBlock(compoundStatement_return b) {
+		TreeAdaptor adaptor = getTreeAdaptor();
+		Object original = b.getTree();
+		Object rv = adaptor.create(HashParser.FUNCTIONBLOCK, "Block");
+		int len = adaptor.getChildCount(original);
+		for (int i = 0; i < len; i++)
+			adaptor.addChild(rv, adaptor.getChild(original, i));
+		return rv;
+	}
+
 }

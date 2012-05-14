@@ -7,8 +7,8 @@ import static org.junit.Assert.fail;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.literal_return;
-import hash.parsing.visitors.LiteralEvaluator;
-import hash.parsing.visitors.nodes.Result;
+import hash.parsing.visitors.evaluators.LiteralEvaluator;
+import hash.parsing.visitors.evaluators.Result;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;

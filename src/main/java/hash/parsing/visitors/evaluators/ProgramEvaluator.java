@@ -1,8 +1,8 @@
-package hash.parsing.visitors;
+package hash.parsing.visitors.evaluators;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;
-import hash.parsing.visitors.nodes.Result;
+import hash.lang.Scope;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
 
@@ -11,12 +11,34 @@ import java.util.Map;
 
 import org.antlr.runtime.tree.Tree;
 
-public class ExpressionEvaluator extends LiteralEvaluator {
+public class ProgramEvaluator extends LiteralEvaluator {
 
-	private Map context;
+	private Scope context;
 
-	public ExpressionEvaluator(Map context) {
+	public ProgramEvaluator(Scope context) {
 		this.context = context;
+	}
+
+	@Override
+	protected Tree visitFunction(Tree node, Tree parameters, Tree block) {
+		List params = (List) ((Result) visit(parameters)).getEvaluationResult();
+		return new Result(new FunctionEvaluator(context, params, block));
+	}
+
+	@Override
+	protected Tree visitReturn(Tree node, Tree returnExpression) {
+		throw new ReturnStatement(
+				((Result) visit(returnExpression)).getEvaluationResult());
+	}
+
+	@Override
+	protected Tree visitBlock(Tree node) {
+		int len = node.getChildCount();
+		Object lastEvaluatedExpression = null;
+		for (int i = 0; i < len; i++)
+			lastEvaluatedExpression = ((Result) visit(node.getChild(i)))
+					.getEvaluationResult();
+		return new Result(lastEvaluatedExpression);
 	}
 
 	@Override
@@ -72,7 +94,7 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 			Object methodKey = ((Result) visit(expression.getChild(1)))
 					.getEvaluationResult();
 			return new Result(Runtime.invokeNormalMethod(tgt, methodKey, args));
-		} else {
+		} else {		
 			// normal function call
 			Object exp = ((Result) visit(expression)).getEvaluationResult();
 			return new Result(Runtime.invokeFunction(exp, args));
@@ -89,7 +111,7 @@ public class ExpressionEvaluator extends LiteralEvaluator {
 			Object value = ((Result) visit(node.getChild(i).getChild(0)))
 					.getEvaluationResult();
 			rv.put(key, value);
-		}		
+		}
 		return new Result(rv);
 	}
 

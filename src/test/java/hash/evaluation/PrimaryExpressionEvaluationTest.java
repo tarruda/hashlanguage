@@ -1,4 +1,4 @@
-package hash;
+package hash.evaluation;
 
 import hash.testutils.Evaluator;
 import hash.testutils.PrimaryExpressionTest;

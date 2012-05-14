@@ -3,8 +3,11 @@ package hash.parsing.visitors;
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.BINARY;
+import static hash.parsing.HashParser.BLOCK;
 import static hash.parsing.HashParser.BOOLEAN;
 import static hash.parsing.HashParser.FLOAT;
+import static hash.parsing.HashParser.FUNCTION;
+import static hash.parsing.HashParser.FUNCTIONBLOCK;
 import static hash.parsing.HashParser.IDENTIFIER;
 import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
@@ -13,6 +16,7 @@ import static hash.parsing.HashParser.INVOCATION;
 import static hash.parsing.HashParser.LIST;
 import static hash.parsing.HashParser.MAP;
 import static hash.parsing.HashParser.NULL;
+import static hash.parsing.HashParser.RETURN;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.UNARY;
@@ -36,13 +40,16 @@ public abstract class AstVisitor {
 	public final Tree visit(Tree node) {
 		int nodeType = node.getType();
 		switch (nodeType) {
+		case FUNCTION:
+			return visitFunction(node, node.getChild(0), node.getChild(1));
+		case RETURN:
+			validateReturn(node);
+			return visitReturn(node, node.getChild(0));
+		case BLOCK:
+		case FUNCTIONBLOCK:
+			return visitBlock(node);
 		case ASSIGN:
-			Tree target = node.getChild(0);
-			if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX || target
-					.getType() == IDENTIFIER))
-				throw new TreeWalkException(target.getLine(),
-						target.getCharPositionInLine(),
-						"Assignment target must be an identifier, attribute or index");
+			validateAssignment(node);
 			return visitAssignment(node, node.getChild(0), node.getChild(1));
 		case INCR:
 			return visitEvalAndIncrement(node, node.getChild(0),
@@ -60,7 +67,7 @@ public abstract class AstVisitor {
 		case SLICE:
 			return visitSlice(node, node.getChild(0), node.getChild(1));
 		case INVOCATION:
-			return visitInvocation(node, node.getChild(0), node.getChild(1));		
+			return visitInvocation(node, node.getChild(0), node.getChild(1));
 		case MAP:
 			return visitMap(node);
 		case LIST:
@@ -80,6 +87,39 @@ public abstract class AstVisitor {
 		default:
 			return node;
 		}
+	}
+
+	private void validateReturn(Tree node) {
+		// Return statement must be inside a function
+		Tree parent = null;
+		boolean insideFunction = false;
+		while ((parent = node.getParent()) != null && !insideFunction)
+			insideFunction = parent.getType() == FUNCTIONBLOCK;
+		if (!insideFunction)
+			throw new TreeWalkException(node.getLine(),
+					node.getCharPositionInLine(),
+					"Return statement can only exist inside a function");
+	}
+
+	private void validateAssignment(Tree node) {
+		Tree target = node.getChild(0);
+		if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX || target
+				.getType() == IDENTIFIER))
+			throw new TreeWalkException(target.getLine(),
+					target.getCharPositionInLine(),
+					"Assignment target must be an identifier, attribute or index");
+	}
+
+	protected Tree visitFunction(Tree node, Tree parameters, Tree block) {
+		return node;
+	}
+
+	protected Tree visitReturn(Tree node, Tree returnExpression) {
+		return node;
+	}
+
+	protected Tree visitBlock(Tree node) {
+		return node;
 	}
 
 	protected Tree visitAssignment(Tree node, Tree target, Tree expression) {

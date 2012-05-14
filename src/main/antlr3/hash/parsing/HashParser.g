@@ -23,6 +23,9 @@ tokens {
     ATTRIBUTE;
     INDEX;
     SLICE;
+    BLOCK;
+    FUNCTIONBLOCK;
+    FUNCTION;
 }
 
 @header {
@@ -31,16 +34,34 @@ tokens {
 
 
 program
-  : statement*
+  : compoundStatement
+  ;
+  
+compoundStatement
+  : s+=statement (SCOLON s+=statement)*
+      -> ^(BLOCK["Block"] $s+)
   ;
   
 statement
-  : expression SCOLON!   
+  : importStatement
+  | returnStatement
+  | expression
   ;
-      
+  
+returnStatement
+  : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
+  ;
+        
+importStatement
+  : t=IMPORT parts+=identifier (DOT parts+=identifier)*
+    -> ^(ASSIGN[$t, "="] IDENTIFIER[getImportTargetId($parts)]
+        ^(INVOCATION["Invocation"] IDENTIFIER[getImportFunctionId()]
+         ^(LIST["Arguments"] STRING[getImportString($parts)])))
+  ;      
+  
 expression
-  : importExpression
-  | incOrDecExpression    
+  : functionExpression
+  | incOrDecExpression     
   | (l=disjunction -> $l)
     ( 
       o=ASSIGN r=expression -> ^($o $l $r)
@@ -58,21 +79,20 @@ expression
     | o=SHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>"] $l $r))
     | o=INC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "+"] $l INTEGER["1"])))
     | o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
-    )?
+    )? 
   ;
-  
-importExpression
-  : t=IMPORT parts+=identifier (DOT parts+=identifier)*
-    -> ^(ASSIGN[$t, "="] IDENTIFIER[getImportTargetId($parts)]
-        ^(INVOCATION["Invocation"] IDENTIFIER[getImportFunctionId()]
-         ^(LIST["Arguments"] NULL STRING[getImportString($parts)])))
-  ;
-      
+
+functionExpression
+  : l=LROUND (params+=identifier (COMMA params+=identifier)*)? 
+      RROUND LCURLY b=compoundStatement RCURLY
+    -> ^(FUNCTION[$l, "Function"] ^(LIST["Parameters"] $params?) {functionBlock(b)} )
+  ;  
+
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
   | o=DEC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   
   ;
-
+  
 disjunction
   : (l=conjunction -> $l) 
     (o=OR r=conjunction -> ^(BINARY[$o] $disjunction $r))* 
@@ -218,7 +238,7 @@ keyValuePair
   ;
   
 identifier
-  : IDENTIFIER -> IDENTIFIER
+  : IDENTIFIER
   ;
   
 literal
