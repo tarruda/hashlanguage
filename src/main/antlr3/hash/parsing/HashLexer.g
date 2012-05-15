@@ -7,7 +7,7 @@ options {
 
 tokens {
   WS;
-  STATEMENT_END;
+  STERM;
 }
 
 @header {
@@ -28,12 +28,12 @@ NULL: 'null';
 COLON: ':';
 COMMA: ',';
 DOT: '.';
-LROUND: '('{nesting++;};
-RROUND: ')'{nesting--;};
-LCURLY: '{'{nesting++;};
-RCURLY: '}'{nesting--;};
-LSQUARE: '['{nesting++;};
-RSQUARE: ']'{nesting--;};
+LROUND: '('{incNesting();};
+RROUND: ')'{decNesting();};
+LCURLY: '{'{enterBlock();};
+RCURLY: '}'{leaveBlock();};
+LSQUARE: '['{incNesting();};
+RSQUARE: ']'{decNesting();};
 PLUS_ASSIGN: '+=';
 MINUS_ASSIGN: '-=';
 MUL_ASSIGN: '*=';

@@ -34,15 +34,19 @@ tokens {
 
 
 program
-  : (s+=statement (STATEMENT_END s+=statement)*)? EOF
-      -> ^(BLOCK["Program"] $s+)
+  : statements EOF!      
+  ;
+
+statements
+  : STERM* s+=statement (STERM+ s+=statement)* STERM*
+    -> ^(BLOCK["Statements"] $s+)
   ;
 
 statement
   : importStatement
   | functionStatement
   | returnStatement
-  | expression  
+  | expression    
   ;
         
 returnStatement
@@ -55,7 +59,7 @@ importStatement
         ^(INVOCATION["Invocation"] IDENTIFIER[getImportFunctionId()]
          ^(LIST["Arguments"] STRING[getImportString($parts)])))
   ;
-  
+    
 functionStatement
   : t=FUNCTION name=identifier f=functionExpression
     -> ^(ASSIGN[$t, "="] $name $f)
@@ -90,8 +94,7 @@ functionExpression
   ;
       
 block
-  : LCURLY (s+=statement (STATEMENT_END s+=statement)*)? RCURLY 
-      -> ^(BLOCK["Block"] $s*)
+  : LCURLY statements RCURLY -> statements
   ;
 
 incOrDecExpression
