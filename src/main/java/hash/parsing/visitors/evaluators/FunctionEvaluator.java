@@ -1,4 +1,4 @@
-package hash.parsing.walkers.evaluators;
+package hash.parsing.visitors.evaluators;
 
 import hash.lang.Function;
 import hash.lang.Scope;

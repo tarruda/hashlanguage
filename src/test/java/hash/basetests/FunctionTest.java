@@ -1,8 +1,7 @@
-package hash.testutils;
+package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
 import hash.lang.Scope;
-import hash.parsing.exceptions.TreeWalkException;
 import hash.runtime.Factory;
 
 import org.junit.Before;
@@ -25,8 +24,4 @@ public abstract class FunctionTest {
 		assertEquals(15.5f, evaluate("f()"));
 	}
 	
-	@Test(expected=TreeWalkException.class)
-	public void returnOutsideFunction() {
-		evaluate("return null");		
-	}
 }

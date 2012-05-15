@@ -1,4 +1,4 @@
-package hash.testutils;
+package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
 import hash.lang.Scope;

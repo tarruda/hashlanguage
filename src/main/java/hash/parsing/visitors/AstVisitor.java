@@ -1,4 +1,4 @@
-package hash.parsing.walkers;
+package hash.parsing.visitors;
 
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
@@ -20,17 +20,21 @@ import static hash.parsing.HashParser.RETURN;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.UNARY;
-import hash.parsing.exceptions.TreeWalkException;
+import hash.parsing.exceptions.TreeValidationException;
 
 import org.antlr.runtime.tree.Tree;
 
 /**
- * Base class for all classes that need to do something with the AST. It can be
+ * Base for all classes that need to do something with the AST. It can be
  * used for translation, transformation, analysis, compilation, execution or any
  * other processing of the AST.
  * 
+ * The 'visit' method will validate tree structure and delegate further
+ * processing to the specialized visitor methods.
+ * 
  * The default behavior for the visitor methods is to simply return the 'Tree'
- * instance passed as the first argument.
+ * instance passed as the first argument. Subclasses can override this behavior
+ * and do any kind of processing of the tree.
  * 
  * @author Thiago de Arruda
  * 
@@ -87,27 +91,6 @@ public abstract class AstVisitor {
 		default:
 			return node;
 		}
-	}
-
-	private void validateReturn(Tree node) {
-		// Return statement must be inside a function
-		boolean insideFunction = false;
-		Tree current = node;
-		while ((current = current.getParent()) != null && !insideFunction)
-			insideFunction = current.getType() == FUNCTIONBLOCK;
-		if (!insideFunction)
-			throw new TreeWalkException(node.getLine(),
-					node.getCharPositionInLine(),
-					"Return statement can only exist inside a function");
-	}
-
-	private void validateAssignment(Tree node) {
-		Tree target = node.getChild(0);
-		if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX || target
-				.getType() == IDENTIFIER))
-			throw new TreeWalkException(target.getLine(),
-					target.getCharPositionInLine(),
-					"Assignment target must be an identifier, attribute or index");
 	}
 
 	protected Tree visitFunction(Tree node, Tree parameters, Tree block) {
@@ -185,5 +168,26 @@ public abstract class AstVisitor {
 
 	protected Tree visitNull(Tree node) {
 		return node;
+	}
+
+	private void validateReturn(Tree node) {
+		// Return statement must be inside a function
+		boolean insideFunction = false;
+		Tree current = node;
+		while ((current = current.getParent()) != null && !insideFunction)
+			insideFunction = current.getType() == FUNCTIONBLOCK;
+		if (!insideFunction)
+			throw new TreeValidationException(node.getLine(),
+					node.getCharPositionInLine(),
+					"Return statement can only exist inside a function");
+	}
+
+	private void validateAssignment(Tree node) {
+		Tree target = node.getChild(0);
+		if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX || target
+				.getType() == IDENTIFIER))
+			throw new TreeValidationException(target.getLine(),
+					target.getCharPositionInLine(),
+					"Assignment target must be an identifier, attribute or index");
 	}
 }

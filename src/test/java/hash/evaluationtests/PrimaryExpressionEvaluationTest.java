@@ -1,7 +1,7 @@
-package hash.evaluation;
+package hash.evaluationtests;
 
+import hash.basetests.PrimaryExpressionTest;
 import hash.testutils.Evaluator;
-import hash.testutils.PrimaryExpressionTest;
 
 public class PrimaryExpressionEvaluationTest extends PrimaryExpressionTest {
 

@@ -1,4 +1,4 @@
-package hash;
+package hash.commontests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,8 +7,8 @@ import static org.junit.Assert.fail;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.literal_return;
-import hash.parsing.walkers.evaluators.LiteralEvaluator;
-import hash.parsing.walkers.evaluators.Result;
+import hash.parsing.visitors.evaluators.LiteralEvaluator;
+import hash.parsing.visitors.nodes.Result;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;

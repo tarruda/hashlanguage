@@ -1,8 +1,9 @@
-package hash.parsing.walkers.evaluators;
+package hash.parsing.visitors.evaluators;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;
 import hash.lang.Scope;
+import hash.parsing.visitors.nodes.Result;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
 
@@ -11,6 +12,11 @@ import java.util.Map;
 
 import org.antlr.runtime.tree.Tree;
 
+/**
+ * Executes a hash program by walking its AST with a context reference.
+ * @author Thiago de Arruda
+ *
+ */
 public class ProgramEvaluator extends LiteralEvaluator {
 
 	private Scope context;
@@ -67,16 +73,16 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
-	protected Tree visitBinaryExpression(Tree operator, Tree left, Tree right) {
+	protected Tree visitBinaryExpression(Tree node, Tree left, Tree right) {
 		Object l = ((Result) visit(left)).getEvaluationResult();
 		Object r = ((Result) visit(right)).getEvaluationResult();
 		return new Result(
-				Runtime.invokeBinaryOperator(operator.getText(), l, r));
+				Runtime.invokeBinaryOperator(node.getText(), l, r));
 	}
 
 	@Override
-	protected Tree visitUnaryExpression(Tree operator, Tree operand) {
-		String operatorTxt = operator.getText();
+	protected Tree visitUnaryExpression(Tree node, Tree operand) {
+		String operatorTxt = node.getText();
 		if (operatorTxt.equals("+"))// ignore
 			return visit(operand);
 		Object op = ((Result) visit(operand)).getEvaluationResult();

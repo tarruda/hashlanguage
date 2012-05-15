@@ -1,6 +1,6 @@
-package hash.evaluation;
+package hash.evaluationtests;
 
-import hash.testutils.BinaryAndUnaryExpressionTest;
+import hash.basetests.BinaryAndUnaryExpressionTest;
 import hash.testutils.Evaluator;
 
 public class BinaryAndUnaryExpressionEvaluationTest extends

@@ -1,4 +1,4 @@
-package hash.parsing.walkers.evaluators;
+package hash.parsing.visitors.nodes;
 
 import java.util.List;
 

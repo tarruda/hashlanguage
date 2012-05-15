@@ -1,6 +1,7 @@
-package hash.parsing.walkers.evaluators;
+package hash.parsing.visitors.evaluators;
 
-import hash.parsing.walkers.AstVisitor;
+import hash.parsing.visitors.AstVisitor;
+import hash.parsing.visitors.nodes.Result;
 
 import org.antlr.runtime.tree.Tree;
 
