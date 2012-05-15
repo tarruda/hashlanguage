@@ -25,6 +25,8 @@ FALSE: 'false';
 NULL: 'null';
 
 //
+INDENTED_HEREDOC: '<<--' {emitIndentedHereDocString();};
+HEREDOC: '<<-' {emitHereDocString();};
 COLON: ':';
 COMMA: ',';
 DOT: '.';
@@ -73,7 +75,6 @@ AND: '&&';
 NOT: '!';
 IN: 'in';
 IS: 'is';
-
 
 IDENTIFIER: LETTER (LETTER|DEC_DIGIT)*;
 

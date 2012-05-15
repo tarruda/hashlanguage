@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.literal_return;
+import hash.parsing.exceptions.ParsingException;
 import hash.parsing.visitors.evaluators.LiteralEvaluator;
 import hash.parsing.visitors.nodes.Result;
 
@@ -66,5 +67,18 @@ public class LiteralTest {
 	public void strings() {
 		assertEquals(" SQ 	string\n ", evaluate("' SQ \\tstring\\n '"));
 		assertEquals(" DQ string ", evaluate("\" DQ string \""));
+	}
+
+	@Test
+	public void heredocs() {
+		assertEquals("Testing\nHere\nc\nString\n  Indentation\n",
+				evaluate("  <<-- EOF\n  Testing\n  Here\nDoc\n  String\n"
+						+ "    Indentation\n  EOF"));
+	}
+
+	@Test(expected = ParsingException.class)
+	public void unfinishedHeredoc() {
+		evaluate("  <<-- EOF\n  Testing\n  Here\nDoc\n  String\n"
+				+ "    Indentation\n  OF");
 	}
 }

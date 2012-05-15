@@ -1,5 +1,7 @@
 package hash.parsing;
 
+import hash.parsing.exceptions.ParsingException;
+
 import java.util.Stack;
 
 import org.antlr.runtime.CharStream;
@@ -14,9 +16,10 @@ public abstract class AbstractHashLexer extends Lexer {
 	private static final String digits = "0123456789";
 	private static final String whiteSpaces = " \n\t\r";
 	private Stack<Integer> blockNesting;
+	private boolean eof = false;
 
 	public AbstractHashLexer() {
-		resetNesting();
+		resetLexer();
 	}
 
 	public AbstractHashLexer(CharStream input) {
@@ -25,12 +28,13 @@ public abstract class AbstractHashLexer extends Lexer {
 
 	public AbstractHashLexer(CharStream input, RecognizerSharedState state) {
 		super(input, state);
-		resetNesting();
+		resetLexer();
 	}
 
-	private void resetNesting() {
+	private void resetLexer() {
 		blockNesting = new Stack<Integer>();
 		blockNesting.push(0);
+		eof = false;
 	}
 
 	@Override
@@ -42,8 +46,7 @@ public abstract class AbstractHashLexer extends Lexer {
 	@Override
 	public void displayRecognitionError(String[] tokenNames,
 			RecognitionException e) {
-		super.displayRecognitionError(tokenNames, e);
-		throw new RuntimeException(e);
+		throw new ParsingException(e);
 	}
 
 	protected int convertFromHexDigits(String c1, String c2, String c3,
@@ -65,7 +68,7 @@ public abstract class AbstractHashLexer extends Lexer {
 				}
 			};
 			ex.line = input.getLine();
-			ex.charPositionInLine = input.getCharPositionInLine();
+			ex.charPositionInLine = firstCharPositionInLine();
 			throw ex;
 		}
 	}
@@ -114,7 +117,7 @@ public abstract class AbstractHashLexer extends Lexer {
 		return isLetter(i);
 	}
 
-	protected void emitTerminatorOrWhitespace() throws RecognitionException {
+	protected void emitTerminatorOrWhitespace() {
 		char current = getText().charAt(0);
 		if (current == ';'
 				|| (blockNesting.peek() == 0 && (current == '\n' || current == '\r')))
@@ -126,11 +129,79 @@ public abstract class AbstractHashLexer extends Lexer {
 		emit();
 	}
 
-	private boolean previousCharIs(char c) {
+	protected void emitHereDocString() {
+
+	}
+
+	protected void emitIndentedHereDocString() {
+		int i = nextCharIndex();
+		int indent = firstCharPositionInLine();
+		StringBuilder buffer = new StringBuilder();
+		while (!isWhitespace(i)) {
+			buffer.appendCodePoint(la(i));
+			i++;
+		}
+		if (eof)
+			return;
+		char[] delimiter = buffer.toString().toCharArray();
+		while (la(i) != '\n') {
+			i++;
+			if (eof)
+				return;
+		}
+		i += indent + 1;
+		buffer = new StringBuilder();
+		while (true) {
+			int c = la(i);
+			if (eof)
+				return;
+			buffer.appendCodePoint(c);
+			i++;
+			if (la(i) == '\n') {
+				buffer.appendCodePoint('\n');
+				i += indent + 1;
+				if (matches(delimiter, i))
+					break;
+			}
+		}
+		input.seek(i);
+		state.type = HashLexer.SQ_STRING;
+		setText(buffer.toString());
+		emit();
+	}
+
+	public int firstCharPositionInLine() {
 		int i = -2;
+		while (la(i) != '\n' && la(i) != CharStream.EOF)
+			i--;
+		i++;
+		return nextCharIndex(i) - i;
+	}
+
+	private int previousCharIndex() {
+		return previousCharIndex(-2);
+	}
+
+	private int nextCharIndex() {
+		return nextCharIndex(1);
+	}
+
+	private int nextCharIndex(int startIndex) {
+		int i = startIndex;
+		while (isWhitespace(i))
+			i++;
+		return i;
+	}
+
+	private int previousCharIndex(int startIndex) {
+		int i = startIndex;
 		while (isWhitespace(i))
 			i--;
-		return la(i) == c;
+		return i;
+	}
+
+	private boolean previousCharIs(char c) {
+		return la(previousCharIndex()) == c;
 	}
 
 	private boolean isDot(int i) {
@@ -149,8 +220,24 @@ public abstract class AbstractHashLexer extends Lexer {
 		return digits.indexOf(la(i)) != -1;
 	}
 
-	private char la(int i) {
-		return (char) input.LA(i);
+	private int la(int i) {
+		if (input.LA(i) == CharStream.EOF && i > 0) {
+			state.type = CharStream.EOF;
+			emit();
+			eof = true;
+		}
+		return input.LA(i);
+	}
+
+	private boolean matches(char[] s, int i) {
+		boolean matches = true;
+		int idx = 0;
+		while (matches && idx < s.length) {
+			matches = la(i) == s[idx];
+			i++;
+			idx++;
+		}
+		return matches;
 	}
 
 }

@@ -36,6 +36,10 @@ tokens {
 program
   : statements EOF!      
   ;
+        
+block
+  : LCURLY statements RCURLY -> statements
+  ;
 
 statements
   : STERM* s+=statement (STERM+ s+=statement)* STERM*
@@ -48,11 +52,7 @@ statement
   | returnStatement
   | expression    
   ;
-        
-returnStatement
-  : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
-  ;
-        
+  
 importStatement
   : t=IMPORT parts+=identifier (DOT parts+=identifier)*
     -> ^(ASSIGN[$t, "="] IDENTIFIER[getImportTargetId($parts)]
@@ -63,8 +63,12 @@ importStatement
 functionStatement
   : t=FUNCTION name=identifier f=functionExpression
     -> ^(ASSIGN[$t, "="] $name $f)
+  ;  
+        
+returnStatement
+  : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
   ;
-  
+        
 expression
   : functionExpression
   | incOrDecExpression     
@@ -92,10 +96,7 @@ functionExpression
   : l=LROUND (params+=identifier (COMMA params+=identifier)*)? RROUND b=block 
       -> ^(FUNCTION[$l, "Function"] {stringList($params)} {functionBlock(b)} )
   ;
-      
-block
-  : LCURLY statements RCURLY -> statements
-  ;
+
 
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   

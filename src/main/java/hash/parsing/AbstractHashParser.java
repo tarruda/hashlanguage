@@ -1,7 +1,7 @@
 package hash.parsing;
 
-import hash.parsing.HashParser
-.block_return;
+import hash.parsing.HashParser.block_return;
+import hash.parsing.exceptions.ParsingException;
 import hash.util.Constants;
 
 import java.util.List;
@@ -33,8 +33,7 @@ public abstract class AbstractHashParser extends Parser {
 	@Override
 	public void displayRecognitionError(String[] tokenNames,
 			RecognitionException e) {
-		super.displayRecognitionError(tokenNames, e);
-		throw new RuntimeException(e);
+		throw new ParsingException(e);
 	}
 
 	public abstract TreeAdaptor getTreeAdaptor();
