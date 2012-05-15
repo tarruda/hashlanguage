@@ -5,8 +5,8 @@ import hash.lang.Scope;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.program_return;
-import hash.parsing.visitors.evaluators.ProgramEvaluator;
-import hash.parsing.visitors.evaluators.Result;
+import hash.parsing.walkers.evaluators.ProgramEvaluator;
+import hash.parsing.walkers.evaluators.Result;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;

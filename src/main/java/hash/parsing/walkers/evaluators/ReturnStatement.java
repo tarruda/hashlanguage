@@ -1,4 +1,4 @@
-package hash.parsing.visitors.evaluators;
+package hash.parsing.walkers.evaluators;
 
 @SuppressWarnings("serial")
 public class ReturnStatement extends RuntimeException {

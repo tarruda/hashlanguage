@@ -38,14 +38,14 @@ program
   ;
   
 compoundStatement
-  : s+=statement (SCOLON s+=statement)*
+  : s+=statement (SCOLON s+=statement)* SCOLON*
       -> ^(BLOCK["Block"] $s+)
   ;
   
 statement
   : importStatement
   | returnStatement
-  | expression
+  | expression  
   ;
   
 returnStatement

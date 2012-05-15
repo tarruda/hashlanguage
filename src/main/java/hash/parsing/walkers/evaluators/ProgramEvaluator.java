@@ -1,4 +1,4 @@
-package hash.parsing.visitors.evaluators;
+package hash.parsing.walkers.evaluators;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;

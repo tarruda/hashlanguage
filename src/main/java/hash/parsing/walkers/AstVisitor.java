@@ -1,4 +1,4 @@
-package hash.parsing.visitors;
+package hash.parsing.walkers;
 
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
@@ -91,10 +91,10 @@ public abstract class AstVisitor {
 
 	private void validateReturn(Tree node) {
 		// Return statement must be inside a function
-		Tree parent = null;
 		boolean insideFunction = false;
-		while ((parent = node.getParent()) != null && !insideFunction)
-			insideFunction = parent.getType() == FUNCTIONBLOCK;
+		Tree current = node;
+		while ((current = current.getParent()) != null && !insideFunction)
+			insideFunction = current.getType() == FUNCTIONBLOCK;
 		if (!insideFunction)
 			throw new TreeWalkException(node.getLine(),
 					node.getCharPositionInLine(),

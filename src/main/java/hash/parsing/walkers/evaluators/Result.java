@@ -1,4 +1,4 @@
-package hash.parsing.visitors.evaluators;
+package hash.parsing.walkers.evaluators;
 
 /**
  * Node for storing the result of evaluation
