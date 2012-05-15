@@ -240,7 +240,7 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(false, evaluate("'1'== 1"));
 		assertEquals(true, evaluate("(((1+1)==3)==false)"));
 		assertEquals(true, evaluate("1+1==3==false"));
-		assertEquals(true, evaluate("false==true==(1-2==3))"));
+		assertEquals(true, evaluate("false==true==(1-2==3)"));
 		assertEquals(true, evaluate("false==false==true==false==false"));
 		assertEquals(false, evaluate("1<2==(3>4)==false==(12<=3*4)==false"));
 	}

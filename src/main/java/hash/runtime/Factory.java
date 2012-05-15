@@ -1,7 +1,7 @@
 package hash.runtime;
 
-import hash.lang.HashContext;
 import hash.lang.Context;
+import hash.lang.HashContext;
 import hash.runtime.functions.Import;
 
 import java.util.ArrayList;

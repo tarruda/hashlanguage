@@ -34,20 +34,17 @@ tokens {
 
 
 program
-  : compoundStatement
+  : (s+=statement (STATEMENT_END s+=statement)*)? EOF
+      -> ^(BLOCK["Program"] $s+)
   ;
-  
-compoundStatement
-  : s+=statement (SCOLON s+=statement)* SCOLON*
-      -> ^(BLOCK["Block"] $s+)
-  ;
-  
+
 statement
   : importStatement
+  | functionStatement
   | returnStatement
   | expression  
   ;
-  
+        
 returnStatement
   : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
   ;
@@ -57,7 +54,12 @@ importStatement
     -> ^(ASSIGN[$t, "="] IDENTIFIER[getImportTargetId($parts)]
         ^(INVOCATION["Invocation"] IDENTIFIER[getImportFunctionId()]
          ^(LIST["Arguments"] STRING[getImportString($parts)])))
-  ;      
+  ;
+  
+functionStatement
+  : t=FUNCTION name=identifier f=functionExpression
+    -> ^(ASSIGN[$t, "="] $name $f)
+  ;
   
 expression
   : functionExpression
@@ -83,10 +85,14 @@ expression
   ;
 
 functionExpression
-  : l=LROUND (params+=identifier (COMMA params+=identifier)*)? 
-      RROUND LCURLY b=compoundStatement RCURLY
-    -> ^(FUNCTION[$l, "Function"] ^(LIST["Parameters"] $params?) {functionBlock(b)} )
-  ;  
+  : l=LROUND (params+=identifier (COMMA params+=identifier)*)? RROUND b=block 
+      -> ^(FUNCTION[$l, "Function"] {stringList($params)} {functionBlock(b)} )
+  ;
+      
+block
+  : LCURLY (s+=statement (STATEMENT_END s+=statement)*)? RCURLY 
+      -> ^(BLOCK["Block"] $s*)
+  ;
 
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   

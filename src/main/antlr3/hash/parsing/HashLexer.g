@@ -5,6 +5,11 @@ options {
    superClass = AbstractHashLexer;
 }
 
+tokens {
+  WS;
+  STATEMENT_END;
+}
+
 @header {
 package hash.parsing;
 }
@@ -20,16 +25,15 @@ FALSE: 'false';
 NULL: 'null';
 
 //
-SCOLON: ';';
 COLON: ':';
 COMMA: ',';
 DOT: '.';
-LROUND: '(';
-RROUND: ')';
-LCURLY: '{';
-RCURLY: '}';
-LSQUARE: '[';
-RSQUARE: ']';
+LROUND: '('{nesting++;};
+RROUND: ')'{nesting--;};
+LCURLY: '{'{nesting++;};
+RCURLY: '}'{nesting--;};
+LSQUARE: '['{nesting++;};
+RSQUARE: ']'{nesting--;};
 PLUS_ASSIGN: '+=';
 MINUS_ASSIGN: '-=';
 MUL_ASSIGN: '*=';
@@ -68,7 +72,8 @@ OR: '||';
 AND: '&&';
 NOT: '!';
 IN: 'in';
-IS: 'is'; 
+IS: 'is';
+
 
 IDENTIFIER: LETTER (LETTER|DEC_DIGIT)*;
 
@@ -171,13 +176,21 @@ fragment OCT_DIGIT: '0'..'7';
 fragment BIN_DIGIT: '0'..'1';
 fragment LETTER: ('a'..'z'|'A'..'Z'|'$'|'_');  
 
+TERM_OR_WS
+  : ((';')+
+  | ('\n'|'\r'|' '|'\t')+)
+  {emitTerminatorOrWhitespace();}
+  ;
+
+LINE_CONT
+  :
+  '\\\n'
+  {$channel = HIDDEN;}
+  ; 
+
 // Ignored tokens
 COMMENT
   : '//' ~('\n'|'\r')* '\r'? '\n'
   | '/*' ( options {greedy=false;} : . )* '*/' 
-    {$channel = HIDDEN;}
-  ;    
-WS  
-  : 
-  (' '|'\r'|'\t'|'\n') {$channel=HIDDEN;}
-  ;
+  {$channel = HIDDEN;}
+  ;  

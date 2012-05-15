@@ -23,5 +23,11 @@ public abstract class FunctionTest {
 		evaluate("f = () { return 15.5 }");
 		assertEquals(15.5f, evaluate("f()"));
 	}
-	
+
+	@Test
+	public void functionStatement() {
+		evaluate("function f1(n){return n}");
+		assertEquals("name", evaluate("f1('name')"));
+		assertEquals(2147483648l, evaluate("f1(1<<31)"));
+	}
 }

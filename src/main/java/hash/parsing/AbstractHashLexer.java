@@ -11,6 +11,7 @@ public abstract class AbstractHashLexer extends Lexer {
 			+ "abcdefghijklmnopqrstuvwxyz" + "_$";
 	private static final String digits = "0123456789";
 	private static final String whiteSpaces = " \n\t\r";
+	protected int nesting = 0;
 
 	public AbstractHashLexer() {
 	}
@@ -21,6 +22,19 @@ public abstract class AbstractHashLexer extends Lexer {
 
 	public AbstractHashLexer(CharStream input, RecognizerSharedState state) {
 		super(input, state);
+	}
+
+	@Override
+	public void emitErrorMessage(String msg) {
+		// Override to send messages to another location
+		super.emitErrorMessage(msg);
+	}
+
+	@Override
+	public void displayRecognitionError(String[] tokenNames,
+			RecognitionException e) {
+		super.displayRecognitionError(tokenNames, e);
+		throw new RuntimeException(e);
 	}
 
 	protected int convertFromHexDigits(String c1, String c2, String c3,
@@ -65,6 +79,18 @@ public abstract class AbstractHashLexer extends Lexer {
 		return isLetter(i);
 	}
 
+	protected void emitTerminatorOrWhitespace() throws RecognitionException {
+		char current = getText().charAt(0);
+		if (current == ';'
+				|| (nesting == 0 && (current == '\n' || current == '\r')))
+			state.type = HashLexer.STATEMENT_END;
+		else {
+			state.type = HashLexer.WS;
+			state.channel = HIDDEN;
+		}
+		emit();
+	}
+
 	private boolean isDot(int i) {
 		return la(i) == '.';
 	}
@@ -81,7 +107,8 @@ public abstract class AbstractHashLexer extends Lexer {
 		return digits.indexOf(la(i)) != -1;
 	}
 
-	private char la(int i) {		
-		return (char) input.LA(i);
+	private int la(int i) {
+		return input.LA(i);
 	}
+
 }

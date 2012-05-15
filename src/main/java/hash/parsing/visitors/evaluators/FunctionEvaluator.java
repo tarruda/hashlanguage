@@ -1,7 +1,7 @@
 package hash.parsing.visitors.evaluators;
 
-import hash.lang.Function;
 import hash.lang.Context;
+import hash.lang.Function;
 import hash.runtime.Factory;
 import hash.util.Check;
 import hash.util.Constants;
