@@ -6,8 +6,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
- * Simple benchmark for comparing the speed of invoking with static, hash lookup
- * and reflection
+ * Simple benchmark for comparing the speed of invoking methods statically, with
+ * hash lookup and reflection
  * 
  */
 public class InvocationBenchmark {

@@ -1,7 +1,7 @@
 package hash.runtime;
 
-import hash.lang.HashScope;
-import hash.lang.Scope;
+import hash.lang.HashContext;
+import hash.lang.Context;
 import hash.runtime.functions.Import;
 
 import java.util.ArrayList;
@@ -27,13 +27,13 @@ public class Factory {
 		return new ArrayList(initialCapacity);
 	}
 
-	public static Scope createExecutionScope() {
-		HashScope rv = new HashScope();
+	public static Context createContext() {
+		HashContext rv = new HashContext();
 		rv.installBuiltin(new Import());
 		return rv;
 	}
 
-	public static Scope createExecutionScope(Scope parent) {
-		return new HashScope(parent);
+	public static Context createContext(Context parent) {
+		return new HashContext(parent);
 	}
 }

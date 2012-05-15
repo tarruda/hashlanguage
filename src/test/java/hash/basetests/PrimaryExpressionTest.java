@@ -1,7 +1,7 @@
 package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
-import hash.lang.Scope;
+import hash.lang.Context;
 import hash.runtime.Factory;
 import hash.runtime.generators.HashAdapter;
 
@@ -10,13 +10,13 @@ import org.junit.Test;
 
 public abstract class PrimaryExpressionTest {
 
-	protected Scope context;
+	protected Context context;
 
 	protected abstract Object evaluate(String expression);
 
 	@Before
 	public void setup() {
-		context = Factory.createExecutionScope();
+		context = Factory.createContext();
 	}
 
 	@Test

@@ -71,14 +71,14 @@ public class Err {
 
 	public static RuntimeException nameNotDefined(Object name) {
 		return new RuntimeException(String.format(
-				"Name '%s' is not defined in any enclosing scope", name));
+				"Name '%s' is not defined in the current or any enclosing context", name));
 	}
 
 	public static RuntimeException attributeNotDefined(Object name) {
 		return new RuntimeException(String.format(
 				"Attribute '%s' is not defined", name));
 	}
-	
+
 	public static RuntimeException attributeNotFunction(Object name) {
 		return new RuntimeException(String.format(
 				"Attribute '%s' is not a function", name));

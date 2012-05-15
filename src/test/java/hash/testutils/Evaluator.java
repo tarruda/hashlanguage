@@ -1,7 +1,7 @@
 package hash.testutils;
 
 import static org.junit.Assert.fail;
-import hash.lang.Scope;
+import hash.lang.Context;
 import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.program_return;
@@ -15,7 +15,7 @@ import org.antlr.runtime.tree.Tree;
 
 public class Evaluator {
 
-	public static Object eval(String code, Scope context) {
+	public static Object eval(String code, Context context) {
 		ProgramEvaluator target = new ProgramEvaluator(context);
 		HashLexer lexer = new HashLexer();
 		ANTLRStringStream source = new ANTLRStringStream(code);

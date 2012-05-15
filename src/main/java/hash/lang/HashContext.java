@@ -6,18 +6,18 @@ import hash.util.Err;
 import java.util.HashMap;
 
 @SuppressWarnings("serial")
-public class HashScope extends HashMap implements Scope {
+public class HashContext extends HashMap implements Context {
 
-	private Scope parent;
+	private Context parent;
 
-	public HashScope() {
+	public HashContext() {
 	}
 
-	public HashScope(Scope parent) {
+	public HashContext(Context parent) {
 		this.parent = parent;
 	}
 
-	public Scope getParent() {
+	public Context getParent() {
 		return parent;
 	}
 

@@ -2,7 +2,7 @@ package hash.parsing.visitors.evaluators;
 
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;
-import hash.lang.Scope;
+import hash.lang.Context;
 import hash.parsing.visitors.nodes.Result;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
@@ -19,9 +19,9 @@ import org.antlr.runtime.tree.Tree;
  */
 public class ProgramEvaluator extends LiteralEvaluator {
 
-	private Scope context;
+	private Context context;
 
-	public ProgramEvaluator(Scope context) {
+	public ProgramEvaluator(Context context) {
 		this.context = context;
 	}
 
