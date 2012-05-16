@@ -1,8 +1,8 @@
 package hash.commontests;
 
 import static org.junit.Assert.fail;
-import hash.parsing.HashLexer;
-import hash.parsing.HashParser;
+import hash.parsing.ConcreteHashLexer;
+import hash.parsing.ConcreteHashParser;
 import hash.parsing.HashParser.program_return;
 import hash.parsing.exceptions.TreeValidationException;
 import hash.parsing.visitors.AstValidator;
@@ -25,9 +25,9 @@ public class AstValidatorTest {
 
 	private void validate(String code) {
 		ANTLRStringStream source = new ANTLRStringStream(code);
-		HashLexer lexer = new HashLexer(source);
+		ConcreteHashLexer lexer = new ConcreteHashLexer(source);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		HashParser parser = new HashParser(tokens);
+		ConcreteHashParser parser = new ConcreteHashParser(tokens);
 		program_return psrReturn = null;
 		try {
 			psrReturn = parser.program();
@@ -42,13 +42,13 @@ public class AstValidatorTest {
 	@Test(expected = TreeValidationException.class)
 	public void assignmentToInvocation() {
 		validate("someFunction() = 'someString'");
-	}	
-	
+	}
+
 	@Test(expected = TreeValidationException.class)
 	public void assignmentToLiteral() {
 		validate("5 = 'someString'");
-	}	
-	
+	}
+
 	@Test(expected = TreeValidationException.class)
 	public void returnOutsideFunction() {
 		validate("return null");

@@ -67,9 +67,11 @@ public class ProgramEvaluator extends LiteralEvaluator {
 				Runtime.setAttribute(ownerObject, key, value);
 			else
 				Runtime.setIndex(ownerObject, key, value);
-		} else
+		} else {
 			// target is an identifier
-			context.put(target.getText(), value);
+			Context c = getContext((HashNode) target);
+			c.put(target.getText(), value);
+		}
 		return new Result(value);
 	}
 
@@ -160,7 +162,8 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitIdentifier(Tree node) {
-		return new Result(context.get(node.getText()));
+		Context c = getContext((HashNode) node);
+		return new Result(c.get(node.getText()));
 	}
 
 	@Override
@@ -177,5 +180,15 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	@Override
 	protected Tree visitThis(Tree node) {
 		return visitIdentifier(node);
+	}
+	
+	private Context getContext(HashNode identifier){
+		int level = 0;
+		if (identifier.getNodeData(HashNode.CONTEXT_LEVEL) != null)
+			level = (Integer) identifier.getNodeData(HashNode.CONTEXT_LEVEL);
+		Context c = context;
+		while (level > 0 && c.getParent() != null)
+			c = c.getParent();
+		return c;
 	}
 }

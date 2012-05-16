@@ -73,6 +73,7 @@ XOR_ASSIGN: '^=';
 SHL_ASSIGN: '<<=';
 USHR_ASSIGN: '>>>=';
 SHR_ASSIGN: '>>=';
+AT: '@';
 POW: '**';
 MUL: '*';
 DIV: '/';
@@ -216,7 +217,7 @@ LINE_CONT
 
 // Ignored tokens
 COMMENT
-  : '//' ~('\n'|'\r')* '\r'? '\n'
+  : ('//'|'#') ~('\n'|'\r')* '\r'? '\n'
   | '/*' ( options {greedy=false;} : . )* '*/' 
   {$channel = HIDDEN;}
   ;  

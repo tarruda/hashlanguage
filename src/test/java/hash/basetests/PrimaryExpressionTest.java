@@ -123,7 +123,7 @@ public abstract class PrimaryExpressionTest {
 	@Test(expected = RuntimeException.class)
 	public void methodInvocationValidation() {
 		// A function is classified as a method if it makes any reference
-		// to 'this'. 
+		// to 'this'.
 		evaluate("person={name:'user',getName:(){return this.name},"
 				+ "getRandom:(){return 15*4+2}}");
 		assertEquals("user", evaluate("person.getName()"));
@@ -131,7 +131,9 @@ public abstract class PrimaryExpressionTest {
 		evaluate("f = person.getRandom");
 		evaluate("m = person.getName");
 		assertEquals(62, evaluate("f()"));
-		evaluate("m()"); // Throws since m is a method.
+		// Throws since m is a method(must be invoked as an attribute or index
+		// of an object)
+		evaluate("m()");
 	}
 
 	@Test

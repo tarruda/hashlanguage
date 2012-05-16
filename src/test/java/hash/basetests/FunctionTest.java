@@ -1,6 +1,7 @@
 package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import hash.lang.Context;
 import hash.runtime.Factory;
 
@@ -30,4 +31,15 @@ public abstract class FunctionTest {
 		assertEquals("name", evaluate("f1('name')"));
 		assertEquals(2147483648l, evaluate("f1(1<<31)"));
 	}
+
+	@Test
+	public void explicitlyAccessingOuterScopes() {
+		evaluate("function outer() { function inner() { @@y=10 }\n @x=5\n "
+				+ "return inner}\n i = outer()");
+		assertEquals(5, context.get("x"));
+		assertFalse(context.containsKey("y"));
+		evaluate("i()");
+		assertEquals(10, context.get("y"));
+	}
+
 }

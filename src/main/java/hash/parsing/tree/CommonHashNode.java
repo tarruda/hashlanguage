@@ -41,6 +41,11 @@ public class CommonHashNode extends CommonTree implements HashNode  {
 	}
 
 	public Tree dupNode() {
-		return new CommonHashNode(this);
+		CommonHashNode rv = new CommonHashNode(this);
+		if(nodeInfo != null)
+			for (Object key : nodeInfo.keySet()) 
+				rv.setNodeData(key, nodeInfo.get(key));
+		rv.setNodeData(data);
+		return rv;
 	}
 }

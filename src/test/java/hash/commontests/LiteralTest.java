@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import hash.parsing.HashLexer;
-import hash.parsing.HashParser;
+import hash.parsing.ConcreteHashLexer;
+import hash.parsing.ConcreteHashParser;
 import hash.parsing.HashParser.literal_return;
 import hash.parsing.exceptions.ParsingException;
 import hash.parsing.tree.Result;
@@ -29,9 +29,9 @@ public class LiteralTest {
 
 	private Object evaluate(String code) {
 		ANTLRStringStream source = new ANTLRStringStream(code);
-		HashLexer lexer = new HashLexer(source);
+		ConcreteHashLexer lexer = new ConcreteHashLexer(source);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		HashParser parser = new HashParser(tokens);
+		ConcreteHashParser parser = new ConcreteHashParser(tokens);
 		literal_return psrReturn = null;
 		try {
 			psrReturn = parser.literal();

@@ -247,9 +247,13 @@ keyValuePair
   : i=identifier COLON v=expression -> ^(STRING[$i.start, $i.text] $v)
   | l=literal COLON v=expression -> ^($l $v)   
   ;
-  
+    
 identifier
-  : IDENTIFIER
+@init {
+  int level = 0;
+}
+  : (AT {level++;})* IDENTIFIER
+    -> ^(IDENTIFIER {level})
   ;
 
 thisExpression
