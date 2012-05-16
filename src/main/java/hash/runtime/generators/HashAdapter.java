@@ -13,6 +13,7 @@ import hash.runtime.mixins.ListMixin;
 import hash.runtime.mixins.MapMixin;
 import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
+import hash.runtime.mixins.RegexMixin;
 import hash.runtime.mixins.StringMixin;
 import hash.util.Asm;
 import hash.util.Constants;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -50,6 +52,7 @@ public class HashAdapter implements Opcodes {
 		classMixins.put(String.class, new Map[] { StringMixin.INSTANCE });
 		classMixins.put(List.class, new Map[] { ListMixin.INSTANCE });
 		classMixins.put(Map.class, new Map[] { MapMixin.INSTANCE });
+		classMixins.put(Pattern.class, new Map[] { RegexMixin.INSTANCE });
 	}
 
 	public static HashObject getHashClass(Class<?> cls) {

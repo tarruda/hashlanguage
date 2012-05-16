@@ -32,6 +32,17 @@ public abstract class BinaryAndUnaryExpressionTest {
 	}
 
 	@Test
+	public void regexes() {
+		evaluate("r=/staticpattern/");
+		evaluate("ri=/staticpattern/i");	
+		assertEquals(true, evaluate("r =~ 'staticpattern'"));
+		assertEquals(false, evaluate("r =~ 'staticpatterN'"));
+		assertEquals(true, evaluate("ri =~ 'staticpatterN'"));
+		assertEquals(false, evaluate("ri =~ 'staticpatter'"));
+		assertEquals(true, evaluate("/[a-z]+[0-9]/i =~ 'SomeWord9'"));
+	}
+
+	@Test
 	public void assignments() {
 		assertEquals(5, evaluate("x = 5"));
 		assertEquals(5, evaluate("x"));

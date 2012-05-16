@@ -41,4 +41,5 @@ public class LiteralEvaluator extends AstVisitor {
 	protected Tree visitNull(Tree node) {
 		return new Result(null);
 	}
+
 }

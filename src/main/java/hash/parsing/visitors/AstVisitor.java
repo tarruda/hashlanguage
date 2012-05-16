@@ -16,6 +16,7 @@ import static hash.parsing.HashParser.INVOCATION;
 import static hash.parsing.HashParser.LIST;
 import static hash.parsing.HashParser.MAP;
 import static hash.parsing.HashParser.NULL;
+import static hash.parsing.HashParser.REGEX;
 import static hash.parsing.HashParser.RETURN;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
@@ -25,8 +26,8 @@ import hash.parsing.exceptions.TreeValidationException;
 import org.antlr.runtime.tree.Tree;
 
 /**
- * Base for all classes that need to do something with the AST. It can be
- * used for translation, transformation, analysis, compilation, execution or any
+ * Base for all classes that need to do something with the AST. It can be used
+ * for translation, transformation, analysis, compilation, execution or any
  * other processing of the AST.
  * 
  * The 'visit' method will validate tree structure and delegate further
@@ -78,6 +79,8 @@ public abstract class AstVisitor {
 			return visitList(node);
 		case IDENTIFIER:
 			return visitIdentifier(node);
+		case REGEX:
+			return visitRegex(node);
 		case STRING:
 			return visitString(node);
 		case FLOAT:
@@ -147,6 +150,10 @@ public abstract class AstVisitor {
 	}
 
 	protected Tree visitIdentifier(Tree node) {
+		return node;
+	}
+
+	protected Tree visitRegex(Tree node) {
 		return node;
 	}
 

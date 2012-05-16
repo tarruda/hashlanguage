@@ -8,6 +8,7 @@ import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Lexer;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.Token;
 
 @SuppressWarnings("serial")
 public abstract class AbstractHashLexer extends Lexer {
@@ -17,6 +18,7 @@ public abstract class AbstractHashLexer extends Lexer {
 	private static final String whiteSpaces = " \n\t\r";
 	private Stack<Integer> blockNesting;
 	private boolean eof = false;
+	private int lastToken = -1;
 
 	public AbstractHashLexer() {
 		resetLexer();
@@ -35,6 +37,13 @@ public abstract class AbstractHashLexer extends Lexer {
 		blockNesting = new Stack<Integer>();
 		blockNesting.push(0);
 		eof = false;
+	}
+
+	@Override
+	public void emit(Token token) {
+		super.emit(token);
+		if (state.channel != HIDDEN)
+			lastToken = state.token.getType();
 	}
 
 	@Override
@@ -261,4 +270,14 @@ public abstract class AbstractHashLexer extends Lexer {
 		return matches;
 	}
 
+	protected boolean regexTokenAllowed() {
+		return lastToken == HashLexer.ASSIGN || lastToken == HashLexer.STERM
+				|| lastToken == HashLexer.COMMA || lastToken == HashLexer.COLON
+				|| lastToken == HashLexer.LROUND
+				|| lastToken == HashLexer.LSQUARE
+				|| lastToken == HashLexer.LCURLY
+				|| lastToken == HashLexer.RETURN || lastToken == HashLexer.NOT
+				|| lastToken == HashLexer.BIT_AND
+				|| lastToken == HashLexer.BIT_OR || lastToken == HashLexer.EOF;
+	}
 }

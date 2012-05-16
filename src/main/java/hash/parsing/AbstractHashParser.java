@@ -33,6 +33,7 @@ public abstract class AbstractHashParser extends Parser {
 	@Override
 	public void displayRecognitionError(String[] tokenNames,
 			RecognitionException e) {
+		super.displayRecognitionError(tokenNames, e);
 		throw new ParsingException(e);
 	}
 

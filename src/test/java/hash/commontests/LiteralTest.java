@@ -79,7 +79,7 @@ public class LiteralTest {
 	@Test
 	public void indentedHereDoc() {
 		assertEquals("Testing\nHere\nc\nString\n  Indentation\n",
-				evaluate("  <<] EOF\n  Testing\n  Here\nDoc\n  String\n"
+				evaluate("  <<]EOF\n  Testing\n  Here\nDoc\n  String\n"
 						+ "    Indentation\n  EOF"));
 	}
 

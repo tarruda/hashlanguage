@@ -9,13 +9,15 @@ import hash.runtime.Runtime;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.tree.Tree;
 
 /**
  * Executes a hash program by walking its AST with a context reference.
+ * 
  * @author Thiago de Arruda
- *
+ * 
  */
 public class ProgramEvaluator extends LiteralEvaluator {
 
@@ -76,8 +78,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	protected Tree visitBinaryExpression(Tree node, Tree left, Tree right) {
 		Object l = ((Result) visit(left)).getEvaluationResult();
 		Object r = ((Result) visit(right)).getEvaluationResult();
-		return new Result(
-				Runtime.invokeBinaryOperator(node.getText(), l, r));
+		return new Result(Runtime.invokeBinaryOperator(node.getText(), l, r));
 	}
 
 	@Override
@@ -100,7 +101,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			Object methodKey = ((Result) visit(expression.getChild(1)))
 					.getEvaluationResult();
 			return new Result(Runtime.invokeNormalMethod(tgt, methodKey, args));
-		} else {		
+		} else {
 			// normal function call
 			Object exp = ((Result) visit(expression)).getEvaluationResult();
 			return new Result(Runtime.invokeFunction(exp, args));
@@ -156,5 +157,16 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	@Override
 	protected Tree visitIdentifier(Tree node) {
 		return new Result(context.get(node.getText()));
+	}
+
+	@Override
+	protected Tree visitRegex(Tree node) {
+		String regexLiteral = node.getText();
+		String regexText = regexLiteral.substring(1,
+				regexLiteral.lastIndexOf('/'));
+		int flags = 0;
+		if (regexLiteral.endsWith("i"))
+			flags = Pattern.CASE_INSENSITIVE;
+		return new Result(Pattern.compile(regexText, flags));
 	}
 }

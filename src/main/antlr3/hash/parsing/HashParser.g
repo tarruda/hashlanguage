@@ -130,7 +130,7 @@ bitwiseAnd
 
 equality
   : (l=comparison -> $l) 
-    ((o=EQ|o=NEQ) r=comparison -> ^(BINARY[$o] $equality $r))*   
+    ((o=EQ|o=NEQ|o=MATCHES) r=comparison -> ^(BINARY[$o] $equality $r))*   
   ;
   
 comparison
@@ -252,11 +252,16 @@ identifier
   ;
   
 literal
-  : stringLiteral
+  : regexLiteral
+  | stringLiteral
   | floatLiteral
   | integerLiteral
   | booleanLiteral
   | NULL
+  ;
+
+regexLiteral
+  : REGEX
   ;
 
 stringLiteral

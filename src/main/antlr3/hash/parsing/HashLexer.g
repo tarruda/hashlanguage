@@ -23,6 +23,30 @@ NEW: 'new';
 TRUE: 'true'; 
 FALSE: 'false';
 NULL: 'null';
+IN: 'in';
+IS: 'is';
+
+REGEX
+@init { 
+StringBuilder sb = new StringBuilder(); 
+}
+  : {regexTokenAllowed()}? =>
+  '/'{sb.append("/");}
+  ( options {greedy=false;}:
+    (
+      '\\/' {sb.append("/");}
+    | REGEXCHAR[sb]     
+    )
+  )* 
+  '/'{sb.append("/");}
+  ('i'{sb.append("i");})?  
+  {setText(sb.toString());}
+  ;
+
+fragment REGEXCHAR[StringBuilder sb]
+  :
+  c=~('\\'|'/'|'\n') {sb.appendCodePoint($c);}  
+  ;
 
 //
 INDENTED_HEREDOC: '<<]' {indentedHereDoc()}?;
@@ -68,14 +92,12 @@ LT: '<';
 GE: '>=';
 GT: '>';
 EQ: '==';
+MATCHES: '=~';
 NEQ: '!=';
 ASSIGN: '=';
 OR: '||';
 AND: '&&';
 NOT: '!';
-IN: 'in';
-IS: 'is';
-
 
 
 IDENTIFIER: LETTER (LETTER|DEC_DIGIT)*;
@@ -166,7 +188,7 @@ fragment ESC_SEQ[StringBuilder sb]
 	  | 'r' {sb.append("\r");}
 	  | '\"' {sb.append("\"");}
 	  | '\'' {sb.append("'");}
-	  | '\\' {sb.append("\\");}
+	  | '\\' {sb.append("\\");}	  
 	  | 'u' i=HEX_DIGIT j=HEX_DIGIT k=HEX_DIGIT l=HEX_DIGIT 
 	    {sb.appendCodePoint(convertFromHexDigits($i.text, $j.text, $k.text, $l.text));}
 	  )
