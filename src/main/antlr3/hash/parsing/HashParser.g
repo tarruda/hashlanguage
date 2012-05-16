@@ -260,7 +260,7 @@ literal
   ;
 
 stringLiteral
-  : (t=SQ_STRING|t=DQ_STRING) -> STRING[$t]
+  : (t=SQ_STRING|t=DQ_STRING|t=HEREDOC|t=INDENTED_HEREDOC) -> STRING[$t]
   ;
 
 floatLiteral

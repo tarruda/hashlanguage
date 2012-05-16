@@ -129,11 +129,33 @@ public abstract class AbstractHashLexer extends Lexer {
 		emit();
 	}
 
-	protected void emitHereDocString() {
-
+	protected boolean hereDoc() {
+		int i = nextCharIndex();
+		StringBuilder buffer = new StringBuilder();
+		while (!isWhitespace(i)) {
+			buffer.appendCodePoint(la(i));
+			i++;
+		}
+		if (eof)
+			return false;
+		i++;
+		char[] delimiter = buffer.toString().toCharArray();
+		buffer = new StringBuilder();
+		while (true) {
+			int c = la(i);
+			if (eof)
+				return false;
+			buffer.appendCodePoint(c);
+			i++;
+			if (matches(delimiter, i))
+				break;
+		}
+		input.seek(i);
+		setText(buffer.toString());
+		return true;
 	}
 
-	protected void emitIndentedHereDocString() {
+	protected boolean indentedHereDoc() {
 		int i = nextCharIndex();
 		int indent = firstCharPositionInLine();
 		StringBuilder buffer = new StringBuilder();
@@ -142,19 +164,19 @@ public abstract class AbstractHashLexer extends Lexer {
 			i++;
 		}
 		if (eof)
-			return;
+			return false;
 		char[] delimiter = buffer.toString().toCharArray();
 		while (la(i) != '\n') {
-			i++;
 			if (eof)
-				return;
+				return false;
+			i++;
 		}
 		i += indent + 1;
 		buffer = new StringBuilder();
 		while (true) {
 			int c = la(i);
 			if (eof)
-				return;
+				return false;
 			buffer.appendCodePoint(c);
 			i++;
 			if (la(i) == '\n') {
@@ -165,13 +187,12 @@ public abstract class AbstractHashLexer extends Lexer {
 			}
 		}
 		input.seek(i);
-		state.type = HashLexer.SQ_STRING;
 		setText(buffer.toString());
-		emit();
+		return true;
 	}
 
 	public int firstCharPositionInLine() {
-		int i = -2;
+		int i = -1;
 		while (la(i) != '\n' && la(i) != CharStream.EOF)
 			i--;
 		i++;

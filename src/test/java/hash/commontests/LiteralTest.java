@@ -68,17 +68,31 @@ public class LiteralTest {
 		assertEquals(" SQ 	string\n ", evaluate("' SQ \\tstring\\n '"));
 		assertEquals(" DQ string ", evaluate("\" DQ string \""));
 	}
+	
+	@Test
+	public void hereDoc() {
+		assertEquals("  Testing\n  Here\nDoc\n  String\n  Indentation\n  ",
+				evaluate("  <<|EOF\n  Testing\n  Here\nDoc\n  String\n"
+						+ "  Indentation\n  EOF"));
+	}
 
 	@Test
-	public void heredocs() {
+	public void indentedHereDoc() {
 		assertEquals("Testing\nHere\nc\nString\n  Indentation\n",
-				evaluate("  <<-- EOF\n  Testing\n  Here\nDoc\n  String\n"
+				evaluate("  <<] EOF\n  Testing\n  Here\nDoc\n  String\n"
 						+ "    Indentation\n  EOF"));
 	}
 
 	@Test(expected = ParsingException.class)
-	public void unfinishedHeredoc() {
-		evaluate("  <<-- EOF\n  Testing\n  Here\nDoc\n  String\n"
+	public void unfinishedHereDoc() {
+		assertEquals("  Testing\n  Here\nDoc\n  String\n  Indentation\n  ",
+				evaluate("  <<|EOF\n  Testing\n  Here\nDoc\n  String\n"
+						+ "  Indentation\n  "));
+	}
+	
+	@Test(expected = ParsingException.class)
+	public void unfinishedIndentedHereDoc() {
+		evaluate("  <<] EOF\n  Testing\n  Here\nDoc\n  String\n"
 				+ "    Indentation\n  OF");
 	}
 }

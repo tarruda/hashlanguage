@@ -1,7 +1,8 @@
 package hash.parsing.exceptions;
 
-public class TreeValidationException extends RuntimeException {
-	private static final long serialVersionUID = 4891033425008881335L;
+@SuppressWarnings("serial")
+public class TreeValidationException extends ParsingException {
+
 	private int line;
 	private int charPositionInLine;
 
@@ -11,10 +12,12 @@ public class TreeValidationException extends RuntimeException {
 		this.charPositionInLine = charPositionInLine;
 	}
 
+	@Override
 	public int getLine() {
 		return line;
 	}
 
+	@Override
 	public int getCharPositionInLine() {
 		return charPositionInLine;
 	}
