@@ -127,9 +127,10 @@ public abstract class AbstractHashLexer extends Lexer {
 	}
 
 	protected void emitTerminatorOrWhitespace() {
-		char current = getText().charAt(0);
-		if (current == ';'
-				|| (blockNesting.peek() == 0 && (current == '\n' || current == '\r')))
+		String text = getText();
+		if (text.contains(";")
+				|| (blockNesting.peek() == 0 && (text.contains("\n") || text
+						.contains("\r"))))
 			state.type = HashLexer.STERM;
 		else {
 			state.type = HashLexer.WS;

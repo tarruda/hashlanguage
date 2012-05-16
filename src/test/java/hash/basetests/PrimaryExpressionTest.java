@@ -103,10 +103,44 @@ public abstract class PrimaryExpressionTest {
 		assertEquals("db", evaluate("m.put('type', 'Programmer')"));
 		assertEquals("{name=Thiago, type=Programmer}", evaluate("m.toString()"));
 	}
+	
+
 
 	@Test
 	public void constructingInstances() {
 		context.put("Integer", HashAdapter.getHashClass(Integer.class));
 		assertEquals(5, evaluate("new Integer('5')"));
+	}
+		
+	
+	@Test
+	public void newlinesAsStatementTerminators() {
+		 /*
+		 TODO Move move this test somewhere else
+		 Also testing how the lexer handles newlines as statement 
+		 terminators based on the nesting/scoping level(newlines inside
+		 curly, square or round breaces are ignored. For curly braces it can
+		 determine if it inside a code block. If it it, then newlines are
+		 treated as STERM tokens)
+		 o = {
+		   duplicateWord: 
+		   (name) {
+		 
+		     calc = (n
+		 ) {
+		 
+		       rv = n * 1
+		       return rv * name
+		     }    
+		     return calc(1) * 2
+		 
+		 
+		   }
+		 }
+		 */
+		evaluate("o = {\n  duplicateWord: \n  (name) {\n\n    calc = (n\n) {\n" + 
+				"\n      rv = n * 1\n      return rv * name\n    }    \n" + 
+				"    return calc(1) * 2\n\n\n  }\n}");
+		assertEquals("abcabc", evaluate("o.duplicateWord('abc')"));
 	}
 }

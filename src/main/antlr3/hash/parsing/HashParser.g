@@ -42,7 +42,7 @@ block
   ;
 
 statements
-  : STERM* s+=statement (STERM+ s+=statement)* STERM*
+  : STERM? s+=statement (STERM s+=statement)* STERM?
     -> ^(BLOCK["Statements"] $s+)
   ;
 
