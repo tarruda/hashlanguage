@@ -39,6 +39,8 @@ public abstract class AbstractHashParser extends Parser {
 
 	public abstract TreeAdaptor getTreeAdaptor();
 
+	public abstract void setTreeAdaptor(TreeAdaptor adaptor);
+
 	protected Object nodeOrNull(ParserRuleReturnScope parserReturn) {
 		if (parserReturn != null)
 			return parserReturn.getTree();

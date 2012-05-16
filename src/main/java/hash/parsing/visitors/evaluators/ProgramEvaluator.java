@@ -3,7 +3,8 @@ package hash.parsing.visitors.evaluators;
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;
 import hash.lang.Context;
-import hash.parsing.visitors.nodes.Result;
+import hash.parsing.tree.HashNode;
+import hash.parsing.tree.Result;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
 
@@ -20,6 +21,8 @@ import org.antlr.runtime.tree.Tree;
  * 
  */
 public class ProgramEvaluator extends LiteralEvaluator {
+	// TODO Need to push line numbers/filenames to a stack in order to produce
+	// meaningful traces when exceptions are thrown
 
 	private Context context;
 
@@ -29,14 +32,18 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitFunction(Tree node, Tree parameters, Tree block) {
-		List params = (List) ((Result) visit(parameters)).getEvaluationResult();
-		return new Result(new FunctionEvaluator(context, params, block));
+		boolean isMethod = false;
+		HashNode fNode = (HashNode) node;
+		isMethod = fNode.getNodeData(HashNode.IS_METHOD) == Boolean.TRUE;
+		List params = (List) ((Result) visit(parameters)).getNodeData();
+		return new Result(new FunctionEvaluator(context, params, block,
+				isMethod));
 	}
 
 	@Override
 	protected Tree visitReturn(Tree node, Tree returnExpression) {
 		throw new ReturnStatement(
-				((Result) visit(returnExpression)).getEvaluationResult());
+				((Result) visit(returnExpression)).getNodeData());
 	}
 
 	@Override
@@ -45,18 +52,17 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		Object lastEvaluatedExpression = null;
 		for (int i = 0; i < len; i++)
 			lastEvaluatedExpression = ((Result) visit(node.getChild(i)))
-					.getEvaluationResult();
+					.getNodeData();
 		return new Result(lastEvaluatedExpression);
 	}
 
 	@Override
 	protected Tree visitAssignment(Tree node, Tree target, Tree expression) {
-		Object value = ((Result) visit(expression)).getEvaluationResult();
+		Object value = ((Result) visit(expression)).getNodeData();
 		if (target.getType() == ATTRIBUTE || target.getType() == INDEX) {
 			Object ownerObject = ((Result) visit(target.getChild(0)))
-					.getEvaluationResult();
-			Object key = ((Result) visit(target.getChild(1)))
-					.getEvaluationResult();
+					.getNodeData();
+			Object key = ((Result) visit(target.getChild(1))).getNodeData();
 			if (target.getType() == ATTRIBUTE)
 				Runtime.setAttribute(ownerObject, key, value);
 			else
@@ -69,15 +75,15 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitEvalAndIncrement(Tree node, Tree target, Tree assignment) {
-		Object rv = ((Result) visit(target)).getEvaluationResult();
+		Object rv = ((Result) visit(target)).getNodeData();
 		visit(assignment);
 		return new Result(rv);
 	}
 
 	@Override
 	protected Tree visitBinaryExpression(Tree node, Tree left, Tree right) {
-		Object l = ((Result) visit(left)).getEvaluationResult();
-		Object r = ((Result) visit(right)).getEvaluationResult();
+		Object l = ((Result) visit(left)).getNodeData();
+		Object r = ((Result) visit(right)).getNodeData();
 		return new Result(Runtime.invokeBinaryOperator(node.getText(), l, r));
 	}
 
@@ -86,24 +92,23 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		String operatorTxt = node.getText();
 		if (operatorTxt.equals("+"))// ignore
 			return visit(operand);
-		Object op = ((Result) visit(operand)).getEvaluationResult();
+		Object op = ((Result) visit(operand)).getNodeData();
 		return new Result(Runtime.invokeUnaryOperator(operatorTxt, op));
 	}
 
 	@Override
 	protected Tree visitInvocation(Tree node, Tree expression, Tree arguments) {
-		Object[] args = ((List) ((Result) visit(arguments))
-				.getEvaluationResult()).toArray();
+		Object[] args = ((List) ((Result) visit(arguments)).getNodeData())
+				.toArray();
 		if (expression.getType() == ATTRIBUTE || expression.getType() == INDEX) {
 			// this is a method call
-			Object tgt = ((Result) visit(expression.getChild(0)))
-					.getEvaluationResult();
+			Object tgt = ((Result) visit(expression.getChild(0))).getNodeData();
 			Object methodKey = ((Result) visit(expression.getChild(1)))
-					.getEvaluationResult();
+					.getNodeData();
 			return new Result(Runtime.invokeNormalMethod(tgt, methodKey, args));
 		} else {
 			// normal function call
-			Object exp = ((Result) visit(expression)).getEvaluationResult();
+			Object exp = ((Result) visit(expression)).getNodeData();
 			return new Result(Runtime.invokeFunction(exp, args));
 		}
 	}
@@ -113,10 +118,9 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		Map rv = Factory.createMap();
 		int len = node.getChildCount();
 		for (int i = 0; i < len; i++) {
-			Object key = ((Result) visit(node.getChild(i)))
-					.getEvaluationResult();
+			Object key = ((Result) visit(node.getChild(i))).getNodeData();
 			Object value = ((Result) visit(node.getChild(i).getChild(0)))
-					.getEvaluationResult();
+					.getNodeData();
 			rv.put(key, value);
 		}
 		return new Result(rv);
@@ -127,29 +131,29 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		int len = node.getChildCount();
 		List rv = Factory.createList();
 		for (int i = 0; i < len; i++)
-			rv.add(((Result) visit(node.getChild(i))).getEvaluationResult());
+			rv.add(((Result) visit(node.getChild(i))).getNodeData());
 		return new Result(rv);
 	}
 
 	@Override
 	protected Tree visitAttributeAccess(Tree node, Tree target,
 			Tree attributeKey) {
-		Object tgt = ((Result) visit(target)).getEvaluationResult();
-		Object key = ((Result) visit(attributeKey)).getEvaluationResult();
+		Object tgt = ((Result) visit(target)).getNodeData();
+		Object key = ((Result) visit(attributeKey)).getNodeData();
 		return new Result(Runtime.getAttribute(tgt, key));
 	}
 
 	@Override
 	protected Tree visitIndexAccess(Tree node, Tree target, Tree itemKey) {
-		Object tgt = ((Result) visit(target)).getEvaluationResult();
-		Object key = ((Result) visit(itemKey)).getEvaluationResult();
+		Object tgt = ((Result) visit(target)).getNodeData();
+		Object key = ((Result) visit(itemKey)).getNodeData();
 		return new Result(Runtime.getIndex(tgt, key));
 	}
 
 	@Override
 	protected Tree visitSlice(Tree node, Tree target, Tree sliceArgs) {
-		Object tgt = ((Result) visit(target)).getEvaluationResult();
-		List args = (List) ((Result) visit(sliceArgs)).getEvaluationResult();
+		Object tgt = ((Result) visit(target)).getNodeData();
+		List args = (List) ((Result) visit(sliceArgs)).getNodeData();
 		return new Result(Runtime.getSlice(tgt, args.get(0), args.get(1),
 				args.get(2)));
 	}
@@ -168,5 +172,10 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		if (regexLiteral.endsWith("i"))
 			flags = Pattern.CASE_INSENSITIVE;
 		return new Result(Pattern.compile(regexText, flags));
+	}
+
+	@Override
+	protected Tree visitThis(Tree node) {
+		return visitIdentifier(node);
 	}
 }

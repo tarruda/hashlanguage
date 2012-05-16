@@ -103,44 +103,57 @@ public abstract class PrimaryExpressionTest {
 		assertEquals("db", evaluate("m.put('type', 'Programmer')"));
 		assertEquals("{name=Thiago, type=Programmer}", evaluate("m.toString()"));
 	}
-	
-
 
 	@Test
 	public void constructingInstances() {
 		context.put("Integer", HashAdapter.getHashClass(Integer.class));
 		assertEquals(5, evaluate("new Integer('5')"));
 	}
-		
-	
+
+	@Test
+	public void methodInvocation() {
+		evaluate("account={balance:0,add:(amount){this.balance+=amount}}");
+		assertEquals(0, evaluate("account.balance"));
+		evaluate("account.add(43.2)");
+		assertEquals(43.2, evaluate("account.balance"));
+		evaluate("account.add(50.5)");
+		assertEquals(93.7, evaluate("account.balance"));
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void methodInvocationValidation() {
+		// A function is classified as a method if it makes any reference
+		// to 'this'. 
+		evaluate("person={name:'user',getName:(){return this.name},"
+				+ "getRandom:(){return 15*4+2}}");
+		assertEquals("user", evaluate("person.getName()"));
+		assertEquals(62, evaluate("person.getRandom()"));
+		evaluate("f = person.getRandom");
+		evaluate("m = person.getName");
+		assertEquals(62, evaluate("f()"));
+		evaluate("m()"); // Throws since m is a method.
+	}
+
 	@Test
 	public void newlinesAsStatementTerminators() {
-		 /*
-		 TODO Move move this test somewhere else
-		 Also testing how the lexer handles newlines as statement 
-		 terminators based on the nesting/scoping level(newlines inside
-		 curly, square or round breaces are ignored. For curly braces it can
-		 determine if it inside a code block. If it it, then newlines are
-		 treated as STERM tokens)
-		 o = {
-		   duplicateWord: 
-		   (name) {
-		 
-		     calc = (n
-		 ) {
-		 
-		       rv = n * 1
-		       return rv * name
-		     }    
-		     return calc(1) * 2
-		 
-		 
-		   }
-		 }
+		/*
+		 * TODO Move move this test somewhere else Also testing how the lexer
+		 * handles newlines as statement terminators based on the
+		 * nesting/scoping level(newlines inside curly, square or round breaces
+		 * are ignored. For curly braces it can determine if it inside a code
+		 * block. If it it, then newlines are treated as STERM tokens) o = {
+		 * duplicateWord: (name) {
+		 * 
+		 * calc = (n ) {
+		 * 
+		 * rv = n * 1 return rv * name } return calc(1) * 2
+		 * 
+		 * 
+		 * } }
 		 */
-		evaluate("o = {\n  duplicateWord: \n  (name) {\n\n    calc = (n\n) {\n" + 
-				"\n      rv = n * 1\n      return rv * name\n    }    \n" + 
-				"    return calc(1) * 2\n\n\n  }\n}");
+		evaluate("o = {\n  duplicateWord: \n  (name) {\n\n    calc = (n\n) {\n"
+				+ "\n      rv = n * 1\n      return rv * name\n    }    \n"
+				+ "    return calc(1) * 2\n\n\n  }\n}");
 		assertEquals("abcabc", evaluate("o.duplicateWord('abc')"));
 	}
 }

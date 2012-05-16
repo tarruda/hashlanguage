@@ -1,4 +1,4 @@
-package hash.parsing.visitors.nodes;
+package hash.parsing.tree;
 
 import java.util.List;
 

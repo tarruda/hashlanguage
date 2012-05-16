@@ -2,11 +2,11 @@ package hash.testutils;
 
 import static org.junit.Assert.fail;
 import hash.lang.Context;
-import hash.parsing.HashLexer;
-import hash.parsing.HashParser;
+import hash.parsing.ConcreteHashLexer;
+import hash.parsing.ConcreteHashParser;
 import hash.parsing.HashParser.program_return;
+import hash.parsing.tree.Result;
 import hash.parsing.visitors.evaluators.ProgramEvaluator;
-import hash.parsing.visitors.nodes.Result;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -17,16 +17,16 @@ public class Evaluator {
 
 	public static Object eval(String code, Context context) {
 		ProgramEvaluator target = new ProgramEvaluator(context);
-		HashLexer lexer = new HashLexer();
+		ConcreteHashLexer lexer = new ConcreteHashLexer();
 		ANTLRStringStream source = new ANTLRStringStream(code);
 		lexer.setCharStream(source);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		HashParser parser = new HashParser(tokens);
+		ConcreteHashParser parser = new ConcreteHashParser(tokens);
 		program_return psrReturn = null;
 		try {
 			psrReturn = parser.program();
 			Tree t = (Tree) psrReturn.getTree();
-			return ((Result) target.visit(t)).getEvaluationResult();
+			return ((Result) target.visit(t)).getNodeData();
 		} catch (RecognitionException e) {
 			e.printStackTrace();
 			fail(e.getMessage());

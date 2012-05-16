@@ -40,7 +40,7 @@ program
 block
   : LCURLY statements RCURLY -> statements
   ;
-
+  
 statements
   : STERM? s+=statement (STERM s+=statement)* STERM?
     -> ^(BLOCK["Statements"] $s+)
@@ -64,7 +64,7 @@ functionStatement
   : t=FUNCTION name=identifier f=functionExpression
     -> ^(ASSIGN[$t, "="] $name $f)
   ;  
-        
+                
 returnStatement
   : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
   ;
@@ -211,8 +211,9 @@ atom
   | constructorExpression
   | mapExpression
   | listExpression
-  | literal
   | identifier
+  | thisExpression
+  | literal 
   ;
    
 parenthesisExpression
@@ -249,6 +250,10 @@ keyValuePair
   
 identifier
   : IDENTIFIER
+  ;
+
+thisExpression
+  : THIS
   ;
   
 literal

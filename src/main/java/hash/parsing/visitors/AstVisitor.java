@@ -20,8 +20,10 @@ import static hash.parsing.HashParser.REGEX;
 import static hash.parsing.HashParser.RETURN;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
+import static hash.parsing.HashParser.THIS;
 import static hash.parsing.HashParser.UNARY;
 import hash.parsing.exceptions.TreeValidationException;
+import hash.parsing.tree.HashNode;
 
 import org.antlr.runtime.tree.Tree;
 
@@ -46,6 +48,7 @@ public abstract class AstVisitor {
 		int nodeType = node.getType();
 		switch (nodeType) {
 		case FUNCTION:
+			checkIfFunctionIsMethod((HashNode) node, node.getChild(1));
 			return visitFunction(node, node.getChild(0), node.getChild(1));
 		case RETURN:
 			validateReturn(node);
@@ -79,6 +82,8 @@ public abstract class AstVisitor {
 			return visitList(node);
 		case IDENTIFIER:
 			return visitIdentifier(node);
+		case THIS:
+			return visitThis(node);
 		case REGEX:
 			return visitRegex(node);
 		case STRING:
@@ -153,6 +158,10 @@ public abstract class AstVisitor {
 		return node;
 	}
 
+	protected Tree visitThis(Tree node) {
+		return node;
+	}
+
 	protected Tree visitRegex(Tree node) {
 		return node;
 	}
@@ -197,4 +206,27 @@ public abstract class AstVisitor {
 					target.getCharPositionInLine(),
 					"Assignment target must be an identifier, attribute or index");
 	}
+
+	private void checkIfFunctionIsMethod(HashNode node, Tree block) {
+		// here if verify if the function body contains any reference to 'this'.
+		// if so, we mark the function as a method(it can only be invoked with
+		// the first implicit argument)
+		boolean found = searchThisExpression(block);
+		if (found)
+			node.setNodeData(HashNode.IS_METHOD, true);
+	}
+
+	private boolean searchThisExpression(Tree current) {
+		if (current.getType() == FUNCTION)
+			// we dont want to descend into closures
+			return false;
+		if (current.getType() == THIS)
+			return true;
+		int len = current.getChildCount();
+		boolean rv = false;
+		for (int i = 0; !rv && i < len; i++)
+			rv = rv || searchThisExpression(current.getChild(i));
+		return rv;
+	}
+
 }

@@ -5,6 +5,7 @@ import hash.lang.Function;
 import hash.runtime.Factory;
 import hash.util.Check;
 import hash.util.Constants;
+import hash.util.Err;
 
 import java.util.List;
 
@@ -15,19 +16,23 @@ public class FunctionEvaluator implements Function {
 	private Context definingContext;
 	private List parameters;
 	private Tree block;
+	private boolean isMethod;
 
-	public FunctionEvaluator(Context definingContext, List parameters, Tree block) {
+	public FunctionEvaluator(Context definingContext, List parameters,
+			Tree block, boolean isMethod) {
 		this.definingContext = definingContext;
 		this.parameters = parameters;
-		this.block = block;	
+		this.block = block;
+		this.isMethod = isMethod;
 	}
 
 	public Object invoke(Object... args) {
 		Check.numberOfArgs(args, parameters.size() + 1);
 		Context context = Factory.createContext(definingContext);
 		Object self = args[0];
-		if (self != null)
-			context.put(Constants.THIS, self);
+		if (self == null && isMethod)
+			throw Err.functionIsMethod();
+		context.put(Constants.THIS, self);
 		for (int i = 0; i < parameters.size(); i++)
 			context.put(parameters.get(i), args[i + 1]);
 		ProgramEvaluator walker = new ProgramEvaluator(context);

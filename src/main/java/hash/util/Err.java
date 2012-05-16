@@ -1,6 +1,5 @@
 package hash.util;
 
-
 public class Err {
 
 	public static RuntimeException ex(Throwable cause) {
@@ -52,11 +51,11 @@ public class Err {
 				argIdx, expectedType));
 	}
 
-	public static RuntimeException nullIndex() {	
+	public static RuntimeException nullIndex() {
 		return new IllegalArgumentException("Index argument is a null referece");
 	}
-	
-	public static RuntimeException illegalArg(String msg) {	
+
+	public static RuntimeException illegalArg(String msg) {
 		return new IllegalArgumentException(msg);
 	}
 
@@ -70,8 +69,10 @@ public class Err {
 	}
 
 	public static RuntimeException nameNotDefined(Object name) {
-		return new RuntimeException(String.format(
-				"Name '%s' is not defined in the current or any enclosing context", name));
+		return new RuntimeException(
+				String.format(
+						"Name '%s' is not defined in the current or any enclosing context",
+						name));
 	}
 
 	public static RuntimeException attributeNotDefined(Object name) {
@@ -82,5 +83,10 @@ public class Err {
 	public static RuntimeException attributeNotFunction(Object name) {
 		return new RuntimeException(String.format(
 				"Attribute '%s' is not a function", name));
+	}
+
+	public static RuntimeException functionIsMethod() {
+		return new RuntimeException(
+				"Function is a method and must be invoked as such");
 	}
 }

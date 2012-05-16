@@ -1,7 +1,7 @@
 package hash;
 
-import hash.parsing.HashLexer;
-import hash.parsing.HashParser;
+import hash.parsing.ConcreteHashLexer;
+import hash.parsing.ConcreteHashParser;
 import hash.parsing.HashParser.program_return;
 
 import java.io.FileWriter;
@@ -16,13 +16,11 @@ import org.antlr.stringtemplate.StringTemplate;
 class TreeVisualizer {
 
 	public static void main(String[] args) throws Exception {
-		//ANTLRStringStream source = new ANTLRStringStream("3+4+2+5+3*1;");
-		//ANTLRStringStream source = new ANTLRStringStream("5.toString(2,3,4)['test'].abc;");
-//		ANTLRStringStream source = new ANTLRStringStream("x.t['34'].number += 4+4*2;");
-		ANTLRStringStream source = new ANTLRStringStream("f = (n) { x=1; import test}");
-		HashLexer lexer = new HashLexer(source);
+		ANTLRStringStream source = new ANTLRStringStream(
+				"f = (n) { x=1; import test}");
+		ConcreteHashLexer lexer = new ConcreteHashLexer(source);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		HashParser parser = new HashParser(tokens);
+		ConcreteHashParser parser = new ConcreteHashParser(tokens);
 		program_return psrReturn = parser.program();
 		Tree t = (Tree) psrReturn.getTree();
 		DOTTreeGenerator gen = new DOTTreeGenerator();

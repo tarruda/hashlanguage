@@ -23,6 +23,7 @@ NEW: 'new';
 TRUE: 'true'; 
 FALSE: 'false';
 NULL: 'null';
+THIS: 'this';
 IN: 'in';
 IS: 'is';
 

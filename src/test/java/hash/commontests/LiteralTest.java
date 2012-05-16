@@ -8,8 +8,8 @@ import hash.parsing.HashLexer;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.literal_return;
 import hash.parsing.exceptions.ParsingException;
+import hash.parsing.tree.Result;
 import hash.parsing.visitors.evaluators.LiteralEvaluator;
-import hash.parsing.visitors.nodes.Result;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -36,7 +36,7 @@ public class LiteralTest {
 		try {
 			psrReturn = parser.literal();
 			Tree t = (Tree) psrReturn.getTree();
-			return ((Result) target.visit(t)).getEvaluationResult();
+			return ((Result) target.visit(t)).getNodeData();
 		} catch (RecognitionException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
