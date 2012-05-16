@@ -68,7 +68,7 @@ functionStatement
 returnStatement
   : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
   ;
-        
+          
 expression
   : functionExpression
   | incOrDecExpression     
@@ -124,13 +124,16 @@ bitwiseXor
   ;  
   
 bitwiseAnd
-  : (l=equality -> $l) 
-    (o=BIT_AND r=equality -> ^(BINARY[$o] $bitwiseAnd $r))*
+  : (l=relation -> $l) 
+    (o=BIT_AND r=relation -> ^(BINARY[$o] $bitwiseAnd $r))*
   ;
 
-equality
+relation
   : (l=comparison -> $l) 
-    ((o=EQ|o=NEQ|o=MATCHES) r=comparison -> ^(BINARY[$o] $equality $r))*   
+    (
+      (o=EQ|o=NEQ|o=MATCHES|o=IS) r=comparison -> ^(BINARY[$o] $relation $r)
+    | (o=IN) r=comparison -> ^(BINARY[$o, "contains"] $r $relation)
+    )*   
   ;
   
 comparison

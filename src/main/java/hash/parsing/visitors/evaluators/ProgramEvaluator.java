@@ -86,7 +86,12 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	protected Tree visitBinaryExpression(Tree node, Tree left, Tree right) {
 		Object l = ((Result) visit(left)).getNodeData();
 		Object r = ((Result) visit(right)).getNodeData();
-		return new Result(Runtime.invokeBinaryOperator(node.getText(), l, r));
+		String text = node.getText();
+		if (text.equals("is")) // skip the runtime
+			return new Result(l == r);
+		else
+			return new Result(
+					Runtime.invokeBinaryOperator(node.getText(), l, r));
 	}
 
 	@Override
@@ -181,8 +186,8 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	protected Tree visitThis(Tree node) {
 		return visitIdentifier(node);
 	}
-	
-	private Context getContext(HashNode identifier){
+
+	private Context getContext(HashNode identifier) {
 		int level = 0;
 		if (identifier.getNodeData(HashNode.CONTEXT_LEVEL) != null)
 			level = (Integer) identifier.getNodeData(HashNode.CONTEXT_LEVEL);

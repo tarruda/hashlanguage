@@ -1,6 +1,7 @@
 package hash.runtime.mixins;
 
 import hash.runtime.Runtime;
+import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.util.Check;
 import hash.util.Constants;
@@ -13,6 +14,14 @@ public class MapMixin extends Mixin {
 	public static final MapMixin INSTANCE = new MapMixin();
 
 	private MapMixin() {
+		installMethod(new BinaryOperator("contains") {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				Map self = (Map) args[0];
+				Object other = args[1];
+				return self.containsKey(other);				
+			}
+		});
 		installMethod(new BuiltinMethod(Constants.SET_ATTRIBUTE) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 3);

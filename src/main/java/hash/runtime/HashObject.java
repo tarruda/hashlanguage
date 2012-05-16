@@ -2,6 +2,14 @@ package hash.runtime;
 
 import java.util.HashMap;
 
+/**
+ * Special map object that 'knows' its type. This is used to implement classes
+ * in the Hash language. Instances of Hash-defined classes are instances of this
+ * class.
+ * 
+ * @author Thiago de Arruda
+ * 
+ */
 public class HashObject extends HashMap {
 
 	private static final long serialVersionUID = -6256302598579545880L;

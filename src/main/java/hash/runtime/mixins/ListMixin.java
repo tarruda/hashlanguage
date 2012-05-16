@@ -1,5 +1,6 @@
 package hash.runtime.mixins;
 
+import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.operations.Common;
 import hash.runtime.operations.ListOperations;
@@ -15,6 +16,14 @@ public class ListMixin extends Mixin {
 	public static final ListMixin INSTANCE = new ListMixin();
 
 	private ListMixin() {
+		installMethod(new BinaryOperator("contains") {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 2);
+				List self = (List) args[0];
+				Object other = args[1];
+				return self.contains(other);				
+			}
+		});
 		installMethod(new BuiltinMethod(Constants.BOOLEAN_VALUE) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 1);

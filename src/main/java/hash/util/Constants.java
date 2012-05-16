@@ -12,8 +12,6 @@ public class Constants {
 	public static final String SET_INDEX = "|setIndex|";
 	public static final String DEL_INDEX = "|delIndex|";
 	public static final String GET_SLICE = "|getSlice|";
-	public static final String CONTAINS = "|contains|";
 	public static final String CONSTRUCTOR = "|constructor|";
 	public static final String IMPORT = "$import";
-
 }

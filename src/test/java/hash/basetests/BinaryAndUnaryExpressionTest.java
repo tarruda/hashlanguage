@@ -255,4 +255,22 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(true, evaluate("false==false==true==false==false"));
 		assertEquals(false, evaluate("1<2==(3>4)==false==(12<=3*4)==false"));
 	}
+	
+	@Test
+	public void listContains() throws RecognitionException {
+		assertEquals(true, evaluate("3 in [1,2,3,4,5]"));
+		assertEquals(false, evaluate("3 in [1,2,4,5]"));	
+	}
+	
+	@Test
+	public void mapContains() throws RecognitionException {
+		assertEquals(true, evaluate("'name' in {name:'Value'}"));
+		assertEquals(false, evaluate("'name' in {key:'Value'}"));	
+	}
+	
+	@Test
+	public void identityOperator() throws RecognitionException {
+		assertEquals(true, evaluate("'p1p2' == 'p1' + 'p2'"));		
+		assertEquals(false, evaluate("'p1p2' is 'p1' + 'p2'"));		
+	}
 }
