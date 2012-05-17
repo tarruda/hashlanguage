@@ -14,4 +14,5 @@ public class Constants {
 	public static final String GET_SLICE = "|getSlice|";
 	public static final String CONSTRUCTOR = "|constructor|";
 	public static final String IMPORT = "$import";
+	public static final String CLASS = "$class";
 }

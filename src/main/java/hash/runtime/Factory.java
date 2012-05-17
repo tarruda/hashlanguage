@@ -2,6 +2,7 @@ package hash.runtime;
 
 import hash.lang.Context;
 import hash.lang.HashContext;
+import hash.runtime.functions.ClassFactory;
 import hash.runtime.functions.Import;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class Factory {
 	public static Context createContext() {
 		HashContext rv = new HashContext();
 		rv.installBuiltin(new Import());
+		rv.installBuiltin(new ClassFactory());
 		return rv;
 	}
 

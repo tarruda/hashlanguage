@@ -4,6 +4,7 @@ import hash.lang.Function;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
 import hash.runtime.generators.HashAdapter;
+import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
 
@@ -11,7 +12,40 @@ import java.util.Map;
 
 public class Runtime {
 
+	public static HashObject newObj(HashObject klass) {
+		HashObject rv = new HashObject();
+		rv.setIsa(klass);
+		return rv;
+	}
+
+	public static HashObject doImport(String name) {
+		Class<?> klass;
+		try {
+			klass = Class.forName(name);
+		} catch (ClassNotFoundException e) {
+			throw Err.ex(e);
+		}
+		return HashAdapter.getHashClass(klass);
+	}
+
+	public static HashObject createClass(Map map, HashObject superClass) {
+		HashObject rv = new HashObject(map);
+		if (superClass != null)
+			rv.setIsa(superClass);
+		else
+			rv.setIsa(HashAdapter.getHashClass(HashObject.class));
+		rv.put(Constants.CONSTRUCTOR, new Function() {
+			public Object invoke(Object... args) {
+				Check.numberOfArgs(args, 1);
+				return newObj((HashObject) args[0]);
+			}
+		});
+		return rv;
+	}
+
 	public static HashObject getHashClass(Object object) {
+		if (object.getClass() == HashObject.class)
+			return ((HashObject) object).getIsa();
 		return HashAdapter.getHashClass(object.getClass());
 	}
 

@@ -55,6 +55,10 @@ public abstract class AbstractHashParser extends Parser {
 		return Constants.IMPORT;
 	}
 
+	protected String getClassFunctionId() {
+		return Constants.CLASS;
+	}
+	
 	protected String getImportTargetId(List parts) {
 		Tree t = (Tree) parts.get(parts.size() - 1);
 		return t.getText();

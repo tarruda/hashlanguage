@@ -53,6 +53,10 @@ public class HashAdapter implements Opcodes {
 		classMixins.put(List.class, new Map[] { ListMixin.INSTANCE });
 		classMixins.put(Map.class, new Map[] { MapMixin.INSTANCE });
 		classMixins.put(Pattern.class, new Map[] { RegexMixin.INSTANCE });
+		HashObject klass = getHashClass(HashObject.class);
+		klass.remove("setIsa");
+		klass.remove("getIsa");	
+		klass.remove(Constants.CONSTRUCTOR);		
 	}
 
 	public static HashObject getHashClass(Class<?> cls) {
@@ -157,7 +161,7 @@ public class HashAdapter implements Opcodes {
 				Boolean.TYPE);
 		cw.visitEnd();
 		byte[] classData = cw.toByteArray();
-		return AdapterLoader.instance.defineClass(
+		return Loader.instance.defineClass(
 				"hash.generated." + klass.getCanonicalName() + "."
 						+ classNameSuffix, classData);
 	}

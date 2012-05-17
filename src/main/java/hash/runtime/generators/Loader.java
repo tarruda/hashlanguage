@@ -1,13 +1,13 @@
 package hash.runtime.generators;
 
-public class AdapterLoader extends ClassLoader {
-	public static final AdapterLoader instance;
+public class Loader extends ClassLoader {
+	public static final Loader instance;
 
 	static {
-		instance = new AdapterLoader();
+		instance = new Loader();
 	}
 
-	private AdapterLoader() {
+	private Loader() {
 
 	}
 

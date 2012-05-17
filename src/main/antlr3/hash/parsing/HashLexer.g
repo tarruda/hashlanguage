@@ -19,6 +19,7 @@ RETURN: 'return';
 IMPORT: 'import';
 FUNCTION: 'function';
 CLASS: 'class';
+EXTENDS: 'extends';
 NEW: 'new';
 TRUE: 'true'; 
 FALSE: 'false';

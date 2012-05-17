@@ -25,12 +25,6 @@ public abstract class FunctionTest {
 		assertEquals(15.5f, evaluate("f()"));
 	}
 
-	@Test
-	public void functionStatement() {
-		evaluate("function f1(n){return n}");
-		assertEquals("name", evaluate("f1('name')"));
-		assertEquals(2147483648l, evaluate("f1(1<<31)"));
-	}
 
 	@Test
 	public void explicitlyAccessingOuterScopes() {

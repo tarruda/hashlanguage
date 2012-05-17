@@ -49,6 +49,7 @@ statements
 statement
   : importStatement
   | functionStatement
+  | classStatement
   | returnStatement
   | expression    
   ;
@@ -62,9 +63,16 @@ importStatement
     
 functionStatement
   : t=FUNCTION name=identifier f=functionExpression
-    -> ^(ASSIGN[$t, "="] $name $f)
-  ;  
-                
+    -> ^(ASSIGN[$t, "Function Declaration"] $name $f)
+  ;
+  
+classStatement
+  : t=CLASS name=identifier (EXTENDS superClass=identifier)? map=mapExpression
+    -> ^(ASSIGN[$t, "Class Declaration"] $name
+        ^(INVOCATION["Invocation"] IDENTIFIER[getClassFunctionId()]
+         ^(LIST["Arguments"] $map {nodeOrNull(superClass)})))
+  ;
+                  
 returnStatement
   : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
   ;
@@ -96,7 +104,6 @@ functionExpression
   : l=LROUND (params+=identifier (COMMA params+=identifier)*)? RROUND b=block 
       -> ^(FUNCTION[$l, "Function"] {stringList($params)} {functionBlock(b)} )
   ;
-
 
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
