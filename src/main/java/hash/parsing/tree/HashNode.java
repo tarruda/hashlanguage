@@ -15,4 +15,6 @@ public interface HashNode extends Tree {
 	void setNodeData(Object value);
 
 	Object getNodeData();
+	
+	void setText(String text);
 }

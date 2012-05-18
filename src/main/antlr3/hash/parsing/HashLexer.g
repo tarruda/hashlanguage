@@ -5,11 +5,6 @@ options {
    superClass = AbstractHashLexer;
 }
 
-tokens {
-  WS;
-  STERM;
-}
-
 @header {
 package hash.parsing;
 }
@@ -27,6 +22,9 @@ NULL: 'null';
 THIS: 'this';
 IN: 'in';
 IS: 'is';
+TRY: 'try';
+CATCH: 'catch';
+FINALLY: 'finally';
 
 REGEX
 @init { 
@@ -56,12 +54,12 @@ HEREDOC: '<<|' {hereDoc()}?;
 COLON: ':';
 COMMA: ',';
 DOT: '.';
-LROUND: '('{incNesting();};
-RROUND: ')'{decNesting();};
-LCURLY: '{'{enterBlock();};
-RCURLY: '}'{leaveBlock();};
-LSQUARE: '['{incNesting();};
-RSQUARE: ']'{decNesting();};
+LROUND: '(';
+RROUND: ')';
+LCURLY: '{';
+RCURLY: '}';
+LSQUARE: '[';
+RSQUARE: ']';
 PLUS_ASSIGN: '+=';
 MINUS_ASSIGN: '-=';
 MUL_ASSIGN: '*=';
@@ -204,11 +202,19 @@ fragment OCT_DIGIT: '0'..'7';
 fragment BIN_DIGIT: '0'..'1';
 fragment LETTER: ('a'..'z'|'A'..'Z'|'$'|'_');  
 
-TERM_OR_WS
-  : ((';')+
-  | ('\n'|'\r'|' '|'\t')+)
-  {emitTerminatorOrWhitespace();}
+SCOLONS
+  : (';')+  
+  ;  
+
+LINES
+  : ('\n'|'\r')+
+  ; 
+  
+WS
+  :(' '|'\t')+
+    {$channel=HIDDEN;}
   ;
+  
 
 LINE_CONT
   :
@@ -218,7 +224,7 @@ LINE_CONT
 
 // Ignored tokens
 COMMENT
-  : ('//'|'#') ~('\n'|'\r')* '\r'? '\n'
-  | '/*' ( options {greedy=false;} : . )* '*/' 
+  : (('//'|'#') ~('\n'|'\r')* '\r'? '\n'
+  | '/*' ( options {greedy=false;} : . )* '*/')  
   {$channel = HIDDEN;}
   ;  

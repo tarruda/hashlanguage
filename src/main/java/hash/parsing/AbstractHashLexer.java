@@ -1,8 +1,19 @@
 package hash.parsing;
 
+import static hash.parsing.HashLexer.ASSIGN;
+import static hash.parsing.HashLexer.BIT_AND;
+import static hash.parsing.HashLexer.BIT_OR;
+import static hash.parsing.HashLexer.COLON;
+import static hash.parsing.HashLexer.COMMA;
+import static hash.parsing.HashLexer.EOF;
+import static hash.parsing.HashLexer.LCURLY;
+import static hash.parsing.HashLexer.LINES;
+import static hash.parsing.HashLexer.LROUND;
+import static hash.parsing.HashLexer.LSQUARE;
+import static hash.parsing.HashLexer.NOT;
+import static hash.parsing.HashLexer.RETURN;
+import static hash.parsing.HashLexer.SCOLONS;
 import hash.parsing.exceptions.ParsingException;
-
-import java.util.Stack;
 
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Lexer;
@@ -15,13 +26,12 @@ public abstract class AbstractHashLexer extends Lexer {
 	private static final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			+ "abcdefghijklmnopqrstuvwxyz" + "_$";
 	private static final String digits = "0123456789";
-	private static final String whiteSpaces = " \n\t\r";
-	private Stack<Integer> blockNesting;
+	private static final String whiteSpaces = " \n\t\r";		
+	private int lastMatchedToken = Token.EOF;
 	private boolean eof = false;
-	private int lastToken = -1;
 
 	public AbstractHashLexer() {
-		resetLexer();
+
 	}
 
 	public AbstractHashLexer(CharStream input) {
@@ -30,20 +40,15 @@ public abstract class AbstractHashLexer extends Lexer {
 
 	public AbstractHashLexer(CharStream input, RecognizerSharedState state) {
 		super(input, state);
-		resetLexer();
-	}
 
-	private void resetLexer() {
-		blockNesting = new Stack<Integer>();
-		blockNesting.push(0);
-		eof = false;
 	}
 
 	@Override
-	public void emit(Token token) {
-		super.emit(token);
-		if (state.channel != HIDDEN)
-			lastToken = state.token.getType();
+	public void emit(Token t) {
+		super.emit(t);
+		if (t.getChannel() == HIDDEN)
+			return;
+		lastMatchedToken = t.getType();
 	}
 
 	@Override
@@ -77,35 +82,8 @@ public abstract class AbstractHashLexer extends Lexer {
 				}
 			};
 			ex.line = input.getLine();
-			ex.charPositionInLine = firstCharPositionInLine();
 			throw ex;
 		}
-	}
-
-	protected void incNesting() {
-		int nesting = blockNesting.pop();
-		nesting++;
-		blockNesting.push(nesting);
-	}
-
-	protected void decNesting() {
-		int nesting = blockNesting.pop();
-		nesting--;
-		blockNesting.push(nesting);
-	}
-
-	protected void enterBlock() {
-		if (previousCharIs(')'))
-			blockNesting.push(0);
-		else
-			incNesting();
-	}
-
-	protected void leaveBlock() {
-		if (blockNesting.peek() == 0)
-			blockNesting.pop();
-		else
-			decNesting();
 	}
 
 	protected boolean isNumberAttributeAccess() {
@@ -124,19 +102,6 @@ public abstract class AbstractHashLexer extends Lexer {
 		while (isWhitespace(i))
 			i++;
 		return isLetter(i);
-	}
-
-	protected void emitTerminatorOrWhitespace() {
-		String text = getText();
-		if (text.contains(";")
-				|| (blockNesting.peek() == 0 && (text.contains("\n") || text
-						.contains("\r"))))
-			state.type = HashLexer.STERM;
-		else {
-			state.type = HashLexer.WS;
-			state.channel = HIDDEN;
-		}
-		emit();
 	}
 
 	protected boolean hereDoc() {
@@ -209,10 +174,6 @@ public abstract class AbstractHashLexer extends Lexer {
 		return nextCharIndex(i) - i;
 	}
 
-	private int previousCharIndex() {
-		return previousCharIndex(-2);
-	}
-
 	private int nextCharIndex() {
 		return nextCharIndex(1);
 	}
@@ -222,17 +183,6 @@ public abstract class AbstractHashLexer extends Lexer {
 		while (isWhitespace(i))
 			i++;
 		return i;
-	}
-
-	private int previousCharIndex(int startIndex) {
-		int i = startIndex;
-		while (isWhitespace(i))
-			i--;
-		return i;
-	}
-
-	private boolean previousCharIs(char c) {
-		return la(previousCharIndex()) == c;
 	}
 
 	private boolean isDot(int i) {
@@ -272,13 +222,22 @@ public abstract class AbstractHashLexer extends Lexer {
 	}
 
 	protected boolean regexTokenAllowed() {
-		return lastToken == HashLexer.ASSIGN || lastToken == HashLexer.STERM
-				|| lastToken == HashLexer.COMMA || lastToken == HashLexer.COLON
-				|| lastToken == HashLexer.LROUND
-				|| lastToken == HashLexer.LSQUARE
-				|| lastToken == HashLexer.LCURLY
-				|| lastToken == HashLexer.RETURN || lastToken == HashLexer.NOT
-				|| lastToken == HashLexer.BIT_AND
-				|| lastToken == HashLexer.BIT_OR || lastToken == HashLexer.EOF;
+		switch (lastMatchedToken) {
+		case ASSIGN:
+		case SCOLONS:
+		case LINES:
+		case COMMA:
+		case COLON:
+		case LROUND:
+		case LSQUARE:
+		case LCURLY:
+		case RETURN:
+		case NOT:
+		case BIT_AND:
+		case BIT_OR:
+		case EOF:
+			return true;
+		}
+		return false;
 	}
 }

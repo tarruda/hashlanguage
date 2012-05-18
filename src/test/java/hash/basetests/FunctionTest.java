@@ -22,7 +22,7 @@ public abstract class FunctionTest {
 	@Test
 	public void simpleFunctionReturn() {
 		evaluate("f=(){g=(){return 15.5}\nreturn g()}");
-		assertEquals(15.5f, evaluate("f()"));
+		assertEquals(15.5, evaluate("f()"));
 	}
 
 

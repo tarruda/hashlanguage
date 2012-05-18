@@ -1,14 +1,13 @@
 package hash.commontests;
 
 import static org.junit.Assert.fail;
-import hash.parsing.ConcreteHashLexer;
-import hash.parsing.ConcreteHashParser;
+import hash.parsing.HashParser;
 import hash.parsing.HashParser.program_return;
+import hash.parsing.ParserFactory;
 import hash.parsing.exceptions.TreeValidationException;
 import hash.parsing.visitors.AstValidator;
 
 import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
 import org.junit.Before;
@@ -25,9 +24,7 @@ public class AstValidatorTest {
 
 	private void validate(String code) {
 		ANTLRStringStream source = new ANTLRStringStream(code);
-		ConcreteHashLexer lexer = new ConcreteHashLexer(source);
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		ConcreteHashParser parser = new ConcreteHashParser(tokens);
+		HashParser parser = ParserFactory.createParser(source);
 		program_return psrReturn = null;
 		try {
 			psrReturn = parser.program();

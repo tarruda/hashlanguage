@@ -29,4 +29,8 @@ public class Result extends EmptyNode implements HashNode {
 		return evaluationResult;
 	}
 
+	public void setText(String text) {
+		throw new UnsupportedOperationException();
+	}
+
 }

@@ -38,18 +38,28 @@ program
   ;
         
 block
-  : LCURLY statements RCURLY -> statements
+  : LCURLY statements? RCURLY -> statements
   ;
-  
+    
 statements
-  : STERM? s+=statement (STERM s+=statement)* STERM?
+  : statementSeparator*
+    s+=statement 
+    (
+      (statementSeparator statement) => statementSeparator s+=statement
+    | statementSeparator
+    )*   
     -> ^(BLOCK["Statements"] $s+)
+  ;
+ 
+statementSeparator
+  : (LINES|SCOLONS)
   ;
 
 statement
   : importStatement
   | functionStatement
-  | classStatement
+  | classStatement 
+  | tryStatement
   | returnStatement
   | expression    
   ;
@@ -67,16 +77,41 @@ functionStatement
   ;
   
 classStatement
-  : t=CLASS name=identifier (EXTENDS superClass=identifier)? map=mapExpression
+  : t=CLASS name=identifier
+      (EXTENDS superClass=identifier)? map=mapExpression
     -> ^(ASSIGN[$t, "Class Declaration"] $name
         ^(INVOCATION["Invocation"] IDENTIFIER[getClassFunctionId()]
          ^(LIST["Arguments"] $map {nodeOrNull(superClass)})))
   ;
-                  
-returnStatement
-  : RETURN r=expression? -> ^(RETURN {nodeOrNull(r)})
+ 
+  
+tryStatement
+  : t=TRY tb=block
+    ((CATCH)=>
+      (catches+=catchBlock)+
+      (FINALLY fb=block)?
+      -> ^(TRY["Try Statement"] 
+            {tryBlock(tb)} 
+            {catchBlocks($catches)} 
+            {finallyBlock(fb)})
+    | FINALLY fb=block
+      -> ^(TRY["Try Statement"] 
+            {tryBlock(tb)}  
+            {catchBlocks()}  
+            {finallyBlock(fb)})
+    )    
+  ;    
+ 
+catchBlock
+  : CATCH (LROUND (extype=identifier)? exid=identifier RROUND)? 
+      cb=block
+    -> ^(CATCH["Catch"] {nodeOrNull(extype)} {nodeOrNull(exid)} $cb)
   ;
-          
+           
+returnStatement
+  : RETURN (r=expression)? -> ^(RETURN {nodeOrNull(r)}) 
+  ;
+                    
 expression
   : functionExpression
   | incOrDecExpression     
@@ -104,7 +139,7 @@ functionExpression
   : l=LROUND (params+=identifier (COMMA params+=identifier)*)? RROUND b=block 
       -> ^(FUNCTION[$l, "Function"] {stringList($params)} {functionBlock(b)} )
   ;
-
+  
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
   | o=DEC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   

@@ -140,18 +140,11 @@ public abstract class PrimaryExpressionTest {
 	public void newlinesAsStatementTerminators() {
 		/*
 		 * TODO Move move this test somewhere else Also testing how the lexer
-		 * handles newlines as statement terminators based on the
-		 * nesting/scoping level(newlines inside curly, square or round breaces
-		 * are ignored. For curly braces it can determine if it inside a code
-		 * block. If it it, then newlines are treated as STERM tokens) o = {
-		 * duplicateWord: (name) {
-		 * 
-		 * calc = (n ) {
-		 * 
-		 * rv = n * 1 return rv * name } return calc(1) * 2
-		 * 
-		 * 
-		 * } }
+		 * ignores newlines based on the nesting/scoping level(newlines inside
+		 * curly, square or round braces are ignored. For curly braces it can
+		 * determine if it inside a code block. If it it, then newlines are
+		 * passed to the parser, which treats them as statement
+		 * terminatorstokens)
 		 */
 		evaluate("o = {\n  duplicateWord: \n  (name) {\n\n    calc = (n\n) {\n"
 				+ "\n      rv = n * 1\n      return rv * name\n    }    \n"

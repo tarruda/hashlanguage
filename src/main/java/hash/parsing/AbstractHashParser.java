@@ -58,7 +58,7 @@ public abstract class AbstractHashParser extends Parser {
 	protected String getClassFunctionId() {
 		return Constants.CLASS;
 	}
-	
+
 	protected String getImportTargetId(List parts) {
 		Tree t = (Tree) parts.get(parts.size() - 1);
 		return t.getText();
@@ -93,4 +93,34 @@ public abstract class AbstractHashParser extends Parser {
 						adaptor.getText(param)));
 		return rv;
 	}
+
+	protected Object tryBlock(block_return tb) {
+		TreeAdaptor adaptor = getTreeAdaptor();
+		Tree rv = (Tree) tb.tree;
+		adaptor.setText(rv, "Try");
+		return rv;
+	}
+
+	protected Object finallyBlock(block_return fb) {
+		TreeAdaptor adaptor = getTreeAdaptor();
+		if (fb == null)
+			return adaptor.create(HashParser.NULL, "Finally");
+		Tree rv = (Tree) fb.tree;
+		adaptor.setText(rv, "Finally");
+		return rv;
+	}
+
+	protected Object catchBlocks() {
+		return catchBlocks(null);
+	}
+
+	protected Object catchBlocks(List list) {
+		TreeAdaptor adaptor = getTreeAdaptor();
+		Tree rv = (Tree) adaptor.create(HashParser.CATCH, "Catch Blocks");
+		if (list != null)
+			for (Object catchBlock : list)
+				rv.addChild((Tree) catchBlock);
+		return rv;
+	}
+
 }

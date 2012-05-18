@@ -20,7 +20,7 @@ public abstract class StatementTest {
 
 	@Test
 	public void functionStatement() {
-		evaluate("function f1(n){return n}");
+		evaluate("function\n f1\n  (n){return n}");
 		assertEquals("name", evaluate("f1('name')"));
 		assertEquals(2147483648l, evaluate("f1(1<<31)"));
 	}
@@ -36,7 +36,7 @@ public abstract class StatementTest {
 
 	@Test
 	public void classStatement() {
-		evaluate("class Account {balance:0,add:(amount){this.balance+=1.0*amount},"
+		evaluate("class \n\nAccount {balance:0,add:(amount){this.balance+=1.0*amount},"
 				+ "remove:(amount){this.balance-=amount}}");
 		evaluate("class BonusAccount extends Account{balance:1,"
 				+ "add:(amount){this.balance+=1.05*amount}}");

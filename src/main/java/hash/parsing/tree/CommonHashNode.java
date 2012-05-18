@@ -7,10 +7,11 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
-public class CommonHashNode extends CommonTree implements HashNode  {
+public class CommonHashNode extends CommonTree implements HashNode {
 
 	private Map nodeInfo;
 	private Object data;
+	private String text;
 
 	public CommonHashNode(CommonHashNode node) {
 		super(node);
@@ -42,10 +43,21 @@ public class CommonHashNode extends CommonTree implements HashNode  {
 
 	public Tree dupNode() {
 		CommonHashNode rv = new CommonHashNode(this);
-		if(nodeInfo != null)
-			for (Object key : nodeInfo.keySet()) 
+		if (nodeInfo != null)
+			for (Object key : nodeInfo.keySet())
 				rv.setNodeData(key, nodeInfo.get(key));
 		rv.setNodeData(data);
 		return rv;
+	}
+
+	@Override
+	public String getText() {
+		if (text != null)
+			return text;
+		return super.getText();
+	}
+
+	public void setText(String text) {
+		this.text = text;
 	}
 }

@@ -19,4 +19,8 @@ public class CommonHashAdaptor extends CommonTreeAdaptor {
 			super.addChild(t, child);
 	}
 
+	@Override
+	public void setText(Object t, String text) {
+		((HashNode) t).setText(text);
+	}
 }
