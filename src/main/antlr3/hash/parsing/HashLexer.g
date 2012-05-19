@@ -213,8 +213,7 @@ LINES
 WS
   :(' '|'\t')+
     {$channel=HIDDEN;}
-  ;
-  
+  ;  
 
 LINE_CONT
   :

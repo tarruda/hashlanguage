@@ -103,9 +103,15 @@ tryStatement
   ;    
  
 catchBlock
-  : CATCH (LROUND (extype=identifier)? exid=identifier RROUND)? 
+  : CATCH 
+    (LROUND 
+    ((identifier identifier) =>
+      extype=identifier exid=identifier
+    | exid=identifier
+    ) 
+    RROUND)
       cb=block
-    -> ^(CATCH["Catch"] {nodeOrNull(extype)} {nodeOrNull(exid)} $cb)
+    -> ^(CATCH["Catch"] {nodeOrNull(extype)} $exid $cb)
   ;
            
 returnStatement

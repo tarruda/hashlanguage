@@ -25,7 +25,7 @@ class TreeVisualizer {
 				"  print3()\n" + 
 				"  ok()\n" + 
 				"} \n" + 
-				"catch {\n" + 
+				"catch (ex){\n" + 
 				"  //print()\n" + 
 				"  return 4\n" + 
 				"} \n" + 

@@ -31,6 +31,42 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
+	protected Tree visitTryStatement(Tree node, Tree tryBlock,
+			Tree catchBlocks, Tree finallyBlock) {
+		Object lastEvaluatedExpression = null;
+		Exception exception = null;
+		try {
+			lastEvaluatedExpression = ((Result) visit(tryBlock)).getNodeData();
+		} catch (Exception ex) {
+			boolean handled = false;
+			int catchBlocksLen = catchBlocks.getChildCount();
+			for (int i = 0; i < catchBlocksLen; i++) {
+				Tree catchBlock = catchBlocks.getChild(i);
+				Object exceptionType = ((Result) visit(catchBlock.getChild(0)))
+						.getNodeData();
+				if (exceptionType != null
+						&& !Runtime.isInstance(ex, exceptionType))
+					continue;
+				String id = catchBlock.getChild(1).getText();
+				context.put(id, ex);
+				lastEvaluatedExpression = ((Result) visit(catchBlock
+						.getChild(2))).getNodeData();
+				handled = true;
+				break;
+			}
+			if (!handled)
+				exception = ex;
+		} finally {
+			if (finallyBlock != null)
+				lastEvaluatedExpression = ((Result) visit(finallyBlock))
+						.getNodeData();
+			if (exception != null)
+				throw new RuntimeException(exception);
+		}
+		return new Result(lastEvaluatedExpression);
+	}
+
+	@Override
 	protected Tree visitFunction(Tree node, Tree parameters, Tree block) {
 		boolean isMethod = false;
 		HashNode fNode = (HashNode) node;

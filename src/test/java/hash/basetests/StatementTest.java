@@ -1,7 +1,11 @@
 package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import hash.lang.Context;
+import hash.lang.Function;
 import hash.runtime.Factory;
 
 import org.junit.Before;
@@ -20,7 +24,7 @@ public abstract class StatementTest {
 
 	@Test
 	public void functionStatement() {
-		evaluate("function\n f1\n  (n){return n}");
+		evaluate("function\n f1\n  (\nn){return n}");
 		assertEquals("name", evaluate("f1('name')"));
 		assertEquals(2147483648l, evaluate("f1(1<<31)"));
 	}
@@ -46,4 +50,73 @@ public abstract class StatementTest {
 		assertEquals(106f, evaluate("bonusAcc.balance"));
 	}
 
+	@Test
+	public void tryCatchFinally() {
+		String message = "TryCatchFinally";
+		final RuntimeException ex = new RuntimeException(message);
+		context.put("throwingAction", new Function() {
+			public Object invoke(Object... args) {
+				throw ex;
+			}
+		});
+		evaluate("try {\n  throwingAction()\n} catch(ex) {\n  x = ex\n"
+				+ "y=ex.getMessage()} finally {\n  z = 'abc'\n}");
+		assertTrue(ex == context.get("x"));
+		assertEquals(message, context.get("y"));
+		assertEquals("abc", context.get("z"));
+	}
+
+	@Test
+	public void tryFinally() {
+		String message = "TryCatchFinally";
+		final RuntimeException ex = new RuntimeException(message);
+		context.put("throwingAction", new Function() {
+			public Object invoke(Object... args) {
+				throw ex;
+			}
+		});
+		try {
+			evaluate("try {throwingAction()}  \n\nfinally \n"
+					+ "{\ny = 'finally'\n}");
+			fail("Should have thrown");
+		} catch (Exception e) {
+			assertEquals("finally", context.get("y"));
+		}
+	}
+
+	@Test
+	public void tryCatchRightExceptionType() {
+		String message = "TryCatchFinally";
+		final UnsupportedOperationException ex = new UnsupportedOperationException(
+				message);
+		context.put("throwingAction", new Function() {
+			public Object invoke(Object... args) {
+				throw ex;
+			}
+		});
+		evaluate("import java.lang.UnsupportedOperationException");
+
+		evaluate("try {throwingAction()} catch(UnsupportedOperationException e){a=1}"
+				+ "catch(e){b=2}");
+		assertEquals(1, context.get("a"));
+		assertFalse(context.containsKey("b"));
+	}
+
+	@Test
+	public void tryCatchWrongExceptionType() {
+		String message = "TryCatchFinally";
+		final UnsupportedOperationException ex = new UnsupportedOperationException(
+				message);
+		context.put("throwingAction", new Function() {
+			public Object invoke(Object... args) {
+				throw ex;
+			}
+		});
+		evaluate("import java.lang.IllegalArgumentException");
+
+		evaluate("try {throwingAction()} catch(IllegalArgumentException e){a=1}"
+				+ "catch(e){b=2}");
+		assertFalse(context.containsKey("a"));
+		assertEquals(2, context.get("b"));
+	}
 }

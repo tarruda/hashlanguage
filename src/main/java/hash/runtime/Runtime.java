@@ -12,6 +12,18 @@ import java.util.Map;
 
 public class Runtime {
 
+	public static boolean isInstance(Object obj, Object klass) {
+		if (!(klass instanceof HashObject))
+			return false;
+		HashObject kls = getHashClass(obj);
+		while (kls != null) {
+			if (kls.equals(klass))
+				return true;
+			kls = kls.getIsa();
+		}
+		return false;
+	}
+
 	public static HashObject newObj(HashObject klass) {
 		HashObject rv = new HashObject();
 		rv.setIsa(klass);
