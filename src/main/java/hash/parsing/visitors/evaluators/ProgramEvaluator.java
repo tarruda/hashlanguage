@@ -67,6 +67,12 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
+	protected Tree visitThrow(Tree node, Tree throwableExpression) {
+		Object throwable = ((Result) visit(throwableExpression)).getNodeData();
+		throw Runtime.throwObj(throwable);
+	}
+
+	@Override
 	protected Tree visitFunction(Tree node, Tree parameters, Tree block) {
 		boolean isMethod = false;
 		HashNode fNode = (HashNode) node;

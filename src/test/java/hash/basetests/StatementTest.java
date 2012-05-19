@@ -113,10 +113,19 @@ public abstract class StatementTest {
 			}
 		});
 		evaluate("import java.lang.IllegalArgumentException");
-
 		evaluate("try {throwingAction()} catch(IllegalArgumentException e){a=1}"
 				+ "catch(e){b=2}");
 		assertFalse(context.containsKey("a"));
 		assertEquals(2, context.get("b"));
+	}
+
+	@Test
+	public void throwing() {
+		try {
+			evaluate("throw 'SomeString'");
+			fail("should have thrown");
+		} catch (RuntimeException e) {
+			assertEquals("SomeString", e.getMessage());
+		}
 	}
 }

@@ -25,6 +25,7 @@ IS: 'is';
 TRY: 'try';
 CATCH: 'catch';
 FINALLY: 'finally';
+THROW: 'throw';
 
 REGEX
 @init { 

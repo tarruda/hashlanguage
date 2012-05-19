@@ -60,6 +60,7 @@ statement
   | functionStatement
   | classStatement 
   | tryStatement
+  | throwStatement
   | returnStatement
   | expression    
   ;
@@ -112,6 +113,11 @@ catchBlock
     RROUND)
       cb=block
     -> ^(CATCH["Catch"] {nodeOrNull(extype)} $exid $cb)
+  ;
+  
+throwStatement
+  : THROW t=expression
+    -> ^(THROW $t) 
   ;
            
 returnStatement

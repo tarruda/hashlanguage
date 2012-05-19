@@ -21,6 +21,7 @@ import static hash.parsing.HashParser.RETURN;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.THIS;
+import static hash.parsing.HashParser.THROW;
 import static hash.parsing.HashParser.TRY;
 import static hash.parsing.HashParser.UNARY;
 import hash.parsing.exceptions.TreeValidationException;
@@ -51,6 +52,8 @@ public abstract class AstVisitor {
 		case TRY:
 			return visitTryStatement(node, node.getChild(0), node.getChild(1),
 					node.getChild(2));
+		case THROW:
+			return visitThrow(node, node.getChild(0));
 		case FUNCTION:
 			checkIfFunctionIsMethod((HashNode) node, node.getChild(1));
 			return visitFunction(node, node.getChild(0), node.getChild(1));
@@ -107,6 +110,10 @@ public abstract class AstVisitor {
 
 	protected Tree visitTryStatement(Tree node, Tree tryBlock,
 			Tree catchBlocks, Tree finallyBlock) {
+		return node;
+	}
+
+	protected Tree visitThrow(Tree node, Tree throwableExpression) {
 		return node;
 	}
 

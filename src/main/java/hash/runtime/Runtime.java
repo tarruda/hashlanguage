@@ -160,4 +160,11 @@ public class Runtime {
 		return rv;
 	}
 
+	public static RuntimeException throwObj(Object throwable) {
+		if (throwable instanceof Throwable)
+			return new RuntimeException((Throwable) throwable);
+		else
+			return new RuntimeException(throwable.toString());
+	}
+
 }
