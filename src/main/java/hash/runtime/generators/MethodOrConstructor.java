@@ -1,14 +1,10 @@
 package hash.runtime.generators;
 
-import hash.util.Asm;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.objectweb.asm.MethodVisitor;
 
 public class MethodOrConstructor {
 
@@ -18,8 +14,9 @@ public class MethodOrConstructor {
 		ArrayList<MethodOrConstructor> rv = new ArrayList<MethodOrConstructor>();
 		for (Method method : klass.getDeclaredMethods()) {
 			int mod = method.getModifiers();
-			if (Modifier.isAbstract(mod) || Modifier.isPrivate(mod)
-					|| Modifier.isProtected(mod) || isIgnored(method))
+			if (!Modifier.isPublic(mod) || Modifier.isAbstract(mod)
+					|| Modifier.isPrivate(mod) || Modifier.isProtected(mod)
+					|| isIgnored(method))
 				continue;
 			rv.add(new MethodOrConstructor(method));
 		}
@@ -73,15 +70,6 @@ public class MethodOrConstructor {
 		return method.getParameterTypes();
 	}
 
-	public void implementInvocation(MethodVisitor mv) {
-		if (method == null)
-			Asm.invokeInit(mv, constructor);
-		else if (!Modifier.isStatic(method.getModifiers()))
-			Asm.invokeVirtual(mv, method);
-		else
-			Asm.invokeStatic(mv, method);
-	}
-
 	public String getName() {
 		return method.getName();
 	}
@@ -92,6 +80,14 @@ public class MethodOrConstructor {
 
 	public boolean isStatic() {
 		return method != null && Modifier.isStatic(method.getModifiers());
+	}
+
+	public Constructor getConstructor() {
+		return constructor;
+	}
+
+	public Method getMethod() {
+		return method;
 	}
 
 }

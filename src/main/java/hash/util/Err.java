@@ -89,4 +89,8 @@ public class Err {
 		return new RuntimeException(
 				"Function is a method and must be invoked as such");
 	}
+
+	public static RuntimeException notImplemented() {
+		return new UnsupportedOperationException();
+	}
 }

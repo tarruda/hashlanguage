@@ -1,6 +1,5 @@
 package hash.runtime.generators;
 
-import hash.lang.Function;
 import hash.runtime.Factory;
 import hash.runtime.HashObject;
 import hash.runtime.functions.JavaMethod;
@@ -15,9 +14,16 @@ import hash.runtime.mixins.NumberMixin;
 import hash.runtime.mixins.ObjectMixin;
 import hash.runtime.mixins.RegexMixin;
 import hash.runtime.mixins.StringMixin;
-import hash.util.Asm;
 import hash.util.Constants;
 import hash.util.Err;
+import hash.vm.ClassGenerator;
+import hash.vm.ConstructorInvocation;
+import hash.vm.If;
+import hash.vm.InstanceMethodInvocation;
+import hash.vm.Invocation;
+import hash.vm.MethodGenerator;
+import hash.vm.StaticMethodInvocation;
+import hash.vm.VirtualMachineCodeFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,15 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class HashAdapter implements Opcodes {
 
 	private static final HashMap<Class<?>, HashObject> classMap;
 	private static final HashMap<Class<?>, Map[]> classMixins;
+	private static final VirtualMachineCodeFactory f = VirtualMachineCodeFactory.Instance;
 
 	static {
 		classMap = new HashMap<Class<?>, HashObject>();
@@ -55,8 +59,8 @@ public class HashAdapter implements Opcodes {
 		classMixins.put(Pattern.class, new Map[] { RegexMixin.INSTANCE });
 		HashObject klass = getHashClass(HashObject.class);
 		klass.remove("setIsa");
-		klass.remove("getIsa");	
-		klass.remove(Constants.CONSTRUCTOR);		
+		klass.remove("getIsa");
+		klass.remove(Constants.CONSTRUCTOR);
 	}
 
 	public static HashObject getHashClass(Class<?> cls) {
@@ -143,107 +147,62 @@ public class HashAdapter implements Opcodes {
 	}
 
 	private static Class<?> createJavaMethodAdapter(Class<?> klass,
-			String name, List<MethodOrConstructor> methods) {
-		String classNameSuffix = name + "Wrapper";
-		ClassWriter cw = Asm.newClassWriter();
-		cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER,
-				"hash/generated/" + Asm.internalName(klass) + "/"
-						+ classNameSuffix, null,
-				Asm.internalName(JavaMethod.class), null);
-		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_VARARGS,
-				Asm.singleMethodName(Function.class),
-				Asm.singleMethodDescriptor(Function.class), null, null);
-		mv.visitCode();
-		implementAdapter(mv, methods);
-		mv.visitMaxs(0, 0);
-		mv.visitEnd();
-		Asm.addConstructor(cw, JavaMethod.class, String.class, String.class,
-				Boolean.TYPE);
-		cw.visitEnd();
-		byte[] classData = cw.toByteArray();
-		return Loader.instance.defineClass(
-				"hash.generated." + klass.getCanonicalName() + "."
-						+ classNameSuffix, classData);
+			String methodName, List<MethodOrConstructor> methods) {
+		String fullname = "hash.generated." + klass.getCanonicalName() + "."
+				+ methodName + "Wrapper";
+		ClassGenerator gen = f.classGenerator(fullname, JavaMethod.class);
+		gen.addConstructor(String.class, String.class, Boolean.TYPE);
+		MethodGenerator m = gen.addMethod("invoke", Object.class,
+				Object[].class);
+		implementAdapter(m, methods);
+		byte[] classData = gen.generate();
+		return Loader.instance.defineClass(fullname, classData);
 	}
 
-	private static void implementAdapter(MethodVisitor mv,
+	private static void implementAdapter(MethodGenerator methodGenerator,
 			List<MethodOrConstructor> methods) {
+		methodGenerator.addStatement(f.ifStmt());
+		If currentIf = null;
 		for (MethodOrConstructor method : methods) {
+			if (currentIf == null)
+				currentIf = (If) methodGenerator.get(0);
+			else {
+				currentIf.setFalseStatement(f.ifStmt());
+				currentIf = (If) currentIf.getFalseStatement();
+			}
+			Class<?>[] params = method.getParameterTypes();
 			// for each method overload we must test if the argument count
 			// and types match with the actual method signature
-			Label nextTest = new Label();
-			Class<?>[] params = method.getParameterTypes();
-			mv.visitVarInsn(ALOAD, 1);
-			mv.visitInsn(ARRAYLENGTH);
-			mv.visitLdcInsn(params.length + 1);
-			mv.visitJumpInsn(IF_ICMPNE, nextTest);
-			for (int i = 0; i < params.length; i++) {
-				mv.visitVarInsn(ALOAD, 1);
-				mv.visitLdcInsn(i + 1);
-				mv.visitInsn(AALOAD);
-				Class<?> kls = params[i];
-				if (kls.isPrimitive())
-					kls = Asm.getBoxedClass(kls);
-				mv.visitTypeInsn(INSTANCEOF, Asm.internalName(kls));
-				mv.visitJumpInsn(IFEQ, nextTest);
+			currentIf.addCondition(f.areEqual(f.argumentCount(),
+					params.length + 1));
+			for (int i = 0; i < params.length; i++)
+				currentIf.addCondition(f.instanceOf(f.arg(i + 1), params[i]));
+			// Invoke the method if the condition matches
+			Invocation invocation = null;
+			if (method.isConstructor()) {
+				ConstructorInvocation inv = f.constructorInvocation();
+				inv.setConstructor(method.getConstructor());
+				invocation = inv;
+			} else if (!method.isStatic()) {
+				InstanceMethodInvocation inv = f.instanceMethodInvocation();
+				inv.setTarget(f.arg(0));
+				inv.setMethod(method.getMethod());
+				invocation = inv;
+			} else {
+				StaticMethodInvocation inv = f.staticMethodInvocation();
+				inv.setMethod(method.getMethod());
+				invocation = inv;
 			}
-			// if the arguments match the signature, the method is invoked
-			implementMethodInvocation(mv, method);
-			// if not, the execution continues from this label
-			mv.visitLabel(nextTest);
+			for (int i = 1; i <= params.length; i++)
+				invocation.addArgument(f.arg(i));
+			currentIf.setTrueStatement(f.returnStmt(invocation));
 		}
 		try {
-			Asm.invokeStatic(mv, Err.class.getMethod("illegalJavaArgs"));
-		} catch (Exception e) {
-			throw Err.ex(e);
+			methodGenerator.addStatement(f.throwStmt(f
+					.staticMethodInvocation(Err.class
+							.getMethod("illegalJavaArgs"))));
+		} catch (Exception ex) {
+			throw Err.ex(ex);
 		}
-		mv.visitInsn(ATHROW);
 	}
-
-	private static void implementMethodInvocation(MethodVisitor mv,
-			MethodOrConstructor method) {
-		if (method.isConstructor()) {
-			mv.visitTypeInsn(NEW, Asm.internalName(method.getDeclaringClass()));
-			mv.visitInsn(DUP);
-		} else if (!method.isStatic()) {
-			// load and cast the instance since we are dealing with normal
-			// methods
-			mv.visitVarInsn(ALOAD, 1);
-			mv.visitLdcInsn(0);
-			mv.visitInsn(AALOAD);
-			mv.visitTypeInsn(CHECKCAST,
-					Asm.internalName(method.getDeclaringClass()));
-		}
-		// load and cast the remaining arguments
-		int i = 1;
-		for (Class<?> param : method.getParameterTypes()) {
-			mv.visitVarInsn(ALOAD, 1);
-			mv.visitLdcInsn(i++);
-			mv.visitInsn(AALOAD);
-			if (param.isPrimitive()) {
-				Class<?> boxedClass = Asm.getBoxedClass(param);
-				mv.visitTypeInsn(CHECKCAST, Asm.internalName(boxedClass));
-				Asm.unbox(mv, boxedClass);
-			} else
-				mv.visitTypeInsn(CHECKCAST, Asm.internalName(param));
-		}
-		// invoke the actual method
-		method.implementInvocation(mv);
-		Class<?> returnClass = method.getReturnType();
-		if (returnClass.isPrimitive()) {
-			Class<?> wrapperClass = null;
-			wrapperClass = Asm.getBoxedClass(returnClass);
-			if (wrapperClass == null)
-				mv.visitInsn(ACONST_NULL);
-			else
-				try {
-					Asm.invokeStatic(mv,
-							wrapperClass.getMethod("valueOf", returnClass));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-		}
-		mv.visitInsn(ARETURN);
-	}
-
 }
