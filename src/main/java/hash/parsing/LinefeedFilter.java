@@ -2,8 +2,12 @@ package hash.parsing;
 
 import static hash.parsing.HashLexer.CATCH;
 import static hash.parsing.HashLexer.CLASS;
+import static hash.parsing.HashLexer.DO;
+import static hash.parsing.HashLexer.ELSE;
 import static hash.parsing.HashLexer.FINALLY;
+import static hash.parsing.HashLexer.FOR;
 import static hash.parsing.HashLexer.FUNCTION;
+import static hash.parsing.HashLexer.IF;
 import static hash.parsing.HashLexer.LCURLY;
 import static hash.parsing.HashLexer.LINES;
 import static hash.parsing.HashLexer.LROUND;
@@ -11,11 +15,14 @@ import static hash.parsing.HashLexer.LSQUARE;
 import static hash.parsing.HashLexer.RCURLY;
 import static hash.parsing.HashLexer.RROUND;
 import static hash.parsing.HashLexer.RSQUARE;
+import static hash.parsing.HashLexer.SCOLONS;
 import static hash.parsing.HashLexer.TRY;
+import static hash.parsing.HashLexer.WHILE;
 import static hash.parsing.HashLexer.WS;
 
 import java.util.LinkedList;
 
+import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
 import org.antlr.runtime.TokenStream;
@@ -58,6 +65,15 @@ public class LinefeedFilter implements TokenSource {
 		case CLASS:
 			forwardIgnoringWsUntil(LCURLY);
 			return;
+		case FOR:
+		case WHILE:
+		case IF:
+			keywordParenthesisBlock();
+			break;
+		case ELSE:
+		case DO:
+			keywordBlock();
+			break;
 		case TRY:
 			tryStatement();
 			break;
@@ -76,6 +92,35 @@ public class LinefeedFilter implements TokenSource {
 			else
 				forwardAnyExcept(WS, LINES);
 		}
+	}
+
+	private void keywordParenthesisBlock() {
+		forward();
+		forwardIgnoringWsUntil(LROUND);
+		roundBraces(false);
+		ignoreFollowingWhitespaces();
+	}
+
+	private void keywordBlock() {
+		boolean terminateLastStatement = true;
+		if (queue.size() > 0)
+			switch (queue.peekLast().getType()) {
+			case SCOLONS:
+			case LINES:
+			case RCURLY:
+				terminateLastStatement = false;
+			}
+		else
+			switch (lastToken) {
+			case SCOLONS:
+			case LINES:
+			case RCURLY:
+				terminateLastStatement = false;
+			}
+		if (terminateLastStatement)
+			queue.add(new CommonToken(SCOLONS));
+		forward();
+		ignoreFollowingWhitespaces();
 	}
 
 	private void curlyBraces(boolean considerLinefeeds) {
@@ -112,6 +157,11 @@ public class LinefeedFilter implements TokenSource {
 			parse(considerLinefeeds);
 		}
 		forward();
+		if (nextNonWhitespaceTokenIs(LCURLY))
+			// this can only happen on if/for/while or function expressions.
+			// if/for/while are already handled in another rule, so this is here
+			// for function expressions
+			forwardIgnoringWsUntil(LCURLY);
 	}
 
 	private void tryStatement() {
@@ -153,6 +203,11 @@ public class LinefeedFilter implements TokenSource {
 			else
 				input.consume();
 		}
+	}
+
+	private void ignoreFollowingWhitespaces() {
+		while (input.LA(1) == WS || input.LA(1) == LINES)
+			input.consume();
 	}
 
 	private void forwardAnyExcept(int... types) {

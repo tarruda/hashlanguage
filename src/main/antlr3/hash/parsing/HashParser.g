@@ -50,7 +50,7 @@ statements
     )*   
     -> ^(BLOCK["Statements"] $s+)
   ;
- 
+  
 statementSeparator
   : (LINES|SCOLONS)
   ;
@@ -58,7 +58,8 @@ statementSeparator
 statement
   : importStatement
   | functionStatement
-  | classStatement 
+  | classStatement
+  | ifStatement
   | tryStatement
   | throwStatement
   | returnStatement
@@ -84,8 +85,41 @@ classStatement
         ^(INVOCATION["Invocation"] IDENTIFIER[getClassFunctionId()]
          ^(LIST["Arguments"] $map {nodeOrNull(superClass)})))
   ;
- 
   
+ifStatement
+  : ((IF LROUND expression RROUND (block|statement statementSeparator) ELSE) =>
+    IF LROUND cond=expression RROUND
+      (
+        (LCURLY) => tb=block
+      | ts=statement statementSeparator
+      )        
+    ELSE 
+      (
+        (LCURLY) => fb=block
+      | fs=statement
+      )
+  | IF LROUND cond=expression RROUND
+      (
+        (LCURLY) => tb=block
+      | ts=statement
+      )
+  )
+    -> ^(IF $cond {select(tb,ts)} {select(fb,fs)})  
+  ;
+//  : IF LROUND cond=expression RROUND
+//      (
+//        (LCURLY) => tb=block
+//      | ts=statement
+//      )        
+//    (statementSeparator ELSE 
+//      (
+//        (LCURLY) => fb=block
+//      | fs=statement
+//      ))?       
+//    -> ^(IF $cond {select(tb,ts)} {select(fb,fs)}) 
+//  ;     
+  
+   
 tryStatement
   : t=TRY tb=block
     ((CATCH)=>
@@ -186,7 +220,7 @@ relation
   : (l=comparison -> $l) 
     (
       (o=EQ|o=NEQ|o=MATCHES|o=IS) r=comparison -> ^(BINARY[$o] $relation $r)
-    | (o=IN) r=comparison -> ^(BINARY[$o, "contains"] $r $relation)
+    | (o=IN) r=comparison -> ^(BINARY[$o, getContainsId()] $r $relation)
     )*   
   ;
   

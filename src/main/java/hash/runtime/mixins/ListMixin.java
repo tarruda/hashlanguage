@@ -16,7 +16,7 @@ public class ListMixin extends Mixin {
 	public static final ListMixin INSTANCE = new ListMixin();
 
 	private ListMixin() {
-		installMethod(new BinaryOperator("contains") {
+		installMethod(new BinaryOperator(Constants.CONTAINS) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
 				List self = (List) args[0];

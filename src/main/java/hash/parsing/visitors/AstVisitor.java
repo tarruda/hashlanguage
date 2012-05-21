@@ -9,6 +9,7 @@ import static hash.parsing.HashParser.FLOAT;
 import static hash.parsing.HashParser.FUNCTION;
 import static hash.parsing.HashParser.FUNCTIONBLOCK;
 import static hash.parsing.HashParser.IDENTIFIER;
+import static hash.parsing.HashParser.IF;
 import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
 import static hash.parsing.HashParser.INTEGER;
@@ -49,6 +50,8 @@ public abstract class AstVisitor {
 	public final Tree visit(Tree node) {
 		int nodeType = node.getType();
 		switch (nodeType) {
+		case IF:
+			return visitIf(node, node.getChild(0), node.getChild(1), node.getChild(2));
 		case TRY:
 			return visitTryStatement(node, node.getChild(0), node.getChild(1),
 					node.getChild(2));
@@ -106,6 +109,10 @@ public abstract class AstVisitor {
 		default:
 			return node;
 		}
+	}
+
+	protected Tree visitIf(Tree node, Tree condition, Tree ifTrue, Tree ifFalse) {
+		return node;
 	}
 
 	protected Tree visitTryStatement(Tree node, Tree tryBlock,

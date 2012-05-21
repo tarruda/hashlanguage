@@ -128,4 +128,13 @@ public abstract class StatementTest {
 			assertEquals("SomeString", e.getMessage());
 		}
 	}
+
+	@Test
+	public void ifs() {
+		evaluate("f=(x){if(x>10)return x else if(x>5) return x+5 else return x+10}");
+		assertEquals(11, evaluate("f(11)"));
+		assertEquals(15, evaluate("f(10)"));
+		assertEquals(14, evaluate("f(9)"));
+		assertEquals(15, evaluate("f(5)"));
+	}
 }

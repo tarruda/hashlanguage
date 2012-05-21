@@ -7,6 +7,7 @@ import hash.parsing.tree.HashNode;
 import hash.parsing.tree.Result;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
+import hash.util.Constants;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,17 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	public ProgramEvaluator(Context context) {
 		this.context = context;
+	}
+
+	@Override
+	protected Tree visitIf(Tree node, Tree condition, Tree ifTrue, Tree ifFalse) {
+		Object cond = ((Result) visit(condition)).getNodeData();
+		Object result = null;
+		if ((Boolean) Runtime.invokeNormalMethod(cond, Constants.BOOLEAN_VALUE))
+			result = ((Result) visit(ifTrue)).getNodeData();
+		else
+			result = ((Result) visit(ifFalse)).getNodeData();
+		return new Result(result);
 	}
 
 	@Override

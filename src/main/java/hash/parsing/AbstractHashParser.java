@@ -1,6 +1,7 @@
 package hash.parsing;
 
 import hash.parsing.HashParser.block_return;
+import hash.parsing.HashParser.statement_return;
 import hash.parsing.exceptions.ParsingException;
 import hash.util.Constants;
 
@@ -45,6 +46,18 @@ public abstract class AbstractHashParser extends Parser {
 		if (parserReturn != null)
 			return parserReturn.getTree();
 		return getTreeAdaptor().create(HashParser.NULL, "null");
+	}
+
+	protected Object select(block_return b, statement_return s) {
+		if (b != null)
+			return b.tree;
+		if (s != null)
+			return s.tree;
+		return getTreeAdaptor().create(HashParser.NULL, "null");
+	}
+
+	protected String getContainsId() {
+		return Constants.CONTAINS;
 	}
 
 	protected String getConstructorId() {
