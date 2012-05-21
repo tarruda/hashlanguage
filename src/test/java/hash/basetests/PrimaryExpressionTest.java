@@ -3,7 +3,7 @@ package hash.basetests;
 import static org.junit.Assert.assertEquals;
 import hash.lang.Context;
 import hash.runtime.Factory;
-import hash.runtime.generators.HashAdapter;
+import hash.runtime.JvmBridge;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -106,7 +106,7 @@ public abstract class PrimaryExpressionTest {
 
 	@Test
 	public void constructingInstances() {
-		context.put("Integer", HashAdapter.getHashClass(Integer.class));
+		context.put("Integer", JvmBridge.INSTANCE.getAdapterFor(Integer.class));
 		assertEquals(5, evaluate("new Integer('5')"));
 	}
 

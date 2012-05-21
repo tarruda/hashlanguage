@@ -3,7 +3,6 @@ package hash.runtime;
 import hash.lang.Function;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
-import hash.runtime.generators.HashAdapter;
 import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
@@ -12,10 +11,16 @@ import java.util.Map;
 
 public class Runtime {
 
+	public static HashObject getAdapterFor(Object object) {
+		if (object.getClass() == HashObject.class)
+			return ((HashObject) object).getIsa();
+		return JvmBridge.INSTANCE.getAdapterFor(object.getClass());
+	}
+
 	public static boolean isInstance(Object obj, Object klass) {
 		if (!(klass instanceof HashObject))
 			return false;
-		HashObject kls = getHashClass(obj);
+		HashObject kls = getAdapterFor(obj);
 		while (kls != null) {
 			if (kls.equals(klass))
 				return true;
@@ -37,7 +42,7 @@ public class Runtime {
 		} catch (ClassNotFoundException e) {
 			throw Err.ex(e);
 		}
-		return HashAdapter.getHashClass(klass);
+		return JvmBridge.INSTANCE.getAdapterFor(klass);
 	}
 
 	public static HashObject createClass(Map map, HashObject superClass) {
@@ -45,7 +50,7 @@ public class Runtime {
 		if (superClass != null)
 			rv.setIsa(superClass);
 		else
-			rv.setIsa(HashAdapter.getHashClass(HashObject.class));
+			rv.setIsa(JvmBridge.INSTANCE.getAdapterFor(HashObject.class));
 		rv.put(Constants.CONSTRUCTOR, new Function() {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 1);
@@ -53,12 +58,6 @@ public class Runtime {
 			}
 		});
 		return rv;
-	}
-
-	public static HashObject getHashClass(Object object) {
-		if (object.getClass() == HashObject.class)
-			return ((HashObject) object).getIsa();
-		return HashAdapter.getHashClass(object.getClass());
 	}
 
 	public static Object invokeFunction(Object f, Object... args) {
@@ -150,7 +149,7 @@ public class Runtime {
 			rv = ((Map) obj).get(key);
 		if (rv != null)
 			return rv;
-		HashObject cls = getHashClass(obj);
+		HashObject cls = getAdapterFor(obj);
 		while (rv == null && cls != null) {
 			rv = cls.get(key);
 			cls = cls.getIsa();

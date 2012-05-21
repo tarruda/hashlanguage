@@ -1,7 +1,5 @@
-package hash.runtime.generators;
+package hash.runtime;
 
-import hash.runtime.Factory;
-import hash.runtime.HashObject;
 import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.ArrayMixin;
 import hash.runtime.mixins.BooleanMixin;
@@ -25,6 +23,9 @@ import hash.vm.MethodGenerator;
 import hash.vm.StaticMethodInvocation;
 import hash.vm.VirtualMachineCodeFactory;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,13 +34,21 @@ import java.util.regex.Pattern;
 
 import org.objectweb.asm.Opcodes;
 
-public class HashAdapter implements Opcodes {
+/**
+ * Class responsible for generating 'adapter' objects which allows hash code to
+ * call java code
+ * 
+ * @author Thiago de Arruda
+ * 
+ */
+public class JvmBridge extends ClassLoader implements Opcodes {
+	public static final JvmBridge INSTANCE = new JvmBridge();
 
-	private static final HashMap<Class<?>, HashObject> classMap;
-	private static final HashMap<Class<?>, Map[]> classMixins;
-	private static final VirtualMachineCodeFactory f = VirtualMachineCodeFactory.Instance;
+	private final HashMap<Class<?>, HashObject> classMap;
+	private final HashMap<Class<?>, Map[]> classMixins;
+	private final VirtualMachineCodeFactory f = VirtualMachineCodeFactory.Instance;
 
-	static {
+	private JvmBridge() {
 		classMap = new HashMap<Class<?>, HashObject>();
 		classMixins = new HashMap<Class<?>, Map[]>();
 		classMixins.put(Object.class, new Map[] { ObjectMixin.INSTANCE });
@@ -57,13 +66,13 @@ public class HashAdapter implements Opcodes {
 		classMixins.put(List.class, new Map[] { ListMixin.INSTANCE });
 		classMixins.put(Map.class, new Map[] { MapMixin.INSTANCE });
 		classMixins.put(Pattern.class, new Map[] { RegexMixin.INSTANCE });
-		HashObject klass = getHashClass(HashObject.class);
+		HashObject klass = getAdapterFor(HashObject.class);
 		klass.remove("setIsa");
 		klass.remove("getIsa");
 		klass.remove(Constants.CONSTRUCTOR);
 	}
 
-	public static HashObject getHashClass(Class<?> cls) {
+	public HashObject getAdapterFor(Class<?> cls) {
 		if (!classMap.containsKey(cls))
 			synchronized (classMap) {
 				if (!classMap.containsKey(cls))
@@ -72,7 +81,7 @@ public class HashAdapter implements Opcodes {
 		return classMap.get(cls);
 	}
 
-	private static void constructHashClass(Class<?> klass) {
+	private void constructHashClass(Class<?> klass) {
 		Class<?> superclass = klass.getSuperclass();
 		if (superclass != null && !classMap.containsKey(superclass))
 			constructHashClass(superclass);
@@ -146,8 +155,8 @@ public class HashAdapter implements Opcodes {
 		classMap.put(klass, hashClass);
 	}
 
-	private static Class<?> createJavaMethodAdapter(Class<?> klass,
-			String methodName, List<MethodOrConstructor> methods) {
+	private Class<?> createJavaMethodAdapter(Class<?> klass, String methodName,
+			List<MethodOrConstructor> methods) {
 		String fullname = "hash.generated." + klass.getCanonicalName() + "."
 				+ methodName + "Wrapper";
 		ClassGenerator gen = f.classGenerator(fullname, JavaMethod.class);
@@ -156,10 +165,10 @@ public class HashAdapter implements Opcodes {
 				Object[].class);
 		implementAdapter(m, methods);
 		byte[] classData = gen.generate();
-		return Loader.instance.defineClass(fullname, classData);
+		return defineClass(fullname, classData, 0, classData.length);
 	}
 
-	private static void implementAdapter(MethodGenerator methodGenerator,
+	private void implementAdapter(MethodGenerator methodGenerator,
 			List<MethodOrConstructor> methods) {
 		methodGenerator.addStatement(f.ifStmt());
 		If currentIf = null;
@@ -205,4 +214,80 @@ public class HashAdapter implements Opcodes {
 			throw Err.ex(ex);
 		}
 	}
+
+	private static class MethodOrConstructor {
+
+		private static final String[] ignoredMethodNames = { "getClass" };
+
+		public static List<MethodOrConstructor> getDeclaredMethods(
+				Class<?> klass) {
+			ArrayList<MethodOrConstructor> rv = new ArrayList<MethodOrConstructor>();
+			for (Method method : klass.getDeclaredMethods()) {
+				int mod = method.getModifiers();
+				if (!Modifier.isPublic(mod) || Modifier.isAbstract(mod)
+						|| Modifier.isPrivate(mod) || Modifier.isProtected(mod)
+						|| isIgnored(method))
+					continue;
+				rv.add(new MethodOrConstructor(method));
+			}
+			return rv;
+		}
+
+		public static List<MethodOrConstructor> getDeclaredConstructors(
+				Class<?> klass) {
+			ArrayList<MethodOrConstructor> rv = new ArrayList<MethodOrConstructor>();
+			for (Constructor constructor : klass.getDeclaredConstructors()) {
+				int mod = constructor.getModifiers();
+				if (Modifier.isPublic(mod))
+					rv.add(new MethodOrConstructor(constructor));
+			}
+			return rv;
+		}
+
+		private static boolean isIgnored(Method method) {
+			for (String mName : ignoredMethodNames)
+				if (mName.equals(method.getName()))
+					return true;
+			return false;
+		}
+
+		private Method method;
+		private Constructor constructor;
+
+		private MethodOrConstructor(Method method) {
+			this.method = method;
+		}
+
+		private MethodOrConstructor(Constructor constructor) {
+			this.constructor = constructor;
+		}
+
+		public Class<?>[] getParameterTypes() {
+			if (method == null)
+				return constructor.getParameterTypes();
+			return method.getParameterTypes();
+		}
+
+		public String getName() {
+			return method.getName();
+		}
+
+		public boolean isConstructor() {
+			return method == null;
+		}
+
+		public boolean isStatic() {
+			return method != null && Modifier.isStatic(method.getModifiers());
+		}
+
+		public Constructor getConstructor() {
+			return constructor;
+		}
+
+		public Method getMethod() {
+			return method;
+		}
+
+	}
+
 }
