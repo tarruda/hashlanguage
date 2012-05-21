@@ -25,6 +25,10 @@ import static hash.parsing.HashParser.THIS;
 import static hash.parsing.HashParser.THROW;
 import static hash.parsing.HashParser.TRY;
 import static hash.parsing.HashParser.UNARY;
+import static hash.parsing.HashParser.WHILE;
+import static hash.parsing.HashParser.FOR;
+import static hash.parsing.HashParser.FOREACH;
+import static hash.parsing.HashParser.DO;
 import hash.parsing.exceptions.TreeValidationException;
 import hash.parsing.tree.HashNode;
 
@@ -50,8 +54,19 @@ public abstract class AstVisitor {
 	public final Tree visit(Tree node) {
 		int nodeType = node.getType();
 		switch (nodeType) {
+		case FOREACH:
+			return visitForeach(node, node.getChild(0), node.getChild(1),
+					node.getChild(2));
+		case FOR:
+			return visitFor(node, node.getChild(0), node.getChild(1),
+					node.getChild(2), node.getChild(3));
+		case WHILE:
+			return visitWhile(node, node.getChild(0), node.getChild(1));
+		case DO:
+			return visitDoWhile(node, node.getChild(0), node.getChild(1));
 		case IF:
-			return visitIf(node, node.getChild(0), node.getChild(1), node.getChild(2));
+			return visitIf(node, node.getChild(0), node.getChild(1),
+					node.getChild(2));
 		case TRY:
 			return visitTryStatement(node, node.getChild(0), node.getChild(1),
 					node.getChild(2));
@@ -111,7 +126,25 @@ public abstract class AstVisitor {
 		}
 	}
 
-	protected Tree visitIf(Tree node, Tree condition, Tree ifTrue, Tree ifFalse) {
+	protected Tree visitForeach(Tree node, Tree id, Tree iterable, Tree action) {
+		return node;
+	}
+
+	protected Tree visitFor(Tree node, Tree init, Tree condition, Tree update,
+			Tree action) {
+		return node;
+	}
+
+	protected Tree visitWhile(Tree node, Tree condition, Tree action) {
+		return node;
+	}
+
+	protected Tree visitDoWhile(Tree node, Tree condition, Tree action) {
+		return node;
+	}
+
+	protected Tree visitIf(Tree node, Tree condition, Tree trueAction,
+			Tree falseAction) {
 		return node;
 	}
 

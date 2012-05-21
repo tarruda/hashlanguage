@@ -154,4 +154,44 @@ public abstract class StatementTest {
 		assertEquals(120, evaluate("f(5)"));
 		assertEquals(720, evaluate("f(6)"));
 	}
+
+	@Test
+	public void whileStatement() {
+		evaluate("i=0 while (i<100) i++");
+		assertEquals(100, context.get("i"));
+	}
+
+	@Test
+	public void whileBlock() {
+		evaluate("i=100 while (i<100){y=i; y*=2}");
+		assertEquals(100, context.get("i"));
+		assertFalse(context.containsKey("y"));
+	}
+
+	@Test
+	public void nestedWhiles() {
+		evaluate("n=i=0 while (i<10){j=0 while(j<10)"
+				+ " {k=0 while(k<10){k++;n++}j++}i++}");
+		assertEquals(1000, context.get("n"));
+	}
+
+	@Test
+	public void doWhileStatement() {
+		evaluate("i=0; do \ni++ while (i<100)");
+		assertEquals(100, context.get("i"));
+	}
+
+	@Test
+	public void doWhileBlock() {
+		evaluate("i=100\n do {\ny=i;\n y*=2} while (i<100)");
+		assertEquals(100, context.get("i"));
+		assertEquals(200, context.get("y"));
+	}
+	
+	@Test
+	public void nestedLoops() {
+		evaluate("i=j=0 do\n while\n(j\n<100){j++;i++} while (i<100)");
+		assertEquals(100, context.get("i"));
+		assertEquals(100, context.get("j"));		
+	}
 }

@@ -26,6 +26,7 @@ tokens {
     BLOCK;
     FUNCTIONBLOCK;
     FUNCTION;
+    FOREACH;  
 }
 
 @header {
@@ -59,7 +60,10 @@ statement
   : importStatement
   | functionStatement
   | classStatement
-  | ifStatement
+  | ifStatement  
+  | forStatement
+  | whileStatement
+  | doWhileStatement
   | tryStatement
   | throwStatement
   | returnStatement
@@ -104,22 +108,33 @@ ifStatement
       | ts=statement
       )
   )
-    -> ^(IF $cond {select(tb,ts)} {select(fb,fs)})  
+    -> ^(IF["if"] $cond {select(tb,ts)} {select(fb,fs)})  
   ;
-//  : IF LROUND cond=expression RROUND
-//      (
-//        (LCURLY) => tb=block
-//      | ts=statement
-//      )        
-//    (statementSeparator ELSE 
-//      (
-//        (LCURLY) => fb=block
-//      | fs=statement
-//      ))?       
-//    -> ^(IF $cond {select(tb,ts)} {select(fb,fs)}) 
-//  ;     
+    
+forStatement
+ : (FOR LROUND identifier IN) =>
+    t=FOR LROUND id=identifier IN iterable=expression RROUND
+      ((LCURLY) => b=block|s=statement)
+    -> ^(FOREACH[$t, "for each"] $id $iterable {select(b,s)})   
+ |  FOR LROUND 
+    (init=expression)? SCOLON (cond=expression)? SCOLON (u=expression)?
+    RROUND
+      ((LCURLY) => b=block|s=statement)
+    -> ^(FOR["for"] {nodeOrNull(init)} {nodeOrNull(cond)} {nodeOrNull(u)} {select(b,s)})
+ ;
   
-   
+whileStatement
+  : WHILE LROUND cond=expression RROUND
+      ((LCURLY) => b=block|s=statement)
+    -> ^(WHILE["while"] $cond {select(b,s)})
+  ;  
+
+doWhileStatement
+  : DO ((LCURLY) => b=block|s=statement)
+    WHILE LROUND cond=expression RROUND
+    -> ^(DO["do while"] $cond {select(b,s)})
+  ;
+      
 tryStatement
   : t=TRY tb=block
     ((CATCH)=>

@@ -24,6 +24,8 @@ IF: 'if';
 ELSE: 'else';
 WHILE: 'while';
 FOR: 'for';
+BREAK: 'break';
+CONTINUE: 'continue';
 DO: 'do';
 IN: 'in';
 IS: 'is';

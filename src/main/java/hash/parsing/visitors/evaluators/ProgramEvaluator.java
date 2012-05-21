@@ -32,13 +32,51 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
-	protected Tree visitIf(Tree node, Tree condition, Tree ifTrue, Tree ifFalse) {
-		Object cond = ((Result) visit(condition)).getNodeData();
+	protected Tree visitForeach(Tree node, Tree id, Tree iterable, Tree action) {
+		// TODO Auto-generated method stub
+		return super.visitForeach(node, id, iterable, action);
+	}
+
+	@Override
+	protected Tree visitFor(Tree node, Tree init, Tree condition, Tree update,
+			Tree action) {
+		// TODO Auto-generated method stub
+		return super.visitFor(node, init, condition, update, action);
+	}
+
+	@Override
+	protected Tree visitWhile(Tree node, Tree condition, Tree action) {
 		Object result = null;
+		Object cond = ((Result) visit(condition)).getNodeData();
+		while ((Boolean) Runtime.invokeNormalMethod(cond,
+				Constants.BOOLEAN_VALUE)) {
+			result = ((Result) visit(action)).getNodeData();
+			cond = ((Result) visit(condition)).getNodeData();
+		}
+		return new Result(result);
+	}
+
+	@Override
+	protected Tree visitDoWhile(Tree node, Tree condition, Tree action) {
+		Object result = null;
+		Object cond = null;
+		do {
+			result = ((Result) visit(action)).getNodeData();
+			cond = ((Result) visit(condition)).getNodeData();
+		} while ((Boolean) Runtime.invokeNormalMethod(cond,
+				Constants.BOOLEAN_VALUE));
+		return new Result(result);
+	}
+
+	@Override
+	protected Tree visitIf(Tree node, Tree condition, Tree trueAction,
+			Tree falseAction) {
+		Object result = null;
+		Object cond = ((Result) visit(condition)).getNodeData();
 		if ((Boolean) Runtime.invokeNormalMethod(cond, Constants.BOOLEAN_VALUE))
-			result = ((Result) visit(ifTrue)).getNodeData();
+			result = ((Result) visit(trueAction)).getNodeData();
 		else
-			result = ((Result) visit(ifFalse)).getNodeData();
+			result = ((Result) visit(falseAction)).getNodeData();
 		return new Result(result);
 	}
 
