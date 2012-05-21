@@ -16,27 +16,21 @@ import org.objectweb.asm.Type;
 
 public class Util implements Opcodes {
 
+	public static String getMethodDescriptor(Class returnType,
+			Class... parameterTypes) {
+		Type[] argumentTypes = new Type[parameterTypes.length];
+		for (int i = 0; i < argumentTypes.length; i++)
+			argumentTypes[i] = Type.getType(parameterTypes[i]);
+		return Type
+				.getMethodDescriptor(Type.getType(returnType), argumentTypes);
+	}
+
 	public static String internalName(Class<?> c) {
 		return Type.getInternalName(c);
 	}
 
 	public static String internalName(String name) {
 		return name.replace('.', '/');
-	}
-
-	public static void load(MethodVisitor mv, Class<?> argType, int index) {
-		if (argType == Boolean.TYPE || argType == Character.TYPE
-				|| argType == Byte.TYPE || argType == Short.TYPE
-				|| argType == Integer.TYPE)
-			mv.visitVarInsn(ILOAD, index);
-		else if (argType == Long.TYPE)
-			mv.visitVarInsn(LLOAD, index);
-		else if (argType == Float.TYPE)
-			mv.visitVarInsn(FLOAD, index);
-		else if (argType == Double.TYPE)
-			mv.visitVarInsn(DLOAD, index);
-		else
-			mv.visitVarInsn(ALOAD, index);
 	}
 
 	public static String descriptor(Class<?> klass) {

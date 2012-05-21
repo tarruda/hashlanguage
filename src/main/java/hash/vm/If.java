@@ -1,10 +1,7 @@
 package hash.vm;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class If extends Statement {
-	private List<BranchCondition> conditions = new ArrayList<BranchCondition>();
+public class If extends ConditionalBranch {
 	private Statement trueStatement;
 	private Statement falseStatement;
 
@@ -22,13 +19,5 @@ public class If extends Statement {
 
 	public void setFalseStatement(Statement falseStatement) {
 		this.falseStatement = falseStatement;
-	}
-
-	public void addCondition(BranchCondition condition) {
-		conditions.add(condition);
-	}
-
-	public Iterable<BranchCondition> getConditions() {
-		return conditions;
 	}
 }

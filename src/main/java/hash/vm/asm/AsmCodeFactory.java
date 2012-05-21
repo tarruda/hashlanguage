@@ -7,7 +7,9 @@ import hash.vm.ClassGenerator;
 import hash.vm.Constant;
 import hash.vm.ConstructorInvocation;
 import hash.vm.If;
+import hash.vm.InitializerInvocation;
 import hash.vm.InstanceMethodInvocation;
+import hash.vm.Local;
 import hash.vm.Return;
 import hash.vm.StaticMethodInvocation;
 import hash.vm.Throw;
@@ -19,10 +21,11 @@ public class AsmCodeFactory extends VirtualMachineCodeFactory implements
 		Opcodes {
 
 	@Override
-	public ClassGenerator classGenerator(String fullname, Class superclass) {	
+	public ClassGenerator classGenerator(String fullname, Class superclass) {
 		AsmClassGenerator rv = new AsmClassGenerator();
+		rv.setFactory(this);
 		rv.setFullname(fullname);
-		rv.setSuperclass(superclass);		
+		rv.setSuperclass(superclass);
 		return rv;
 	}
 
@@ -39,6 +42,11 @@ public class AsmCodeFactory extends VirtualMachineCodeFactory implements
 	@Override
 	public ConstructorInvocation constructorInvocation() {
 		return new AsmConstructorInvocation();
+	}
+	
+	@Override
+	public InitializerInvocation initializerInvocation() {
+		return new AsmInitializerInvocation();
 	}
 
 	@Override
@@ -64,6 +72,11 @@ public class AsmCodeFactory extends VirtualMachineCodeFactory implements
 	@Override
 	public Arg arg() {
 		return new AsmArg();
+	}
+
+	@Override
+	public Local local() {
+		return new AsmLocal();
 	}
 
 	@Override

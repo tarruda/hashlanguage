@@ -160,7 +160,7 @@ public class JvmBridge extends ClassLoader implements Opcodes {
 		String fullname = "hash.generated." + klass.getCanonicalName() + "."
 				+ methodName + "Wrapper";
 		ClassGenerator gen = f.classGenerator(fullname, JavaMethod.class);
-		gen.addConstructor(String.class, String.class, Boolean.TYPE);
+		gen.addSimpleConstructor(String.class, String.class, Boolean.TYPE);		
 		MethodGenerator m = gen.addMethod("invoke", Object.class,
 				Object[].class);
 		implementAdapter(m, methods);

@@ -23,6 +23,15 @@ public abstract class VirtualMachineCodeFactory {
 			rv.addArgument(args[i]);
 		return rv;
 	}
+	
+	public InitializerInvocation initializerInvocation(Constructor constructor,
+			Expression... args) {
+		InitializerInvocation rv = initializerInvocation();
+		rv.setConstructor(constructor);
+		for (int i = 0; i < args.length; i++)
+			rv.addArgument(args[i]);
+		return rv;
+	}
 
 	public InstanceMethodInvocation instanceMethodInvocation(Expression target,
 			java.lang.reflect.Method method, Expression... args) {
@@ -36,7 +45,7 @@ public abstract class VirtualMachineCodeFactory {
 
 	public StaticMethodInvocation staticMethodInvocation(
 			java.lang.reflect.Method method, Expression... args) {
-		StaticMethodInvocation rv = staticMethodInvocation();		
+		StaticMethodInvocation rv = staticMethodInvocation();
 		rv.setMethod(method);
 		for (int i = 0; i < args.length; i++)
 			rv.addArgument(args[i]);
@@ -60,9 +69,23 @@ public abstract class VirtualMachineCodeFactory {
 		return rv;
 	}
 
-	public Expression arg(int index) {
+	public Arg arg(int index) {
 		Arg rv = arg();
 		rv.setIndex(index);
+		return rv;
+	}
+
+	public Local local(int index) {
+		Local rv = local();
+		rv.setIndex(index);
+		rv.setType(Object.class);
+		return rv;
+	}
+	
+	public Local local(int index, Class type) {
+		Local rv = local();
+		rv.setIndex(index);
+		rv.setType(type);
 		return rv;
 	}
 
@@ -101,6 +124,8 @@ public abstract class VirtualMachineCodeFactory {
 	public abstract Block block();
 
 	public abstract ConstructorInvocation constructorInvocation();
+	
+	public abstract InitializerInvocation initializerInvocation();
 
 	public abstract InstanceMethodInvocation instanceMethodInvocation();
 
@@ -111,6 +136,8 @@ public abstract class VirtualMachineCodeFactory {
 	public abstract Constant constant();
 
 	public abstract Arg arg();
+
+	public abstract Local local();
 
 	public abstract Return returnStmt();
 
