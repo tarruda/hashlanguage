@@ -130,11 +130,28 @@ public abstract class StatementTest {
 	}
 
 	@Test
-	public void ifs() {
-		evaluate("f=(x){if(x>10)return x else if(x>5) return x+5 else return x+10}");
+	public void elseif() {
+		evaluate("f=(x){if(x>10)return x else if(x>5) return x+5; else return x+10}");
 		assertEquals(11, evaluate("f(11)"));
 		assertEquals(15, evaluate("f(10)"));
 		assertEquals(14, evaluate("f(9)"));
 		assertEquals(15, evaluate("f(5)"));
+	}
+
+	@Test
+	public void elseifBlock() {
+		evaluate("f=(x){if(x>10){return x}\n else if(x>5) {return x+5}\n"
+				+ " else {return x+10}}");
+		assertEquals(11, evaluate("f(11)"));
+		assertEquals(15, evaluate("f(10)"));
+		assertEquals(14, evaluate("f(9)"));
+		assertEquals(15, evaluate("f(5)"));
+	}
+
+	@Test
+	public void ifBlock() {
+		evaluate("f=(n){if(n==1){return 1} return n*f(n-1);}");
+		assertEquals(120, evaluate("f(5)"));
+		assertEquals(720, evaluate("f(6)"));
 	}
 }

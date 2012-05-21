@@ -95,36 +95,58 @@ public class LinefeedFilter implements TokenSource {
 	}
 
 	private void keywordParenthesisBlock() {
+		terminatePreviousStatement();
 		forward();
 		forwardIgnoringWsUntil(LROUND);
 		roundBraces(false);
 		ignoreFollowingWhitespaces();
+		terminateBlockStatement();
 	}
 
 	private void keywordBlock() {
+		terminatePreviousStatement();
+		forward();
+		ignoreFollowingWhitespaces();
+		terminateBlockStatement();
+	}
+
+	private void terminateBlockStatement() {
+		// terminates a block statement
+		if (input.LA(1) == LCURLY) {
+			curlyBraces(true); // consume the block inside curly braces
+			ignoreFollowingWhitespaces();
+			if (!nextNonWhitespaceTokenIs(ELSE))
+				// force the if block to terminate
+				queue.add(new CommonToken(LINES));
+		}
+	}
+
+	private void terminatePreviousStatement() {
+		// terminates the previous statement if needed
 		boolean terminateLastStatement = true;
-		if (queue.size() > 0)
+		if (queue.size() > 0) {
 			switch (queue.peekLast().getType()) {
 			case SCOLONS:
 			case LINES:
 			case RCURLY:
+			case ELSE:
 				terminateLastStatement = false;
 			}
-		else
+		} else
 			switch (lastToken) {
 			case SCOLONS:
 			case LINES:
 			case RCURLY:
+			case ELSE:
 				terminateLastStatement = false;
 			}
 		if (terminateLastStatement)
-			queue.add(new CommonToken(SCOLONS));
-		forward();
-		ignoreFollowingWhitespaces();
+			queue.add(new CommonToken(LINES, "\n"));
 	}
 
 	private void curlyBraces(boolean considerLinefeeds) {
-		if ((queue.size() > 0 && queue.peekLast().getType() == RROUND)
+		if (!considerLinefeeds
+				&& (queue.size() > 0 && queue.peekLast().getType() == RROUND)
 				|| lastToken == RROUND)
 			// The only way a left curly can appear after a closing round brace
 			// is in a function expression or if/for/while statement, so we
