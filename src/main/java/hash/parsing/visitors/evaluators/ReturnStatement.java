@@ -1,4 +1,6 @@
-package hash.parsing.tree;
+package hash.parsing.visitors.evaluators;
+
+import hash.parsing.tree.EmptyNode;
 
 public class ReturnStatement extends EmptyNode {
 

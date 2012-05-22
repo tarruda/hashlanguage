@@ -15,6 +15,8 @@ import static hash.parsing.HashParser.IF;
 import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
 import static hash.parsing.HashParser.INTEGER;
+import static hash.parsing.HashParser.BREAK;
+import static hash.parsing.HashParser.CONTINUE;
 import static hash.parsing.HashParser.INVOCATION;
 import static hash.parsing.HashParser.LIST;
 import static hash.parsing.HashParser.MAP;
@@ -78,6 +80,12 @@ public abstract class AstVisitor {
 		case RETURN:
 			validateReturn(node);
 			return visitReturn(node, node.getChild(0));
+		case CONTINUE:
+			validateContinue(node);
+			return visitContinue(node);
+		case BREAK:
+			validateBreak(node);
+			return visitBreak(node);
 		case BLOCK:
 		case FUNCTIONBLOCK:
 			return visitBlock(node);
@@ -104,7 +112,7 @@ public abstract class AstVisitor {
 		case MAP:
 			return visitMap(node);
 		case LIST:
-			return visitList(node);		
+			return visitList(node);
 		case NAMEREF:
 			return visitNameReference(node);
 		case THIS:
@@ -162,6 +170,14 @@ public abstract class AstVisitor {
 	}
 
 	protected Tree visitReturn(Tree node, Tree returnExpression) {
+		return node;
+	}
+
+	protected Tree visitBreak(Tree node) {
+		return node;
+	}
+
+	protected Tree visitContinue(Tree node) {
 		return node;
 	}
 
@@ -254,10 +270,44 @@ public abstract class AstVisitor {
 					"Return statement can only exist inside a function");
 	}
 
+	private void validateBreak(Tree node) {
+		boolean insideLoop = false;
+		Tree current = node;
+		while ((current = current.getParent()) != null && !insideLoop)
+			switch (current.getType()) {
+			case DO:
+			case WHILE:
+			case FOR:
+			case FOREACH:
+				insideLoop = true;
+			}
+		if (!insideLoop)
+			throw new TreeValidationException(node.getLine(),
+					node.getCharPositionInLine(),
+					"Break statement can only exist inside a loop/switch");
+	}
+
+	private void validateContinue(Tree node) {
+		boolean insideLoop = false;
+		Tree current = node;
+		while ((current = current.getParent()) != null && !insideLoop)
+			switch (current.getType()) {
+			case DO:
+			case WHILE:
+			case FOR:
+			case FOREACH:
+				insideLoop = true;
+			}
+		if (!insideLoop)
+			throw new TreeValidationException(node.getLine(),
+					node.getCharPositionInLine(),
+					"Continue statement can only exist inside a loop");
+	}
+
 	private void validateAssignment(Tree node) {
 		Tree target = node.getChild(0);
-		if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX
-				|| target.getType() == NAMEREF))
+		if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX || target
+				.getType() == NAMEREF))
 			throw new TreeValidationException(target.getLine(),
 					target.getCharPositionInLine(),
 					"Assignment target must be an identifier, attribute or index");

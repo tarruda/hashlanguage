@@ -8,7 +8,7 @@ import hash.parsing.HashParser;
 import hash.parsing.HashParser.literal_return;
 import hash.parsing.ParserFactory;
 import hash.parsing.exceptions.ParsingException;
-import hash.parsing.tree.ExpressionResult;
+import hash.parsing.visitors.evaluators.ExpressionResult;
 import hash.parsing.visitors.evaluators.LiteralEvaluator;
 
 import org.antlr.runtime.ANTLRStringStream;

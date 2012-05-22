@@ -3,9 +3,7 @@ package hash.parsing.visitors.evaluators;
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;
 import hash.lang.Context;
-import hash.parsing.tree.ExpressionResult;
 import hash.parsing.tree.HashNode;
-import hash.parsing.tree.ReturnStatement;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
 import hash.util.Constants;
@@ -45,6 +43,8 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			lastResult = visit(action);
 			if (lastResult instanceof ReturnStatement)
 				return lastResult;
+			else if (lastResult == BreakStatement.INSTANCE)
+				break;
 		}
 		return lastResult;
 	}
@@ -60,6 +60,8 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			lastResult = visit(action);
 			if (lastResult instanceof ReturnStatement)
 				return lastResult;
+			else if (lastResult == BreakStatement.INSTANCE)
+				break;
 			visit(update);
 			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		}
@@ -75,6 +77,8 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			lastResult = visit(action);
 			if (lastResult instanceof ReturnStatement)
 				return lastResult;
+			else if (lastResult == BreakStatement.INSTANCE)
+				break;
 			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		}
 		return lastResult;
@@ -82,12 +86,15 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitDoWhile(Tree node, Tree condition, Tree action) {
+
 		Tree lastResult = null;
 		Object cond = null;
 		do {
 			lastResult = visit(action);
 			if (lastResult instanceof ReturnStatement)
 				return lastResult;
+			else if (lastResult == BreakStatement.INSTANCE)
+				break;
 			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		} while ((Boolean) Runtime.invokeNormalMethod(cond,
 				Constants.BOOLEAN_VALUE));
@@ -166,12 +173,24 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
+	protected Tree visitContinue(Tree node) {
+		return ContinueStatement.INSTANCE;
+	}
+
+	@Override
+	protected Tree visitBreak(Tree node) {
+		return BreakStatement.INSTANCE;
+	}
+
+	@Override
 	protected Tree visitBlock(Tree node) {
 		int len = node.getChildCount();
 		Tree lastResult = null;
 		for (int i = 0; i < len; i++) {
 			lastResult = visit(node.getChild(i));
-			if (lastResult instanceof ReturnStatement)
+			if (lastResult instanceof ReturnStatement
+					|| lastResult == BreakStatement.INSTANCE
+					|| lastResult == ContinueStatement.INSTANCE)
 				return lastResult;
 		}
 		return lastResult;

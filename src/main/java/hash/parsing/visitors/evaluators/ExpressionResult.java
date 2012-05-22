@@ -1,4 +1,6 @@
-package hash.parsing.tree;
+package hash.parsing.visitors.evaluators;
+
+import hash.parsing.tree.EmptyNode;
 
 /**
  * Node for storing the result of program evaluation

@@ -204,14 +204,37 @@ public abstract class StatementTest {
 	@Test
 	public void foreachStmt() {
 		evaluate("s=0 for (i in [1,2,3,4]) s+=i");
-		assertEquals(10, context.get("s"));		
+		assertEquals(10, context.get("s"));
 	}
-	
+
 	@Test
 	public void nestedLoops() {
 		evaluate("i=0 do while(i<10000) do for(j=0;j<10001;j++){i++} while(i<10000)"
 				+ "  while (i<10000)");
-		assertEquals(10001, context.get("i"));		
+		assertEquals(10001, context.get("i"));
 	}
 
+	@Test
+	public void loopBreak() {
+		evaluate("i=0 while(i<10) if(i>5)break else i++");
+		assertEquals(6, context.get("i"));
+		evaluate("i=0 do if(i==0)break else i++ while(i<10)");
+		assertEquals(0, context.get("i"));
+		evaluate("l=[1,2,3,4];l2=[]for (i in l) if(i==3)break else l2.add(i)");
+		assertEquals("[1, 2]", context.get("l2").toString());
+		evaluate("for(i=10;i>0;i--) if(i==5)break");
+		assertEquals(5, context.get("i"));
+	}
+
+	@Test
+	public void loopContinue() {
+		evaluate("l=[];i=0 while(i<10) {i++ if(i%2==0)continue; l.add(i)}");
+		assertEquals("[1, 3, 5, 7, 9]", context.get("l").toString());
+		evaluate("j=i=0 do {i++ if(i%3!=0)continue;j++}while(i<10)");
+		assertEquals(3, context.get("j"));
+		evaluate("l=[1,2,3,4];l2=[]for (i in l){ if(i<3)continue; l2.add(i)}");
+		assertEquals("[3, 4]", context.get("l2").toString());
+		evaluate("for(i=0;i<=10;i++) {if(i<10)continue;i+=10}");
+		assertEquals(21, context.get("i"));		
+	}
 }

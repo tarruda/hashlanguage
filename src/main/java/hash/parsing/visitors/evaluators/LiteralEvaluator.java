@@ -1,6 +1,5 @@
 package hash.parsing.visitors.evaluators;
 
-import hash.parsing.tree.ExpressionResult;
 import hash.parsing.visitors.AstVisitor;
 
 import org.antlr.runtime.tree.Tree;

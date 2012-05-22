@@ -68,6 +68,8 @@ statement
   | tryStatement
   | throwStatement
   | returnStatement
+  | continueStatement
+  | breakStatement
   | expression    
   ;
   
@@ -173,6 +175,14 @@ throwStatement
 returnStatement
   : RETURN (r=expression)? -> ^(RETURN {nodeOrNull(r)}) 
   ;
+  
+continueStatement
+  : CONTINUE
+  ;
+  
+breakStatement
+  : BREAK
+  ;    
                     
 expression
   : functionExpression

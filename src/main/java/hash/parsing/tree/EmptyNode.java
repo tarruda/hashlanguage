@@ -37,7 +37,7 @@ public class EmptyNode implements Tree, HashNode {
 	public Tree getAncestor(int ttype) {
 		throw Err.notImplemented();
 	}
-	
+
 	public List getAncestors() {
 		throw Err.notImplemented();
 	}
@@ -128,14 +128,14 @@ public class EmptyNode implements Tree, HashNode {
 	}
 
 	public Object getNodeData() {
-		throw Err.notImplemented();
+		return null;
 	}
 
 	public void setText(String text) {
 		throw Err.notImplemented();
 	}
 
-	public boolean contains(Object key) {		
+	public boolean contains(Object key) {
 		throw Err.notImplemented();
 	}
 }
