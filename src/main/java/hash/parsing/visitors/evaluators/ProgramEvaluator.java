@@ -46,7 +46,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			else if (lastResult == BreakStatement.INSTANCE)
 				break;
 		}
-		return lastResult;
+		return loopResult(lastResult);
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			visit(update);
 			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		}
-		return lastResult;
+		return loopResult(lastResult);
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 				break;
 			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		}
-		return lastResult;
+		return loopResult(lastResult);
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		} while ((Boolean) Runtime.invokeNormalMethod(cond,
 				Constants.BOOLEAN_VALUE));
-		return lastResult;
+		return loopResult(lastResult);
 	}
 
 	@Override
@@ -341,4 +341,12 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			c = c.getParent();
 		return c;
 	}
+
+	private Tree loopResult(Tree lastResult) {
+		if (lastResult == BreakStatement.INSTANCE
+				|| lastResult == ContinueStatement.INSTANCE)
+			return null;
+		return lastResult;
+	}
+
 }

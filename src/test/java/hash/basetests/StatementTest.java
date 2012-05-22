@@ -237,4 +237,11 @@ public abstract class StatementTest {
 		evaluate("for(i=0;i<=10;i++) {if(i<10)continue;i+=10}");
 		assertEquals(21, context.get("i"));		
 	}
+	
+	@Test
+	public void nestedLoopBreak(){
+		evaluate("for(i=0;i<15;i++) for(j=0;i<15;j++)break");
+		assertEquals(0, context.get("j"));
+		assertEquals(15, context.get("i"));
+	}
 }
