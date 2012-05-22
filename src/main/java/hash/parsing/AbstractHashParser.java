@@ -1,5 +1,6 @@
 package hash.parsing;
 
+import static hash.parsing.HashParser.NAMEREF;
 import hash.parsing.HashParser.block_return;
 import hash.parsing.HashParser.statement_return;
 import hash.parsing.exceptions.ParsingException;
@@ -11,6 +12,7 @@ import org.antlr.runtime.Parser;
 import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.runtime.tree.TreeAdaptor;
@@ -41,6 +43,18 @@ public abstract class AbstractHashParser extends Parser {
 	public abstract TreeAdaptor getTreeAdaptor();
 
 	public abstract void setTreeAdaptor(TreeAdaptor adaptor);
+
+	protected Object nameRefOrNull(Token t) {
+		if (t != null)
+			return getTreeAdaptor().create(NAMEREF, t.getText());
+		return getTreeAdaptor().create(HashParser.NULL, "null");
+	}
+
+	protected Object nodeOrNull(Token t) {
+		if (t != null)
+			return getTreeAdaptor().create(t);
+		return getTreeAdaptor().create(HashParser.NULL, "null");
+	}
 
 	protected Object nodeOrNull(ParserRuleReturnScope parserReturn) {
 		if (parserReturn != null)
@@ -73,14 +87,20 @@ public abstract class AbstractHashParser extends Parser {
 	}
 
 	protected String getImportTargetId(List parts) {
-		Tree t = (Tree) parts.get(parts.size() - 1);
-		return t.getText();
+		Object lastPart = parts.get(parts.size() - 1);
+		if (lastPart instanceof Tree)
+			return ((Tree) lastPart).getText();
+		else
+			return ((Token) lastPart).getText();
 	}
 
 	protected String getImportString(List parts) {
 		StringBuilder sb = new StringBuilder();
-		for (Object object : parts) {
-			sb.append(((Tree) object).getText());
+		for (Object part : parts) {
+			if (part instanceof Tree)
+				sb.append(((Tree) part).getText());
+			else
+				sb.append(((Token) part).getText());
 			sb.append(".");
 		}
 		sb.deleteCharAt(sb.length() - 1);
@@ -103,7 +123,8 @@ public abstract class AbstractHashParser extends Parser {
 		if (params != null)
 			for (Object param : params)
 				rv.addChild((Tree) adaptor.create(HashParser.STRING,
-						adaptor.getText(param)));
+						param instanceof Token ? ((Token) param).getText()
+								: adaptor.getText(param)));
 		return rv;
 	}
 

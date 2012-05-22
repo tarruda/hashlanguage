@@ -26,7 +26,8 @@ tokens {
     BLOCK;
     FUNCTIONBLOCK;
     FUNCTION;
-    FOREACH;  
+    FOREACH; 
+    NAMEREF; 
 }
 
 @header {
@@ -71,22 +72,22 @@ statement
   ;
   
 importStatement
-  : t=IMPORT parts+=identifier (DOT parts+=identifier)*
-    -> ^(ASSIGN[$t, "="] IDENTIFIER[getImportTargetId($parts)]
-        ^(INVOCATION["Invocation"] IDENTIFIER[getImportFunctionId()]
+  : t=IMPORT parts+=IDENTIFIER (DOT parts+=IDENTIFIER)*
+    -> ^(ASSIGN[$t, "="] NAMEREF[getImportTargetId($parts)]
+        ^(INVOCATION["Invocation"] NAMEREF[getImportFunctionId()]
          ^(LIST["Arguments"] STRING[getImportString($parts)])))
   ;
     
 functionStatement
-  : t=FUNCTION name=identifier f=functionExpression
-    -> ^(ASSIGN[$t, "Function Declaration"] $name $f)
+  : t=FUNCTION name=IDENTIFIER f=functionExpression
+    -> ^(ASSIGN[$t, "Function Declaration"] NAMEREF[$name] $f)
   ;
   
 classStatement
-  : t=CLASS name=identifier
-      (EXTENDS superClass=identifier)? map=mapExpression
-    -> ^(ASSIGN[$t, "Class Declaration"] $name
-        ^(INVOCATION["Invocation"] IDENTIFIER[getClassFunctionId()]
+  : t=CLASS name=IDENTIFIER
+      (EXTENDS superClass=nameRef)? map=mapExpression
+    -> ^(ASSIGN[$t, "Class Declaration"] NAMEREF[$name]
+        ^(INVOCATION["Invocation"] NAMEREF[getClassFunctionId()]
          ^(LIST["Arguments"] $map {nodeOrNull(superClass)})))
   ;
   
@@ -112,8 +113,8 @@ ifStatement
   ;
     
 forStatement
- : (FOR LROUND identifier IN) =>
-    t=FOR LROUND id=identifier IN iterable=expression RROUND
+ : (FOR LROUND IDENTIFIER IN) =>
+    t=FOR LROUND id=IDENTIFIER IN iterable=expression RROUND
       ((LCURLY) => b=block|s=statement)
     -> ^(FOREACH[$t, "for each"] $id $iterable {select(b,s)})   
  |  FOR LROUND 
@@ -155,13 +156,13 @@ tryStatement
 catchBlock
   : CATCH 
     (LROUND 
-    ((identifier identifier) =>
-      extype=identifier exid=identifier
-    | exid=identifier
+    ((IDENTIFIER IDENTIFIER) =>
+      extype=IDENTIFIER exid=IDENTIFIER
+    | exid=IDENTIFIER
     ) 
     RROUND)
       cb=block
-    -> ^(CATCH["Catch"] {nodeOrNull(extype)} $exid $cb)
+    -> ^(CATCH["Catch"] {nameRefOrNull(extype)} NAMEREF[$exid] $cb)
   ;
   
 throwStatement
@@ -197,7 +198,7 @@ expression
   ;
 
 functionExpression
-  : l=LROUND (params+=identifier (COMMA params+=identifier)*)? RROUND b=block 
+  : l=LROUND (params+=IDENTIFIER (COMMA params+=IDENTIFIER)*)? RROUND b=block 
       -> ^(FUNCTION[$l, "Function"] {stringList($params)} {functionBlock(b)} )
   ;
   
@@ -284,8 +285,8 @@ primary
         -> ^(INVOCATION[$s, "Invocation"] $primary ^(LIST["Arguments"] $args?))
       )
     | (
-        s=DOT name=identifier 
-        -> ^(ATTRIBUTE[$s, "Attribute"] $primary STRING[$name.start, $name.text])
+        s=DOT name=IDENTIFIER 
+        -> ^(ATTRIBUTE[$s, "Attribute"] $primary STRING[$name])
       )            
     | ( (LSQUARE expression RSQUARE) =>
         (
@@ -317,7 +318,7 @@ atom
   | constructorExpression
   | mapExpression
   | listExpression
-  | identifier
+  | nameRef
   | thisExpression
   | literal 
   ;
@@ -327,7 +328,7 @@ parenthesisExpression
   ;
   
 constructorExpression
-  : t=NEW klass=identifier LROUND (args=expressionList)? RROUND
+  : t=NEW klass=nameRef LROUND (args=expressionList)? RROUND
     -> ^(INVOCATION[$t, "New Instance"] 
           ^(ATTRIBUTE["Attribute"] $klass STRING[getConstructorId()])
           ^(LIST["Arguments"] $args?))    
@@ -350,16 +351,16 @@ listExpression
   ;
   
 keyValuePair
-  : i=identifier COLON v=expression -> ^(STRING[$i.start, $i.text] $v)
+  : i=IDENTIFIER COLON v=expression -> ^(STRING[$i] $v)
   | l=literal COLON v=expression -> ^($l $v)   
   ;
     
-identifier
+nameRef
 @init {
   int level = 0;
 }
-  : (AT {level++;})* IDENTIFIER
-    -> ^(IDENTIFIER {level})
+  : (AT {level++;})* t=IDENTIFIER
+    -> ^(NAMEREF[$t] {level})
   ;
 
 thisExpression

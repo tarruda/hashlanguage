@@ -7,6 +7,7 @@ import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
 
+import java.util.Iterator;
 import java.util.Map;
 
 public class Runtime {
@@ -164,6 +165,13 @@ public class Runtime {
 			return new RuntimeException((Throwable) throwable);
 		else
 			return new RuntimeException(throwable.toString());
+	}
+
+	public static Iterator getIterator(Object nodeData) {
+		if (nodeData instanceof Iterable)
+			return ((Iterable) nodeData).iterator();
+		throw Err
+				.illegalArg("For loop cannot get an iterator from this object");
 	}
 
 }

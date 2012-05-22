@@ -13,8 +13,10 @@ public class CommonHashAdaptor extends CommonTreeAdaptor {
 
 	@Override
 	public void addChild(Object t, Object child) {
-		if (((Tree) t).getType() == HashParser.IDENTIFIER)
+		if (((Tree) t).getType() == HashParser.NAMEREF)
 			((HashNode) t).setNodeData(HashNode.CONTEXT_LEVEL, child);
+//		else if (child instanceof Token)
+//			super.addChild(t, create((Token) child));
 		else
 			super.addChild(t, child);
 	}

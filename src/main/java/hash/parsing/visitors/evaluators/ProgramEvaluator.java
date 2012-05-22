@@ -9,6 +9,7 @@ import hash.runtime.Factory;
 import hash.runtime.Runtime;
 import hash.util.Constants;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -33,8 +34,15 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitForeach(Tree node, Tree id, Tree iterable, Tree action) {
-		// TODO Auto-generated method stub
-		return super.visitForeach(node, id, iterable, action);
+		Iterator iterator = Runtime.getIterator(((Result) visit(iterable))
+				.getNodeData());
+		Object result = iterator;
+		while (iterator.hasNext()) {
+			String name = id.getText();
+			context.put(name, iterator.next());
+			result = ((Result) visit(action)).getNodeData();
+		}
+		return new Result(result);
 	}
 
 	@Override
@@ -266,7 +274,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	}
 
 	@Override
-	protected Tree visitIdentifier(Tree node) {
+	protected Tree visitNameReference(Tree node) {
 		Context c = getContext((HashNode) node);
 		return new Result(c.get(node.getText()));
 	}
@@ -284,7 +292,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitThis(Tree node) {
-		return visitIdentifier(node);
+		return visitNameReference(node);
 	}
 
 	private Context getContext(HashNode identifier) {

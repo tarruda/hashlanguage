@@ -5,10 +5,12 @@ import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BLOCK;
 import static hash.parsing.HashParser.BOOLEAN;
+import static hash.parsing.HashParser.DO;
 import static hash.parsing.HashParser.FLOAT;
+import static hash.parsing.HashParser.FOR;
+import static hash.parsing.HashParser.FOREACH;
 import static hash.parsing.HashParser.FUNCTION;
 import static hash.parsing.HashParser.FUNCTIONBLOCK;
-import static hash.parsing.HashParser.IDENTIFIER;
 import static hash.parsing.HashParser.IF;
 import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
@@ -16,6 +18,7 @@ import static hash.parsing.HashParser.INTEGER;
 import static hash.parsing.HashParser.INVOCATION;
 import static hash.parsing.HashParser.LIST;
 import static hash.parsing.HashParser.MAP;
+import static hash.parsing.HashParser.NAMEREF;
 import static hash.parsing.HashParser.NULL;
 import static hash.parsing.HashParser.REGEX;
 import static hash.parsing.HashParser.RETURN;
@@ -26,9 +29,6 @@ import static hash.parsing.HashParser.THROW;
 import static hash.parsing.HashParser.TRY;
 import static hash.parsing.HashParser.UNARY;
 import static hash.parsing.HashParser.WHILE;
-import static hash.parsing.HashParser.FOR;
-import static hash.parsing.HashParser.FOREACH;
-import static hash.parsing.HashParser.DO;
 import hash.parsing.exceptions.TreeValidationException;
 import hash.parsing.tree.HashNode;
 
@@ -104,9 +104,9 @@ public abstract class AstVisitor {
 		case MAP:
 			return visitMap(node);
 		case LIST:
-			return visitList(node);
-		case IDENTIFIER:
-			return visitIdentifier(node);
+			return visitList(node);		
+		case NAMEREF:
+			return visitNameReference(node);
 		case THIS:
 			return visitThis(node);
 		case REGEX:
@@ -210,7 +210,7 @@ public abstract class AstVisitor {
 		return node;
 	}
 
-	protected Tree visitIdentifier(Tree node) {
+	protected Tree visitNameReference(Tree node) {
 		return node;
 	}
 
@@ -256,8 +256,8 @@ public abstract class AstVisitor {
 
 	private void validateAssignment(Tree node) {
 		Tree target = node.getChild(0);
-		if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX || target
-				.getType() == IDENTIFIER))
+		if (!(target.getType() == ATTRIBUTE || target.getType() == INDEX
+				|| target.getType() == NAMEREF))
 			throw new TreeValidationException(target.getLine(),
 					target.getCharPositionInLine(),
 					"Assignment target must be an identifier, attribute or index");

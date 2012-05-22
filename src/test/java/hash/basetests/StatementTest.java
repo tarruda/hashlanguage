@@ -169,7 +169,7 @@ public abstract class StatementTest {
 	}
 
 	@Test
-	public void whileStatement() {
+	public void whileStmt() {
 		evaluate("i=0 while (i<100) i++");
 		assertEquals(100, context.get("i"));
 	}
@@ -189,7 +189,7 @@ public abstract class StatementTest {
 	}
 
 	@Test
-	public void doWhileStatement() {
+	public void doWhileStmt() {
 		evaluate("i=0; do \ni++ while (i<100)");
 		assertEquals(100, context.get("i"));
 	}
@@ -202,11 +202,16 @@ public abstract class StatementTest {
 	}
 
 	@Test
+	public void foreachStmt() {
+		evaluate("s=0 for (i in [1,2,3,4]) s+=i");
+		assertEquals(10, context.get("s"));		
+	}
+	
+	@Test
 	public void nestedLoops() {
-		evaluate("i=j=k=0 do while(j<1000) do {j++;i++;k++}\n while(k<1000)"
-				+ "  while (i<1000)");
-		assertEquals(1000, context.get("i"));
-		assertEquals(1000, context.get("j"));
+		evaluate("i=0 do while(i<10000) do for(j=0;j<10001;j++){i++} while(i<10000)"
+				+ "  while (i<10000)");
+		assertEquals(10001, context.get("i"));		
 	}
 
 }
