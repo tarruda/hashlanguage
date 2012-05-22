@@ -25,6 +25,8 @@ ELSE: 'else';
 WHILE: 'while';
 FOR: 'for';
 BREAK: 'break';
+YIELD: 'yield';
+RESUME: 'resume';
 CONTINUE: 'continue';
 DO: 'do';
 IN: 'in';

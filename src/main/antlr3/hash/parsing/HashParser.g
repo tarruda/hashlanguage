@@ -166,7 +166,7 @@ catchBlock
       cb=block
     -> ^(CATCH["Catch"] {nameRefOrNull(extype)} NAMEREF[$exid] $cb)
   ;
-  
+    
 throwStatement
   : THROW t=expression
     -> ^(THROW $t) 
@@ -185,7 +185,9 @@ breakStatement
   ;    
                     
 expression
-  : functionExpression
+  : resumeExpression
+  | yieldExpression
+  | functionExpression
   | incOrDecExpression     
   | (l=disjunction -> $l)
     ( 
@@ -205,6 +207,16 @@ expression
     | o=INC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "+"] $l INTEGER["1"])))
     | o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
     )? 
+  ;
+  
+resumeExpression
+  : RESUME name=nameRef arg=expression 
+    -> ^(RESUME $name $arg)
+  ;
+  
+yieldExpression
+  : YIELD arg=expression
+    -> ^(YIELD $arg)
   ;
 
 functionExpression

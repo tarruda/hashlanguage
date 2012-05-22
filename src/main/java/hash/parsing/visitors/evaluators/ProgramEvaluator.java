@@ -181,6 +181,12 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	protected Tree visitBreak(Tree node) {
 		return BreakStatement.INSTANCE;
 	}
+	
+	@Override
+	protected Tree visitResume(Tree node) {
+		// TODO Auto-generated method stub
+		return super.visitResume(node);
+	}
 
 	@Override
 	protected Tree visitBlock(Tree node) {

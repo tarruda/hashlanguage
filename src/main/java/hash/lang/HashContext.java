@@ -11,6 +11,7 @@ public class HashContext extends HashMap implements Context {
 	private Context parent;
 
 	public HashContext() {
+		
 	}
 
 	public HashContext(Context parent) {
@@ -32,6 +33,6 @@ public class HashContext extends HashMap implements Context {
 	}
 
 	public void installBuiltin(BuiltinFunction f) {
-		put(f.getName(), f);		
+		put(f.getName(), f);
 	}
 }

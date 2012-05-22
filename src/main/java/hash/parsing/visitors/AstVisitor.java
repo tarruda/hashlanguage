@@ -22,6 +22,8 @@ import static hash.parsing.HashParser.LIST;
 import static hash.parsing.HashParser.MAP;
 import static hash.parsing.HashParser.NAMEREF;
 import static hash.parsing.HashParser.NULL;
+import static hash.parsing.HashParser.YIELD;
+import static hash.parsing.HashParser.RESUME;
 import static hash.parsing.HashParser.REGEX;
 import static hash.parsing.HashParser.RETURN;
 import static hash.parsing.HashParser.SLICE;
@@ -86,6 +88,10 @@ public abstract class AstVisitor {
 		case BREAK:
 			validateBreak(node);
 			return visitBreak(node);
+		case YIELD:
+			return visitYield(node);
+		case RESUME:
+			return visitResume(node);
 		case BLOCK:
 		case FUNCTIONBLOCK:
 			return visitBlock(node);
@@ -175,6 +181,16 @@ public abstract class AstVisitor {
 
 	protected Tree visitBreak(Tree node) {
 		return node;
+	}
+
+	protected Tree visitResume(Tree node) {
+		return node;
+	}
+
+	private Tree visitYield(Tree node) {
+		throw new TreeValidationException(node.getLine(),
+				node.getCharPositionInLine(),
+				"Yield expression can only exist inside a function");
 	}
 
 	protected Tree visitContinue(Tree node) {
