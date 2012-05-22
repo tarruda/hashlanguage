@@ -1,107 +1,141 @@
 package hash.parsing.tree;
 
+import hash.util.Err;
+
 import java.util.List;
 
 import org.antlr.runtime.tree.Tree;
 
 /**
- * Provides default implementation for the 'Tree' interface 
+ * Provides default implementation for the 'Tree' interface
+ * 
  * @author Thiago de Arruda
- *
+ * 
  */
-public class EmptyNode implements Tree {
+public class EmptyNode implements Tree, HashNode {
 
 	public Tree getChild(int i) {
-		return null;
+		throw Err.notImplemented();
 	}
 
 	public int getChildCount() {
-		return 0;
+		throw Err.notImplemented();
 	}
 
 	public Tree getParent() {
-		return null;
+		throw Err.notImplemented();
 	}
 
 	public void setParent(Tree t) {
+		throw Err.notImplemented();
 	}
 
 	public boolean hasAncestor(int ttype) {
-		return false;
+		throw Err.notImplemented();
 	}
 
 	public Tree getAncestor(int ttype) {
-		return null;
+		throw Err.notImplemented();
 	}
-
-	@SuppressWarnings("rawtypes")
+	
 	public List getAncestors() {
-		return null;
+		throw Err.notImplemented();
 	}
 
 	public int getChildIndex() {
-		return 0;
+		throw Err.notImplemented();
 	}
 
 	public void setChildIndex(int index) {
+		throw Err.notImplemented();
 	}
 
 	public void freshenParentAndChildIndexes() {
+		throw Err.notImplemented();
 	}
 
 	public void addChild(Tree t) {
+		throw Err.notImplemented();
 	}
 
 	public void setChild(int i, Tree t) {
+		throw Err.notImplemented();
 	}
 
 	public Object deleteChild(int i) {
-		return null;
+		throw Err.notImplemented();
 	}
 
 	public void replaceChildren(int startChildIndex, int stopChildIndex,
 			Object t) {
+		throw Err.notImplemented();
 	}
 
 	public boolean isNil() {
-		return false;
+		throw Err.notImplemented();
 	}
 
 	public int getTokenStartIndex() {
-		return 0;
+		throw Err.notImplemented();
 	}
 
 	public void setTokenStartIndex(int index) {
+		throw Err.notImplemented();
 	}
 
 	public int getTokenStopIndex() {
-		return 0;
+		throw Err.notImplemented();
 	}
 
 	public void setTokenStopIndex(int index) {
+		throw Err.notImplemented();
 	}
 
 	public Tree dupNode() {
-		return null;
+		throw Err.notImplemented();
 	}
 
 	public int getType() {
-		return 0;
+		throw Err.notImplemented();
 	}
 
 	public String getText() {
-		return null;
+		throw Err.notImplemented();
 	}
 
 	public int getLine() {
-		return 0;
+		throw Err.notImplemented();
 	}
 
 	public int getCharPositionInLine() {
-		return 0;
+		throw Err.notImplemented();
 	}
 
 	public String toStringTree() {
-		return null;
+		throw Err.notImplemented();
+	}
+
+	public Object getNodeData(Object key) {
+		throw Err.notImplemented();
+	}
+
+	public void setNodeData(Object key, Object value) {
+		throw Err.notImplemented();
+	}
+
+	public void setNodeData(Object value) {
+		throw Err.notImplemented();
+	}
+
+	public Object getNodeData() {
+		throw Err.notImplemented();
+	}
+
+	public void setText(String text) {
+		throw Err.notImplemented();
+	}
+
+	public boolean contains(Object key) {		
+		throw Err.notImplemented();
 	}
 }

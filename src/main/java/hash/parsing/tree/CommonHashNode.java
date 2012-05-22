@@ -60,4 +60,8 @@ public class CommonHashNode extends CommonTree implements HashNode {
 	public void setText(String text) {
 		this.text = text;
 	}
+
+	public boolean contains(Object key) {
+		return nodeInfo != null && nodeInfo.containsKey(key);
+	}
 }

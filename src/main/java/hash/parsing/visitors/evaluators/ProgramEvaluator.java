@@ -3,8 +3,9 @@ package hash.parsing.visitors.evaluators;
 import static hash.parsing.HashParser.ATTRIBUTE;
 import static hash.parsing.HashParser.INDEX;
 import hash.lang.Context;
+import hash.parsing.tree.ExpressionResult;
 import hash.parsing.tree.HashNode;
-import hash.parsing.tree.Result;
+import hash.parsing.tree.ReturnStatement;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
 import hash.util.Constants;
@@ -25,6 +26,7 @@ import org.antlr.runtime.tree.Tree;
 public class ProgramEvaluator extends LiteralEvaluator {
 	// TODO Need to push line numbers/filenames to a stack in order to produce
 	// meaningful traces when exceptions are thrown
+	public static final String RETURN_KEY = "returnValue";
 
 	private Context context;
 
@@ -34,89 +36,96 @@ public class ProgramEvaluator extends LiteralEvaluator {
 
 	@Override
 	protected Tree visitForeach(Tree node, Tree id, Tree iterable, Tree action) {
-		Iterator iterator = Runtime.getIterator(((Result) visit(iterable))
-				.getNodeData());
-		Object result = iterator;
+		Tree lastResult = null;
+		Iterator iterator = Runtime
+				.getIterator(((ExpressionResult) visit(iterable)).getNodeData());
 		while (iterator.hasNext()) {
 			String name = id.getText();
 			context.put(name, iterator.next());
-			result = ((Result) visit(action)).getNodeData();
+			lastResult = visit(action);
+			if (lastResult instanceof ReturnStatement)
+				return lastResult;
 		}
-		return new Result(result);
+		return lastResult;
 	}
 
 	@Override
 	protected Tree visitFor(Tree node, Tree init, Tree condition, Tree update,
 			Tree action) {
+		Tree lastResult = null;
 		visit(init);
-		Object cond = ((Result) visit(condition)).getNodeData();
-		Object result = cond;
+		Object cond = ((ExpressionResult) visit(condition)).getNodeData();
 		while ((Boolean) Runtime.invokeNormalMethod(cond,
 				Constants.BOOLEAN_VALUE)) {
-			result = ((Result) visit(action)).getNodeData();
+			lastResult = visit(action);
+			if (lastResult instanceof ReturnStatement)
+				return lastResult;
 			visit(update);
-			cond = ((Result) visit(condition)).getNodeData();
+			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		}
-		return new Result(result);
+		return lastResult;
 	}
 
 	@Override
 	protected Tree visitWhile(Tree node, Tree condition, Tree action) {
-		Object cond = ((Result) visit(condition)).getNodeData();
-		Object result = cond;
+		Tree lastResult = null;
+		Object cond = ((ExpressionResult) visit(condition)).getNodeData();
 		while ((Boolean) Runtime.invokeNormalMethod(cond,
 				Constants.BOOLEAN_VALUE)) {
-			result = ((Result) visit(action)).getNodeData();
-			cond = ((Result) visit(condition)).getNodeData();
+			lastResult = visit(action);
+			if (lastResult instanceof ReturnStatement)
+				return lastResult;
+			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		}
-		return new Result(result);
+		return lastResult;
 	}
 
 	@Override
 	protected Tree visitDoWhile(Tree node, Tree condition, Tree action) {
-		Object result = null;
+		Tree lastResult = null;
 		Object cond = null;
 		do {
-			result = ((Result) visit(action)).getNodeData();
-			cond = ((Result) visit(condition)).getNodeData();
+			lastResult = visit(action);
+			if (lastResult instanceof ReturnStatement)
+				return lastResult;
+			cond = ((ExpressionResult) visit(condition)).getNodeData();
 		} while ((Boolean) Runtime.invokeNormalMethod(cond,
 				Constants.BOOLEAN_VALUE));
-		return new Result(result);
+		return lastResult;
 	}
 
 	@Override
 	protected Tree visitIf(Tree node, Tree condition, Tree trueAction,
 			Tree falseAction) {
-		Object result = null;
-		Object cond = ((Result) visit(condition)).getNodeData();
+		Tree lastResult = null;
+		Object cond = ((ExpressionResult) visit(condition)).getNodeData();
 		if ((Boolean) Runtime.invokeNormalMethod(cond, Constants.BOOLEAN_VALUE))
-			result = ((Result) visit(trueAction)).getNodeData();
+			lastResult = visit(trueAction);
 		else
-			result = ((Result) visit(falseAction)).getNodeData();
-		return new Result(result);
+			lastResult = visit(falseAction);
+		return lastResult;
 	}
 
 	@Override
 	protected Tree visitTryStatement(Tree node, Tree tryBlock,
 			Tree catchBlocks, Tree finallyBlock) {
-		Object lastEvaluatedExpression = null;
+		Tree lastResult = null;
 		Exception exception = null;
 		try {
-			lastEvaluatedExpression = ((Result) visit(tryBlock)).getNodeData();
+			lastResult = visit(tryBlock);
 		} catch (Exception ex) {
 			boolean handled = false;
 			int catchBlocksLen = catchBlocks.getChildCount();
 			for (int i = 0; i < catchBlocksLen; i++) {
 				Tree catchBlock = catchBlocks.getChild(i);
-				Object exceptionType = ((Result) visit(catchBlock.getChild(0)))
-						.getNodeData();
+				Object exceptionType = ((ExpressionResult) visit(catchBlock
+						.getChild(0))).getNodeData();
 				if (exceptionType != null
 						&& !Runtime.isInstance(ex, exceptionType))
 					continue;
 				String id = catchBlock.getChild(1).getText();
 				context.put(id, ex);
-				lastEvaluatedExpression = ((Result) visit(catchBlock
-						.getChild(2))).getNodeData();
+				lastResult = visit(catchBlock.getChild(2));
 				handled = true;
 				break;
 			}
@@ -124,17 +133,18 @@ public class ProgramEvaluator extends LiteralEvaluator {
 				exception = ex;
 		} finally {
 			if (finallyBlock != null)
-				lastEvaluatedExpression = ((Result) visit(finallyBlock))
-						.getNodeData();
+				if (!(lastResult instanceof ReturnStatement))
+					lastResult = visit(finallyBlock);
 			if (exception != null)
 				throw new RuntimeException(exception);
 		}
-		return new Result(lastEvaluatedExpression);
+		return lastResult;
 	}
 
 	@Override
 	protected Tree visitThrow(Tree node, Tree throwableExpression) {
-		Object throwable = ((Result) visit(throwableExpression)).getNodeData();
+		Object throwable = ((ExpressionResult) visit(throwableExpression))
+				.getNodeData();
 		throw Runtime.throwObj(throwable);
 	}
 
@@ -143,34 +153,38 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		boolean isMethod = false;
 		HashNode fNode = (HashNode) node;
 		isMethod = fNode.getNodeData(HashNode.IS_METHOD) == Boolean.TRUE;
-		List params = (List) ((Result) visit(parameters)).getNodeData();
-		return new Result(new FunctionEvaluator(context, params, block,
-				isMethod));
+		List params = (List) ((ExpressionResult) visit(parameters))
+				.getNodeData();
+		return new ExpressionResult(new FunctionEvaluator(context, params,
+				block, isMethod));
 	}
 
 	@Override
 	protected Tree visitReturn(Tree node, Tree returnExpression) {
-		throw new ReturnStatement(
-				((Result) visit(returnExpression)).getNodeData());
+		return new ReturnStatement(
+				((HashNode) visit(returnExpression)).getNodeData());
 	}
 
 	@Override
 	protected Tree visitBlock(Tree node) {
 		int len = node.getChildCount();
-		Object lastEvaluatedExpression = null;
-		for (int i = 0; i < len; i++)
-			lastEvaluatedExpression = ((Result) visit(node.getChild(i)))
-					.getNodeData();
-		return new Result(lastEvaluatedExpression);
+		Tree lastResult = null;
+		for (int i = 0; i < len; i++) {
+			lastResult = visit(node.getChild(i));
+			if (lastResult instanceof ReturnStatement)
+				return lastResult;
+		}
+		return lastResult;
 	}
 
 	@Override
 	protected Tree visitAssignment(Tree node, Tree target, Tree expression) {
-		Object value = ((Result) visit(expression)).getNodeData();
+		Object value = ((ExpressionResult) visit(expression)).getNodeData();
 		if (target.getType() == ATTRIBUTE || target.getType() == INDEX) {
-			Object ownerObject = ((Result) visit(target.getChild(0)))
+			Object ownerObject = ((ExpressionResult) visit(target.getChild(0)))
 					.getNodeData();
-			Object key = ((Result) visit(target.getChild(1))).getNodeData();
+			Object key = ((ExpressionResult) visit(target.getChild(1)))
+					.getNodeData();
 			if (target.getType() == ATTRIBUTE)
 				Runtime.setAttribute(ownerObject, key, value);
 			else
@@ -180,26 +194,26 @@ public class ProgramEvaluator extends LiteralEvaluator {
 			Context c = getContext((HashNode) target);
 			c.put(target.getText(), value);
 		}
-		return new Result(value);
+		return new ExpressionResult(value);
 	}
 
 	@Override
 	protected Tree visitEvalAndIncrement(Tree node, Tree target, Tree assignment) {
-		Object rv = ((Result) visit(target)).getNodeData();
+		Object rv = ((ExpressionResult) visit(target)).getNodeData();
 		visit(assignment);
-		return new Result(rv);
+		return new ExpressionResult(rv);
 	}
 
 	@Override
 	protected Tree visitBinaryExpression(Tree node, Tree left, Tree right) {
-		Object l = ((Result) visit(left)).getNodeData();
-		Object r = ((Result) visit(right)).getNodeData();
+		Object l = ((ExpressionResult) visit(left)).getNodeData();
+		Object r = ((ExpressionResult) visit(right)).getNodeData();
 		String text = node.getText();
 		if (text.equals("is")) // skip the runtime
-			return new Result(l == r);
+			return new ExpressionResult(l == r);
 		else
-			return new Result(
-					Runtime.invokeBinaryOperator(node.getText(), l, r));
+			return new ExpressionResult(Runtime.invokeBinaryOperator(
+					node.getText(), l, r));
 	}
 
 	@Override
@@ -207,24 +221,27 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		String operatorTxt = node.getText();
 		if (operatorTxt.equals("+"))// ignore
 			return visit(operand);
-		Object op = ((Result) visit(operand)).getNodeData();
-		return new Result(Runtime.invokeUnaryOperator(operatorTxt, op));
+		Object op = ((ExpressionResult) visit(operand)).getNodeData();
+		return new ExpressionResult(
+				Runtime.invokeUnaryOperator(operatorTxt, op));
 	}
 
 	@Override
 	protected Tree visitInvocation(Tree node, Tree expression, Tree arguments) {
-		Object[] args = ((List) ((Result) visit(arguments)).getNodeData())
-				.toArray();
+		Object[] args = ((List) ((ExpressionResult) visit(arguments))
+				.getNodeData()).toArray();
 		if (expression.getType() == ATTRIBUTE || expression.getType() == INDEX) {
 			// this is a method call
-			Object tgt = ((Result) visit(expression.getChild(0))).getNodeData();
-			Object methodKey = ((Result) visit(expression.getChild(1)))
+			Object tgt = ((ExpressionResult) visit(expression.getChild(0)))
 					.getNodeData();
-			return new Result(Runtime.invokeNormalMethod(tgt, methodKey, args));
+			Object methodKey = ((ExpressionResult) visit(expression.getChild(1)))
+					.getNodeData();
+			return new ExpressionResult(Runtime.invokeNormalMethod(tgt,
+					methodKey, args));
 		} else {
 			// normal function call
-			Object exp = ((Result) visit(expression)).getNodeData();
-			return new Result(Runtime.invokeFunction(exp, args));
+			Object exp = ((ExpressionResult) visit(expression)).getNodeData();
+			return new ExpressionResult(Runtime.invokeFunction(exp, args));
 		}
 	}
 
@@ -233,12 +250,13 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		Map rv = Factory.createMap();
 		int len = node.getChildCount();
 		for (int i = 0; i < len; i++) {
-			Object key = ((Result) visit(node.getChild(i))).getNodeData();
-			Object value = ((Result) visit(node.getChild(i).getChild(0)))
+			Object key = ((ExpressionResult) visit(node.getChild(i)))
 					.getNodeData();
+			Object value = ((ExpressionResult) visit(node.getChild(i).getChild(
+					0))).getNodeData();
 			rv.put(key, value);
 		}
-		return new Result(rv);
+		return new ExpressionResult(rv);
 	}
 
 	@Override
@@ -246,37 +264,37 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		int len = node.getChildCount();
 		List rv = Factory.createList();
 		for (int i = 0; i < len; i++)
-			rv.add(((Result) visit(node.getChild(i))).getNodeData());
-		return new Result(rv);
+			rv.add(((ExpressionResult) visit(node.getChild(i))).getNodeData());
+		return new ExpressionResult(rv);
 	}
 
 	@Override
 	protected Tree visitAttributeAccess(Tree node, Tree target,
 			Tree attributeKey) {
-		Object tgt = ((Result) visit(target)).getNodeData();
-		Object key = ((Result) visit(attributeKey)).getNodeData();
-		return new Result(Runtime.getAttribute(tgt, key));
+		Object tgt = ((ExpressionResult) visit(target)).getNodeData();
+		Object key = ((ExpressionResult) visit(attributeKey)).getNodeData();
+		return new ExpressionResult(Runtime.getAttribute(tgt, key));
 	}
 
 	@Override
 	protected Tree visitIndexAccess(Tree node, Tree target, Tree itemKey) {
-		Object tgt = ((Result) visit(target)).getNodeData();
-		Object key = ((Result) visit(itemKey)).getNodeData();
-		return new Result(Runtime.getIndex(tgt, key));
+		Object tgt = ((ExpressionResult) visit(target)).getNodeData();
+		Object key = ((ExpressionResult) visit(itemKey)).getNodeData();
+		return new ExpressionResult(Runtime.getIndex(tgt, key));
 	}
 
 	@Override
 	protected Tree visitSlice(Tree node, Tree target, Tree sliceArgs) {
-		Object tgt = ((Result) visit(target)).getNodeData();
-		List args = (List) ((Result) visit(sliceArgs)).getNodeData();
-		return new Result(Runtime.getSlice(tgt, args.get(0), args.get(1),
-				args.get(2)));
+		Object tgt = ((ExpressionResult) visit(target)).getNodeData();
+		List args = (List) ((ExpressionResult) visit(sliceArgs)).getNodeData();
+		return new ExpressionResult(Runtime.getSlice(tgt, args.get(0),
+				args.get(1), args.get(2)));
 	}
 
 	@Override
 	protected Tree visitNameReference(Tree node) {
 		Context c = getContext((HashNode) node);
-		return new Result(c.get(node.getText()));
+		return new ExpressionResult(c.get(node.getText()));
 	}
 
 	@Override
@@ -287,7 +305,7 @@ public class ProgramEvaluator extends LiteralEvaluator {
 		int flags = 0;
 		if (regexLiteral.endsWith("i"))
 			flags = Pattern.CASE_INSENSITIVE;
-		return new Result(Pattern.compile(regexText, flags));
+		return new ExpressionResult(Pattern.compile(regexText, flags));
 	}
 
 	@Override

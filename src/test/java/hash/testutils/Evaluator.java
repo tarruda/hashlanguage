@@ -5,7 +5,7 @@ import hash.lang.Context;
 import hash.parsing.HashParser;
 import hash.parsing.HashParser.program_return;
 import hash.parsing.ParserFactory;
-import hash.parsing.tree.Result;
+import hash.parsing.tree.ExpressionResult;
 import hash.parsing.visitors.evaluators.ProgramEvaluator;
 
 import org.antlr.runtime.ANTLRStringStream;
@@ -22,7 +22,10 @@ public class Evaluator {
 		try {
 			psrReturn = parser.program();
 			Tree t = (Tree) psrReturn.getTree();
-			return ((Result) target.visit(t)).getNodeData();
+			Tree r = target.visit(t);
+			if (r != null)
+				return ((ExpressionResult) r).getNodeData();
+			return null;
 		} catch (RecognitionException e) {
 			e.printStackTrace();
 			fail(e.getMessage());

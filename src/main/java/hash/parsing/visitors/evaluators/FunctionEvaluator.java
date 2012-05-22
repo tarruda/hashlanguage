@@ -2,6 +2,8 @@ package hash.parsing.visitors.evaluators;
 
 import hash.lang.Context;
 import hash.lang.Function;
+import hash.parsing.tree.HashNode;
+import hash.parsing.tree.ReturnStatement;
 import hash.runtime.Factory;
 import hash.util.Check;
 import hash.util.Constants;
@@ -36,12 +38,17 @@ public class FunctionEvaluator implements Function {
 		for (int i = 0; i < parameters.size(); i++)
 			context.put(parameters.get(i), args[i + 1]);
 		ProgramEvaluator walker = new ProgramEvaluator(context);
-		try {
-			walker.visit(block);
-		} catch (ReturnStatement r) {
-			return r.getValue();
-		}
-		return null;
+		Tree result = walker.visit(block);
+		if (result instanceof ReturnStatement)
+			return ((HashNode) result).getNodeData();
+		else
+			return null;
+		// HashNode node = (HashNode) block;
+		// int len = node.getChildCount();
+		// for (int i = 0; i < len &&
+		// !node.contains(ProgramEvaluator.RETURN_KEY); i++)
+		// walker.visit(node.getChild(i));
+		// return node.getNodeData(ProgramEvaluator.RETURN_KEY);
 	}
 
 }
