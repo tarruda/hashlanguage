@@ -210,11 +210,11 @@ fragment OCT_DIGIT: '0'..'7';
 fragment BIN_DIGIT: '0'..'1';
 fragment LETTER: ('a'..'z'|'A'..'Z'|'$'|'_');  
 
-SCOLONS
-  : (';')+  
+SCOLON
+  : (';')  
   ;  
 
-LINES
+LINE
   : ('\n'|'\r')+
   ; 
   

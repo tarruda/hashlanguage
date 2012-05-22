@@ -9,13 +9,13 @@ import static hash.parsing.HashLexer.FOR;
 import static hash.parsing.HashLexer.FUNCTION;
 import static hash.parsing.HashLexer.IF;
 import static hash.parsing.HashLexer.LCURLY;
-import static hash.parsing.HashLexer.LINES;
+import static hash.parsing.HashLexer.LINE;
 import static hash.parsing.HashLexer.LROUND;
 import static hash.parsing.HashLexer.LSQUARE;
 import static hash.parsing.HashLexer.RCURLY;
 import static hash.parsing.HashLexer.RROUND;
 import static hash.parsing.HashLexer.RSQUARE;
-import static hash.parsing.HashLexer.SCOLONS;
+import static hash.parsing.HashLexer.SCOLON;
 import static hash.parsing.HashLexer.TRY;
 import static hash.parsing.HashLexer.WHILE;
 import static hash.parsing.HashLexer.WS;
@@ -54,7 +54,7 @@ public class LinefeedFilter implements TokenSource {
 			return getNext();
 		if (eof())
 			return Token.EOF_TOKEN;
-		parse(true);
+		parse(true, true);
 		if (queue.size() > 0)
 			return getNext();
 		return Token.EOF_TOKEN;
@@ -69,26 +69,26 @@ public class LinefeedFilter implements TokenSource {
 		return null;
 	}
 
-	private void parse(boolean considerLinefeeds) {
+	private void parse(boolean considerLinefeeds,
+			boolean terminatePreviousStatements) {
 		int tokenType = la();
 		switch (tokenType) {
 		case FUNCTION:
 		case CLASS:
 			forwardIgnoringWsUntil(LCURLY);
 			return;
-		case FOR:
+		case FOR:			
 		case WHILE:
-		case IF:
-			keywordParenthesisBlock();
+			forWhileStmt(terminatePreviousStatements);
 			break;
-		case ELSE:
-			keywordBlock();
+		case IF:
+			ifStmt(terminatePreviousStatements);
 			break;
 		case DO:
-			doWhile();
+			doWhileStmt(terminatePreviousStatements);
 			break;
 		case TRY:
-			tryStatement();
+			tryStmt(terminatePreviousStatements);
 			break;
 		case LCURLY:
 			curlyBraces(false);
@@ -103,37 +103,90 @@ public class LinefeedFilter implements TokenSource {
 			if (considerLinefeeds)
 				forward();
 			else
-				forwardAnyExcept(WS, LINES);
+				forwardAnyExcept(WS, LINE);
 		}
 	}
 
-	private void keywordParenthesisBlock() {
-		terminatePreviousStatement();
+	private void forWhileStmt(boolean terminatePreviousStatements) {
+		if (terminatePreviousStatements)
+			terminatePreviousStatement();
 		forward();
 		forwardIgnoringWsUntil(LROUND);
 		roundBraces(false);
 		ignoreFollowingWhitespaces();
-		terminateBlockStatement();
+		if (!parseCompoundStatement())
+			parseUntil(SCOLON, LINE, FOR, DO, WHILE, IF, TRY, FUNCTION,
+					CLASS, RCURLY);
+		if (queue.peekLast().getType() == RCURLY)
+			addTerminator();
 	}
 
-	private void keywordBlock() {
-		terminatePreviousStatement();
+	private void ifStmt(boolean terminatePreviousStatements) {
+		if (terminatePreviousStatements)
+			terminatePreviousStatement();
+		forward();
+		forwardIgnoringWsUntil(LROUND);
+		roundBraces(false);
+		ignoreFollowingWhitespaces();
+		if (!parseCompoundStatement()) {
+			forwardIgnoringWsUntil(SCOLON, LINE, ELSE);
+			if (la() == ELSE)
+				// the statement wasnt terminated
+				addTerminator();
+			ignoreFollowingWhitespaces();
+			forward();
+		}
+		if (nextNonWhitespaceTokenIs(ELSE)) {
+			ignoreFollowingWhitespaces();
+			forward();
+		}
+		if (queue.peekLast().getType() == ELSE) {
+			ignoreFollowingWhitespaces();
+			if (!parseCompoundStatement())
+				parseUntil(SCOLON, LINE, FOR, DO, WHILE, IF, TRY, FUNCTION,
+						CLASS, RCURLY);
+		}
+		if (queue.peekLast().getType() == RCURLY)
+			addTerminator();
+	}	
+
+	private void doWhileStmt(boolean terminatePreviousStatements) {
+		if (terminatePreviousStatements)
+			terminatePreviousStatement();
 		forward();
 		ignoreFollowingWhitespaces();
-		terminateBlockStatement();
+		if (!parseCompoundStatement())
+			parseUntil(WHILE);
+		forward();
+		ignoreFollowingWhitespaces();
+		roundBraces(false);
+		addTerminator();
 	}
 
-	private void doWhile() {
-		terminatePreviousStatement();
-		forward();
-		ignoreFollowingWhitespaces();
-		if (la() == LCURLY)
+	private void tryStmt(boolean terminatePreviousStatements) {
+		forwardIgnoringWsUntil(LCURLY);
+		curlyBraces(true);
+		// find catch or finally
+		while (nextNonWhitespaceTokenIs(CATCH)) {
+			forwardIgnoringWsUntil(LCURLY);
 			curlyBraces(true);
-		else {
+		}
+		if (nextNonWhitespaceTokenIs(FINALLY)) {
+			forwardIgnoringWsUntil(LCURLY);
+			curlyBraces(true);
+		}
+	}
+
+	private boolean parseCompoundStatement() {
+		boolean rv = false;
+		if (la() == LCURLY) {
+			curlyBraces(true);
+			rv = true;
+		} else {
 			// if this is a single statement do-while, it is possible that this
 			// statement contains a block of code(another compound statement).
 			// If this is the case, the next statement must be parsed before
-			// forwarding to the 'while'
+			// forwarding to the 'while' part of the current do-while
 			switch (la()) {
 			case FOR:
 			case DO:
@@ -142,38 +195,19 @@ public class LinefeedFilter implements TokenSource {
 			case TRY:
 			case FUNCTION:
 			case CLASS:
-				parse(true);
+				parse(true, false);
+				rv = true;
 			}
 		}
-		forwardIgnoringWsUntil(WHILE);
-		forward();
-		ignoreFollowingWhitespaces();
-		roundBraces(false);
+		return rv;
 	}
 
-	private void terminateBlockStatement() {
-		// terminates a block statement
-		if (la() == LCURLY) {
-			curlyBraces(true); // consume the block inside curly braces
-			ignoreFollowingWhitespaces();
-			boolean terminate = true;
-			switch (la()) {
-			case ELSE:
-			case WHILE: // when inside a do-while statement
-				terminate = false;
-			}
-			if (terminate) {
-				// force the if block to terminate
-				CommonToken t = new CommonToken(SCOLONS,
-						"Separator(generated by lexer filter)");
-				Token last = queue.peekLast();
-				if (last == null)
-					last = lastToken;
-				t.setLine(last.getLine());
-				t.setCharPositionInLine(last.getCharPositionInLine());
-				queue.add(t);
-			}
-		}
+	private void addTerminator() {
+		Token next = input.get(input.index());
+		CommonToken t = new CommonToken(SCOLON, next.getText());
+		t.setLine(next.getLine());
+		t.setCharPositionInLine(next.getCharPositionInLine());
+		queue.add(t);
 	}
 
 	private void terminatePreviousStatement() {
@@ -183,20 +217,12 @@ public class LinefeedFilter implements TokenSource {
 		if (last == null)
 			last = lastToken;
 		switch (last.getType()) {
-		case SCOLONS:
-		case LINES:
-		case RCURLY:
-		case ELSE:
-		case DO:
+		case SCOLON:
+		case LINE:
 			terminateLastStatement = false;
 		}
-		if (terminateLastStatement) {
-			CommonToken t = new CommonToken(SCOLONS,
-					"Separator(generated by lexer filter)");
-			t.setLine(last.getLine());
-			t.setCharPositionInLine(last.getCharPositionInLine());
-			queue.add(t);
-		}
+		if (terminateLastStatement)
+			addTerminator();
 	}
 
 	private void curlyBraces(boolean considerLinefeeds) {
@@ -211,7 +237,7 @@ public class LinefeedFilter implements TokenSource {
 		while (la() != RCURLY) {
 			if (eof())
 				break;
-			parse(considerLinefeeds);
+			parse(considerLinefeeds, true);
 		}
 		forward();
 	}
@@ -221,7 +247,7 @@ public class LinefeedFilter implements TokenSource {
 		while (la() != RSQUARE) {
 			if (eof())
 				break;
-			parse(considerLinefeeds);
+			parse(considerLinefeeds, true);
 		}
 		forward();
 	}
@@ -231,7 +257,7 @@ public class LinefeedFilter implements TokenSource {
 		while (la() != RROUND) {
 			if (eof())
 				break;
-			parse(considerLinefeeds);
+			parse(considerLinefeeds, true);
 		}
 		forward();
 		if (nextNonWhitespaceTokenIs(LCURLY))
@@ -241,23 +267,9 @@ public class LinefeedFilter implements TokenSource {
 			forwardIgnoringWsUntil(LCURLY);
 	}
 
-	private void tryStatement() {
-		forwardIgnoringWsUntil(LCURLY);
-		curlyBraces(true);
-		// find catch or finally
-		while (nextNonWhitespaceTokenIs(CATCH)) {
-			forwardIgnoringWsUntil(LCURLY);
-			curlyBraces(true);
-		}
-		if (nextNonWhitespaceTokenIs(FINALLY)) {
-			forwardIgnoringWsUntil(LCURLY);
-			curlyBraces(true);
-		}
-	}
-
 	private int nextNonWhitespaceToken() {
 		int pos = 1;
-		while (la(pos) == LINES || la(pos) == WS)
+		while (la(pos) == LINE || la(pos) == WS)
 			pos++;
 		return la(pos);
 	}
@@ -271,6 +283,21 @@ public class LinefeedFilter implements TokenSource {
 		input.consume();
 	}
 
+	private void parseUntil(int... types) {
+		while (true) {
+			int actualType = la();
+			boolean matched = true;
+			for (int i = 0; matched && i < types.length; i++)
+				matched = types[i] != actualType;
+			if (!matched || actualType == Token.EOF)
+				break;
+			if (actualType != WS)
+				parse(true, true);
+			else
+				input.consume();
+		}
+	}
+
 	private void forwardIgnoringWsUntil(int... types) {
 		while (true) {
 			int actualType = la();
@@ -279,7 +306,7 @@ public class LinefeedFilter implements TokenSource {
 				matched = types[i] != actualType;
 			if (!matched || actualType == Token.EOF)
 				break;
-			if (actualType != WS && actualType != LINES)
+			if (actualType != WS && actualType != LINE)
 				forward();
 			else
 				input.consume();
@@ -287,7 +314,7 @@ public class LinefeedFilter implements TokenSource {
 	}
 
 	private void ignoreFollowingWhitespaces() {
-		while (la() == WS || la() == LINES)
+		while (la() == WS || la() == LINE)
 			input.consume();
 	}
 

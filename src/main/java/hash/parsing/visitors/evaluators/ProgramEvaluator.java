@@ -40,14 +40,22 @@ public class ProgramEvaluator extends LiteralEvaluator {
 	@Override
 	protected Tree visitFor(Tree node, Tree init, Tree condition, Tree update,
 			Tree action) {
-		// TODO Auto-generated method stub
-		return super.visitFor(node, init, condition, update, action);
+		visit(init);
+		Object cond = ((Result) visit(condition)).getNodeData();
+		Object result = cond;
+		while ((Boolean) Runtime.invokeNormalMethod(cond,
+				Constants.BOOLEAN_VALUE)) {
+			result = ((Result) visit(action)).getNodeData();
+			visit(update);
+			cond = ((Result) visit(condition)).getNodeData();
+		}
+		return new Result(result);
 	}
 
 	@Override
 	protected Tree visitWhile(Tree node, Tree condition, Tree action) {
-		Object result = null;
 		Object cond = ((Result) visit(condition)).getNodeData();
+		Object result = cond;
 		while ((Boolean) Runtime.invokeNormalMethod(cond,
 				Constants.BOOLEAN_VALUE)) {
 			result = ((Result) visit(action)).getNodeData();

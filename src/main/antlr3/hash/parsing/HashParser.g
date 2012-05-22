@@ -53,7 +53,7 @@ statements
   ;
   
 statementSeparator
-  : (LINES|SCOLONS)
+  : (LINE|SCOLON)
   ;
 
 statement
@@ -131,10 +131,10 @@ whileStatement
 
 doWhileStatement
   : DO ((LCURLY) => b=block|s=statement)
-    WHILE LROUND cond=expression RROUND
+    statementSeparator* WHILE LROUND cond=expression RROUND
     -> ^(DO["do while"] $cond {select(b,s)})
   ;
-      
+            
 tryStatement
   : t=TRY tb=block
     ((CATCH)=>

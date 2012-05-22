@@ -7,12 +7,12 @@ import static hash.parsing.HashLexer.COLON;
 import static hash.parsing.HashLexer.COMMA;
 import static hash.parsing.HashLexer.EOF;
 import static hash.parsing.HashLexer.LCURLY;
-import static hash.parsing.HashLexer.LINES;
+import static hash.parsing.HashLexer.LINE;
 import static hash.parsing.HashLexer.LROUND;
 import static hash.parsing.HashLexer.LSQUARE;
 import static hash.parsing.HashLexer.NOT;
 import static hash.parsing.HashLexer.RETURN;
-import static hash.parsing.HashLexer.SCOLONS;
+import static hash.parsing.HashLexer.SCOLON;
 import hash.parsing.exceptions.ParsingException;
 
 import org.antlr.runtime.CharStream;
@@ -225,8 +225,8 @@ public abstract class AbstractHashLexer extends Lexer {
 	protected boolean regexTokenAllowed() {
 		switch (lastMatchedToken) {
 		case ASSIGN:
-		case SCOLONS:
-		case LINES:
+		case SCOLON:
+		case LINE:
 		case COMMA:
 		case COLON:
 		case LROUND:

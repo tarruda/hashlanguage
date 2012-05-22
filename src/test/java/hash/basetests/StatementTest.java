@@ -131,7 +131,7 @@ public abstract class StatementTest {
 
 	@Test
 	public void elseif() {
-		evaluate("f=(x){if(x>10)return x else if(x>5) return x+5; else return x+10}");
+		evaluate("f=(x){if(x>10)return x else if(x>5) return x+5 else return x+10}");
 		assertEquals(11, evaluate("f(11)"));
 		assertEquals(15, evaluate("f(10)"));
 		assertEquals(14, evaluate("f(9)"));
@@ -153,6 +153,19 @@ public abstract class StatementTest {
 		evaluate("f=(n){if(n==1){return 1} return n*f(n-1);}");
 		assertEquals(120, evaluate("f(5)"));
 		assertEquals(720, evaluate("f(6)"));
+	}
+
+	@Test
+	public void forStmt() {
+		evaluate("z=0 for (i=0;i<10;i++) z+=i");
+		assertEquals(45, context.get("z"));
+	}
+
+	@Test
+	public void nestedFor() {
+		evaluate("z=0 for(i=0;i<10;i++)for(j=0;j<10;j++)for(k=0;k<10;k++)"
+				+ "z+=i");
+		assertEquals(4500, context.get("z"));
 	}
 
 	@Test
@@ -183,15 +196,17 @@ public abstract class StatementTest {
 
 	@Test
 	public void doWhileBlock() {
-		evaluate("i=100\n do {\ny=i;\n y*=2} while (i<100)");
+		evaluate("i=100\n do {\ny=i;\n y*=2}\n\n while (i<100)");
 		assertEquals(100, context.get("i"));
 		assertEquals(200, context.get("y"));
 	}
-	
+
 	@Test
 	public void nestedLoops() {
-		evaluate("i=j=0 do\n while\n(j\n<100){j++;i++} while (i<100)");
-		assertEquals(100, context.get("i"));
-		assertEquals(100, context.get("j"));		
+		evaluate("i=j=k=0 do while(j<1000) do {j++;i++;k++}\n while(k<1000)"
+				+ "  while (i<1000)");
+		assertEquals(1000, context.get("i"));
+		assertEquals(1000, context.get("j"));
 	}
+
 }
