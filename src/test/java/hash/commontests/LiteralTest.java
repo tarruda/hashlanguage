@@ -4,14 +4,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import hash.parsing.exceptions.ParsingException;
-import hash.testutils.Evaluator;
+import hash.testutils.SimpleVmTester;
 
 import org.junit.Test;
 
 public class LiteralTest {
 
 	private Object evaluate(String code) {
-		return Evaluator.eval(code, null);
+		return SimpleVmTester.eval(code, null);
+	}
+
+	private Object evaluate(String code, Class expectedException) {
+		return SimpleVmTester.eval(code, null, expectedException);
 	}
 
 	@Test
@@ -53,16 +57,13 @@ public class LiteralTest {
 						+ "    Indentation\n  EOF"));
 	}
 
-	@Test(expected = ParsingException.class)
 	public void unfinishedHereDoc() {
-		assertEquals("  Testing\n  Here\nDoc\n  String\n  Indentation\n  ",
-				evaluate("  <<|EOF\n  Testing\n  Here\nDoc\n  String\n"
-						+ "  Indentation\n  "));
+		evaluate("  <<|EOF\n  Testing\n  Here\nDoc\n  String\n"
+				+ "  Indentation\n  ", ParsingException.class);
 	}
 
-	@Test(expected = ParsingException.class)
 	public void unfinishedIndentedHereDoc() {
 		evaluate("  <<] EOF\n  Testing\n  Here\nDoc\n  String\n"
-				+ "    Indentation\n  OF");
+				+ "    Indentation\n  OF", ParsingException.class);
 	}
 }
