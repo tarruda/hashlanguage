@@ -5,11 +5,11 @@ import hash.parsing.HashParser;
 import hash.parsing.HashParser.program_return;
 import hash.parsing.ParserFactory;
 import hash.parsing.exceptions.TreeValidationException;
+import hash.parsing.tree.HashNode;
 import hash.parsing.visitors.AstValidator;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.Tree;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +28,7 @@ public class AstValidatorTest {
 		program_return psrReturn = null;
 		try {
 			psrReturn = parser.program();
-			Tree t = (Tree) psrReturn.getTree();
+			HashNode t = (HashNode) psrReturn.getTree();
 			target.visit(t);
 		} catch (RecognitionException e) {
 			e.printStackTrace();

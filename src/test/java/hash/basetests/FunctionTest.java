@@ -8,13 +8,11 @@ import hash.runtime.Factory;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class FunctionTest {
+public abstract class FunctionTest extends AbstractCodeTest{
 
 	protected Context context;
 
-	protected abstract Object evaluate(String expression);
-
-	@Before
+		@Before
 	public void setup() {
 		context = Factory.createContext();
 	}

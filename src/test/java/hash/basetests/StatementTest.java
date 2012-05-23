@@ -3,7 +3,6 @@ package hash.basetests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import hash.lang.Context;
 import hash.lang.Function;
 import hash.runtime.Factory;
@@ -11,11 +10,9 @@ import hash.runtime.Factory;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class StatementTest {
+public abstract class StatementTest extends AbstractCodeTest {
 
 	protected Context context;
-
-	protected abstract Object evaluate(String expression);
 
 	@Before
 	public void setup() {
@@ -75,13 +72,9 @@ public abstract class StatementTest {
 				throw ex;
 			}
 		});
-		try {
-			evaluate("try {throwingAction()}  \n\nfinally \n"
-					+ "{\ny = 'finally'\n}");
-			fail("Should have thrown");
-		} catch (Exception e) {
-			assertEquals("finally", context.get("y"));
-		}
+		evaluate("try {throwingAction()}  \n\nfinally \n"
+				+ "{\ny = 'finally'\n}", RuntimeException.class);
+		assertEquals("finally", context.get("y"));
 	}
 
 	@Test
@@ -113,6 +106,7 @@ public abstract class StatementTest {
 			}
 		});
 		evaluate("import java.lang.IllegalArgumentException");
+
 		evaluate("try {throwingAction()} catch(IllegalArgumentException e){a=1}"
 				+ "catch(e){b=2}");
 		assertFalse(context.containsKey("a"));
@@ -121,12 +115,7 @@ public abstract class StatementTest {
 
 	@Test
 	public void throwing() {
-		try {
-			evaluate("throw 'SomeString'");
-			fail("should have thrown");
-		} catch (RuntimeException e) {
-			assertEquals("SomeString", e.getMessage());
-		}
+		evaluate("throw 'SomeString'", RuntimeException.class);
 	}
 
 	@Test
@@ -235,12 +224,12 @@ public abstract class StatementTest {
 		evaluate("l=[1,2,3,4];l2=[]for (i in l){ if(i<3)continue; l2.add(i)}");
 		assertEquals("[3, 4]", context.get("l2").toString());
 		evaluate("for(i=0;i<=10;i++) {if(i<10)continue;i+=10}");
-		assertEquals(21, context.get("i"));		
+		assertEquals(21, context.get("i"));
 	}
-	
+
 	@Test
-	public void nestedLoopBreak(){
-		evaluate("for(i=0;i<15;i++) for(j=0;i<15;j++)break");
+	public void nestedLoopBreak() {
+		evaluate("for(i=0;i<15;i++) for(j=0;j<15;j++)break");
 		assertEquals(0, context.get("j"));
 		assertEquals(15, context.get("i"));
 	}

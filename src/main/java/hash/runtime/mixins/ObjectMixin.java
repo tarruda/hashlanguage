@@ -14,7 +14,7 @@ public class ObjectMixin extends Mixin {
 
 	private ObjectMixin() {
 		installMethod(new BinaryOperator("==") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
@@ -31,7 +31,7 @@ public class ObjectMixin extends Mixin {
 			}
 		});
 		installMethod(new BinaryOperator("!=") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
@@ -48,7 +48,7 @@ public class ObjectMixin extends Mixin {
 			}
 		});
 		installMethod(new BinaryOperator(">=") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
@@ -61,7 +61,7 @@ public class ObjectMixin extends Mixin {
 			}
 		});
 		installMethod(new BinaryOperator(">") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
@@ -74,7 +74,7 @@ public class ObjectMixin extends Mixin {
 			}
 		});
 		installMethod(new BinaryOperator("<=") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
@@ -87,7 +87,7 @@ public class ObjectMixin extends Mixin {
 			}
 		});
 		installMethod(new BinaryOperator("<") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
@@ -106,7 +106,7 @@ public class ObjectMixin extends Mixin {
 			}
 		});
 		installMethod(new BinaryOperator("||") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
@@ -130,7 +130,7 @@ public class ObjectMixin extends Mixin {
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				return Runtime.invokeNormalMethod(args[0],
 						Constants.GET_ATTRIBUTE);
 			}

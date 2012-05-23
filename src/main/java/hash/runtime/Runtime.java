@@ -1,5 +1,6 @@
 package hash.runtime;
 
+import hash.lang.Context;
 import hash.lang.Function;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
@@ -61,7 +62,8 @@ public class Runtime {
 		return rv;
 	}
 
-	public static Object invokeFunction(Object f, Object... args) {
+	public static Object invokeFunction(Object f, Object... args)
+			throws Throwable {
 		Object[] fArgs = new Object[args.length + 1];
 		fArgs[0] = null;
 		for (int i = 0; i < args.length; i++)
@@ -72,17 +74,18 @@ public class Runtime {
 	}
 
 	public static Object invokeBinaryOperator(String operator,
-			Object leftOperand, Object rightOperand) {
+			Object leftOperand, Object rightOperand) throws Throwable {
 		return invokeSpecialMethod(leftOperand,
 				BinaryOperator.getSlotName(operator), rightOperand);
 	}
 
-	public static Object invokeUnaryOperator(String operator, Object operand) {
+	public static Object invokeUnaryOperator(String operator, Object operand)
+			throws Throwable {
 		return invokeSpecialMethod(operand, UnaryOperator.getSlotName(operator));
 	}
 
 	public static Object invokeNormalMethod(Object target, Object methodKey,
-			Object... args) {
+			Object... args) throws Throwable {
 		Object f = getAttribute(target, methodKey);
 		if (!(f instanceof Function))
 			throw Err.attributeNotFunction(methodKey);
@@ -91,15 +94,17 @@ public class Runtime {
 
 	/**
 	 * Invokes a method ignoring the 'getAttr/getItem' accessors.
+	 * 
+	 * @throws Throwable
 	 */
 	public static Object invokeSpecialMethod(Object target, Object methodKey,
-			Object... args) {
+			Object... args) throws Throwable {
 		Function f = getSpecialMethod(target, methodKey);
 		return invokeMethod(f, target, methodKey, args);
 	}
 
 	private static Object invokeMethod(Function f, Object target,
-			Object methodKey, Object... args) {
+			Object methodKey, Object... args) throws Throwable {
 		Object[] methodArgs = new Object[args.length + 1];
 		methodArgs[0] = target;
 		for (int i = 0; i < args.length; i++)
@@ -107,28 +112,31 @@ public class Runtime {
 		return f.invoke(methodArgs);
 	}
 
-	public static Object getAttribute(Object target, Object key) {
+	public static Object getAttribute(Object target, Object key)
+			throws Throwable {
 		return getSpecialMethod(target, Constants.GET_ATTRIBUTE).invoke(target,
 				key);
 	}
 
-	public static Object setAttribute(Object target, Object key, Object value) {
+	public static Object setAttribute(Object target, Object key, Object value)
+			throws Throwable {
 		return getSpecialMethod(target, Constants.SET_ATTRIBUTE).invoke(target,
 				key, value);
 	}
 
-	public static Object getIndex(Object target, Object key) {
+	public static Object getIndex(Object target, Object key) throws Throwable {
 		return getSpecialMethod(target, Constants.GET_INDEX)
 				.invoke(target, key);
 	}
 
-	public static Object setIndex(Object target, Object key, Object value) {
+	public static Object setIndex(Object target, Object key, Object value)
+			throws Throwable {
 		return getSpecialMethod(target, Constants.SET_INDEX).invoke(target,
 				key, value);
 	}
 
 	public static Object getSlice(Object target, Object lowerBound,
-			Object upperBound, Object step) {
+			Object upperBound, Object step) throws Throwable {
 		return getSpecialMethod(target, Constants.GET_SLICE).invoke(target,
 				lowerBound, upperBound, step);
 	}
@@ -160,9 +168,9 @@ public class Runtime {
 		return rv;
 	}
 
-	public static RuntimeException throwObj(Object throwable) {
+	public static Throwable throwableObj(Object throwable) {
 		if (throwable instanceof Throwable)
-			return new RuntimeException((Throwable) throwable);
+			return (Throwable) throwable;
 		else
 			return new RuntimeException(throwable.toString());
 	}
@@ -172,6 +180,15 @@ public class Runtime {
 			return ((Iterable) nodeData).iterator();
 		throw Err
 				.illegalArg("For loop cannot get an iterator from this object");
+	}
+
+	public static Context getContext(int level, Context current) {
+		Context c = current;
+		while (level > 0 && c.getParent() != null) {
+			c = c.getParent();
+			level--;
+		}
+		return c;
 	}
 
 }

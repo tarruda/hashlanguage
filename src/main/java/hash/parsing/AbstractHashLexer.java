@@ -26,7 +26,7 @@ public abstract class AbstractHashLexer extends Lexer {
 	private static final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			+ "abcdefghijklmnopqrstuvwxyz" + "_$";
 	private static final String digits = "0123456789";
-	private static final String whiteSpaces = " \n\t\r";		
+	private static final String whiteSpaces = " \n\t\r";
 	private int lastMatchedToken = Token.EOF;
 	private boolean eof = false;
 
@@ -60,7 +60,7 @@ public abstract class AbstractHashLexer extends Lexer {
 	@Override
 	public void displayRecognitionError(String[] tokenNames,
 			RecognitionException e) {
-		//super.displayRecognitionError(tokenNames, e);		
+		// super.displayRecognitionError(tokenNames, e);
 		throw new ParsingException(e);
 	}
 
@@ -123,10 +123,12 @@ public abstract class AbstractHashLexer extends Lexer {
 				return false;
 			buffer.appendCodePoint(c);
 			i++;
-			if (matches(delimiter, i))
+			if (matches(delimiter, i)) {
+				i += delimiter.length;
 				break;
+			}
 		}
-		input.seek(i);
+		input.seek(i - 1 + input.index());
 		setText(buffer.toString());
 		return true;
 	}
@@ -158,11 +160,13 @@ public abstract class AbstractHashLexer extends Lexer {
 			if (la(i) == '\n') {
 				buffer.appendCodePoint('\n');
 				i += indent + 1;
-				if (matches(delimiter, i))
+				if (matches(delimiter, i)) {
+					i += delimiter.length;
 					break;
+				}
 			}
 		}
-		input.seek(i);
+		input.seek(i + input.index() - 1);
 		setText(buffer.toString());
 		return true;
 	}

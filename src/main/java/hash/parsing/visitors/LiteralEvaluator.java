@@ -1,8 +1,7 @@
-package hash.parsing.visitors.evaluators;
+package hash.parsing.visitors;
 
-import hash.parsing.visitors.AstVisitor;
-
-import org.antlr.runtime.tree.Tree;
+import hash.parsing.tree.HashNode;
+import hash.parsing.visitors.simplevm.Result;
 
 public class LiteralEvaluator extends AstVisitor {
 	public void advance(Integer n) {
@@ -17,36 +16,36 @@ public class LiteralEvaluator extends AstVisitor {
 	}
 
 	@Override
-	protected Tree visitInteger(Tree node) {
+	protected HashNode visitInteger(HashNode node) {
 		String txt = node.getText();
 		Long val = Long.parseLong(txt, 16);
 		int iVal = val.intValue();
 		if (val.longValue() == iVal)
-			return new ExpressionResult(iVal);
-		return new ExpressionResult(val);
+			return new Result(iVal);
+		return new Result(val);
 	}
 
 	@Override
-	protected Tree visitFloat(Tree node) {
+	protected HashNode visitFloat(HashNode node) {
 		String txt = node.getText();
 		Double val = Double.parseDouble(txt);
-		return new ExpressionResult(val);
+		return new Result(val);
 	}
 
 	@Override
-	protected Tree visitString(Tree node) {
-		return new ExpressionResult(node.getText());
+	protected HashNode visitString(HashNode node) {
+		return new Result(node.getText());
 	}
 
 	@Override
-	protected Tree visitBoolean(Tree node) {
+	protected HashNode visitBoolean(HashNode node) {
 		String txt = node.getText();
-		return new ExpressionResult(Boolean.parseBoolean(txt));
+		return new Result(Boolean.parseBoolean(txt));
 	}
 
 	@Override
-	protected Tree visitNull(Tree node) {
-		return new ExpressionResult(null);
+	protected HashNode visitNull(HashNode node) {
+		return new Result(null);
 	}
 
 }

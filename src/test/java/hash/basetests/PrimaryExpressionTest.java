@@ -8,11 +8,9 @@ import hash.runtime.JvmBridge;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class PrimaryExpressionTest {
+public abstract class PrimaryExpressionTest extends AbstractCodeTest {
 
 	protected Context context;
-
-	protected abstract Object evaluate(String expression);
 
 	@Before
 	public void setup() {
@@ -63,10 +61,9 @@ public abstract class PrimaryExpressionTest {
 		assertEquals("[5, Test]", evaluate("l.toString()"));
 	}
 
-	@Test(expected = ClassCastException.class)
 	public void nullArgument() {
 		evaluate("l=[5,10]");
-		evaluate("l[1.2]");
+		evaluate("l[1.2]", ClassCastException.class);
 	}
 
 	@Test
@@ -120,7 +117,7 @@ public abstract class PrimaryExpressionTest {
 		assertEquals(93.7, evaluate("account.balance"));
 	}
 
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void methodInvocationValidation() {
 		// A function is classified as a method if it makes any reference
 		// to 'this'.
@@ -133,7 +130,7 @@ public abstract class PrimaryExpressionTest {
 		assertEquals(62, evaluate("f()"));
 		// Throws since m is a method(must be invoked as an attribute or index
 		// of an object)
-		evaluate("m()");
+		evaluate("m()", RuntimeException.class);
 	}
 
 	@Test

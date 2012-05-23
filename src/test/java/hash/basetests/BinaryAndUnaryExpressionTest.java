@@ -11,11 +11,9 @@ import org.antlr.runtime.RecognitionException;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class BinaryAndUnaryExpressionTest {
+public abstract class BinaryAndUnaryExpressionTest extends AbstractCodeTest {
 
 	protected Context context;
-
-	protected abstract Object evaluate(String expression);
 
 	@Before
 	public void setup() {
@@ -27,14 +25,15 @@ public abstract class BinaryAndUnaryExpressionTest {
 		context.put("x", 255);
 		context.put("y", "Str");
 		assertEquals(255, evaluate("x"));
-		assertEquals("StrStrStrStrStr", evaluate("y*=5"));
+		evaluate("y*=5");
+		assertEquals("StrStrStrStrStr", evaluate("y"));
 		assertEquals("StrStrStrStrStrStrStrStrStrStr", evaluate("2 * y"));
 	}
 
 	@Test
 	public void regexes() {
 		evaluate("r=/staticpattern/");
-		evaluate("ri=/staticpattern/i");	
+		evaluate("ri=/staticpattern/i");
 		assertEquals(true, evaluate("r =~ 'staticpattern'"));
 		assertEquals(false, evaluate("r =~ 'staticpatterN'"));
 		assertEquals(true, evaluate("ri =~ 'staticpatterN'"));
@@ -44,17 +43,16 @@ public abstract class BinaryAndUnaryExpressionTest {
 
 	@Test
 	public void assignments() {
-		assertEquals(5, evaluate("x = 5"));
-		assertEquals(5, evaluate("x"));
-		assertEquals(10, evaluate("x+=5"));
-		assertEquals(30, evaluate("x*=3"));
-		assertEquals(0, evaluate("x%=3"));
-		assertEquals(1, evaluate("++x"));
-		assertEquals(2, evaluate("++x"));
+		assertEquals(5, evaluate("x = 5;x"));		
+		assertEquals(10, evaluate("x+=5;x"));
+		assertEquals(30, evaluate("x*=3;x"));
+		assertEquals(0, evaluate("x%=3;x"));
+		assertEquals(1, evaluate("++x;x"));
+		assertEquals(2, evaluate("++x;x"));
 		assertEquals(2, evaluate("x++"));
 		assertEquals(3, evaluate("x++"));
 		assertEquals(4, evaluate("x++"));
-		assertEquals(5, evaluate("z = y = x"));
+		assertEquals(5, evaluate("z = y = x;z"));
 		assertEquals(5, evaluate("y"));
 		assertEquals(5, evaluate("z"));
 	}
@@ -255,22 +253,22 @@ public abstract class BinaryAndUnaryExpressionTest {
 		assertEquals(true, evaluate("false==false==true==false==false"));
 		assertEquals(false, evaluate("1<2==(3>4)==false==(12<=3*4)==false"));
 	}
-	
+
 	@Test
 	public void listContains() throws RecognitionException {
 		assertEquals(true, evaluate("3 in [1,2,3,4,5]"));
-		assertEquals(false, evaluate("3 in [1,2,4,5]"));	
+		assertEquals(false, evaluate("3 in [1,2,4,5]"));
 	}
-	
+
 	@Test
 	public void mapContains() throws RecognitionException {
 		assertEquals(true, evaluate("'name' in {name:'Value'}"));
-		assertEquals(false, evaluate("'name' in {key:'Value'}"));	
+		assertEquals(false, evaluate("'name' in {key:'Value'}"));
 	}
-	
+
 	@Test
 	public void identityOperator() throws RecognitionException {
-		assertEquals(true, evaluate("'p1p2' == 'p1' + 'p2'"));		
-		assertEquals(false, evaluate("'p1p2' is 'p1' + 'p2'"));		
+		assertEquals(true, evaluate("'p1p2' == 'p1' + 'p2'"));
+		assertEquals(false, evaluate("'p1p2' is 'p1' + 'p2'"));
 	}
 }

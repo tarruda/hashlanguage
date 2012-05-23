@@ -61,7 +61,7 @@ public class NumberMixin extends Mixin {
 			}
 		});
 		installMethod(new BinaryOperator("*") {
-			public Object invoke(Object... args) {
+			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];

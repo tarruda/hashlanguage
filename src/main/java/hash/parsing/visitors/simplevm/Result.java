@@ -1,17 +1,17 @@
-package hash.parsing.visitors.evaluators;
+package hash.parsing.visitors.simplevm;
 
 import hash.parsing.tree.EmptyNode;
 
 /**
- * Node for storing the result of program evaluation
+ * Node for storing some result relevant to a particular kind of tree walking
  * 
  * @author Thiago de Arruda
  * 
  */
-public class ExpressionResult extends EmptyNode  {
+public class Result extends EmptyNode  {
 	private Object evaluationResult;
 
-	public ExpressionResult(Object evaluationResult) {
+	public Result(Object evaluationResult) {
 		this.evaluationResult = evaluationResult;
 	}
 

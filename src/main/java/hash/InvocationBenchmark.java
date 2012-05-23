@@ -11,7 +11,7 @@ import java.util.HashMap;
  * 
  */
 public class InvocationBenchmark {
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Throwable {
 		doRegular(10);
 		doHash(10);
 		doReflectionCachedMethod(10);
@@ -27,7 +27,7 @@ public class InvocationBenchmark {
 				System.currentTimeMillis() - start));
 	}
 
-	public static void doHash(Object arg) throws Exception {
+	public static void doHash(Object arg) throws Throwable {
 		HashMap hm = createHashClass();
 		Object stub = new Stub();
 		long start = System.currentTimeMillis();

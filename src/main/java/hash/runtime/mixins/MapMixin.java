@@ -19,7 +19,7 @@ public class MapMixin extends Mixin {
 				Check.numberOfArgs(args, 2);
 				Map self = (Map) args[0];
 				Object other = args[1];
-				return self.containsKey(other);				
+				return self.containsKey(other);
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.SET_ATTRIBUTE) {
@@ -41,13 +41,15 @@ public class MapMixin extends Mixin {
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.SET_INDEX) {
-			public Object invoke(Object... args) {
-				return Runtime.invokeNormalMethod(args[0], Constants.SET_ATTRIBUTE);
+			public Object invoke(Object... args) throws Throwable {
+				return Runtime.invokeNormalMethod(args[0],
+						Constants.SET_ATTRIBUTE);
 			}
-		});		
+		});
 		installMethod(new BuiltinMethod(Constants.DEL_INDEX) {
-			public Object invoke(Object... args) {
-				return Runtime.invokeNormalMethod(args[0], Constants.DEL_ATTRIBUTE);
+			public Object invoke(Object... args) throws Throwable {
+				return Runtime.invokeNormalMethod(args[0],
+						Constants.DEL_ATTRIBUTE);
 			}
 		});
 	}

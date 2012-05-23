@@ -1,6 +1,5 @@
 package hash.lang;
 
-
 public interface Function {
-	Object invoke(Object... args);
+	Object invoke(Object... args) throws Throwable;
 }
