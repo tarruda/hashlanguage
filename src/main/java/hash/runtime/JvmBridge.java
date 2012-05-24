@@ -1,5 +1,13 @@
 package hash.runtime;
 
+import hash.jvm.ClassGenerator;
+import hash.jvm.ConstructorInvocation;
+import hash.jvm.If;
+import hash.jvm.InstanceMethodInvocation;
+import hash.jvm.Invocation;
+import hash.jvm.MethodGenerator;
+import hash.jvm.StaticMethodInvocation;
+import hash.jvm.VirtualMachineCodeFactory;
 import hash.runtime.functions.JavaMethod;
 import hash.runtime.mixins.ArrayMixin;
 import hash.runtime.mixins.BooleanMixin;
@@ -14,19 +22,12 @@ import hash.runtime.mixins.RegexMixin;
 import hash.runtime.mixins.StringMixin;
 import hash.util.Constants;
 import hash.util.Err;
-import hash.vm.ClassGenerator;
-import hash.vm.ConstructorInvocation;
-import hash.vm.If;
-import hash.vm.InstanceMethodInvocation;
-import hash.vm.Invocation;
-import hash.vm.MethodGenerator;
-import hash.vm.StaticMethodInvocation;
-import hash.vm.VirtualMachineCodeFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,7 +161,7 @@ public class JvmBridge extends ClassLoader implements Opcodes {
 		String fullname = "hash.generated." + klass.getCanonicalName() + "."
 				+ methodName + "Wrapper";
 		ClassGenerator gen = f.classGenerator(fullname, JavaMethod.class);
-		gen.addSimpleConstructor(String.class, String.class, Boolean.TYPE);		
+		gen.addSimpleConstructor(String.class, String.class, Boolean.TYPE);
 		MethodGenerator m = gen.addMethod("invoke", Object.class,
 				Object[].class);
 		implementAdapter(m, methods);
@@ -228,7 +229,12 @@ public class JvmBridge extends ClassLoader implements Opcodes {
 						|| Modifier.isPrivate(mod) || Modifier.isProtected(mod)
 						|| isIgnored(method))
 					continue;
-				rv.add(new MethodOrConstructor(method));
+				if (!Modifier.isPublic(klass.getModifiers()))
+					// look for a public superclass/interface method that has
+					// the same signature
+					method = lookupAccessibleMethod(method, klass);
+				if (method != null)
+					rv.add(new MethodOrConstructor(method));
 			}
 			return rv;
 		}
@@ -236,12 +242,34 @@ public class JvmBridge extends ClassLoader implements Opcodes {
 		public static List<MethodOrConstructor> getDeclaredConstructors(
 				Class<?> klass) {
 			ArrayList<MethodOrConstructor> rv = new ArrayList<MethodOrConstructor>();
-			for (Constructor constructor : klass.getDeclaredConstructors()) {
-				int mod = constructor.getModifiers();
-				if (Modifier.isPublic(mod))
-					rv.add(new MethodOrConstructor(constructor));
-			}
+			if (Modifier.isPublic(klass.getModifiers()))
+				for (Constructor constructor : klass.getDeclaredConstructors()) {
+					if (Modifier.isPublic(constructor.getModifiers()))
+						rv.add(new MethodOrConstructor(constructor));
+				}
 			return rv;
+		}
+
+		private static Method lookupAccessibleMethod(Method method,
+				Class<?> klass) {
+			String name = method.getName();
+			Class rtype = method.getReturnType();
+			Class[] ptypes = method.getParameterTypes();
+			for (Method m : klass.getDeclaredMethods())
+				if (Modifier.isPublic(klass.getModifiers())
+						&& Modifier.isPublic(m.getModifiers())
+						&& m.getName().equals(name)
+						&& m.getReturnType() == rtype
+						&& Arrays.equals(ptypes, m.getParameterTypes()))
+					return m;
+			Method m = null;
+			Class superClass = klass.getSuperclass();
+			if (superClass != null)
+				m = lookupAccessibleMethod(method, superClass);
+			Class[] interfaces = klass.getInterfaces();
+			for (int i = 0; m == null && i < interfaces.length; i++)
+				m = lookupAccessibleMethod(method, interfaces[i]);
+			return m;
 		}
 
 		private static boolean isIgnored(Method method) {

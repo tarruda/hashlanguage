@@ -42,7 +42,8 @@ public class SimpleVmTester {
 						.format("Incompatible exception type, expecting '%s', caught '%s'",
 								exceptionClass.getCanonicalName(), ex
 										.getClass().getCanonicalName()));
-		}
+		} else if (ex != null)
+			throw new RuntimeException(ex);
 		return rv;
 	}
 }

@@ -4,7 +4,7 @@ import hash.lang.Context;
 import hash.lang.Continuation;
 import hash.util.Err;
 
-public class SimpleVmContinuation implements Continuation {
+class SimpleVmContinuation implements Continuation {
 
 	private Context locals;
 	private Instruction[] instructions;

@@ -322,7 +322,10 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 			int catchPointer = code.size() - 1;
 			code.add(Instructions.pop());
 			visit((HashNode) catchBlock.getChild(2));
-			code.add(finallyStart);
+			if (finallyStart != null)
+				code.add(finallyStart);
+			else
+				code.add(tryCatchEnd);
 			code.addTryCatchBlock(tryStart, tryEnd, catchPointer,
 					exceptionTypeId);
 		}
