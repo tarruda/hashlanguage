@@ -93,4 +93,8 @@ public class Err {
 	public static RuntimeException notImplemented() {
 		return new UnsupportedOperationException();
 	}
+
+	public static IllegalStateException illegalState(String string) {
+		return new IllegalStateException(string);
+	}
 }

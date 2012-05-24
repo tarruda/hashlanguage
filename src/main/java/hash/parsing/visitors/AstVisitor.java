@@ -80,11 +80,12 @@ public abstract class AstVisitor {
 		case THROW:
 			return visitThrow(node, (HashNode) node.getChild(0));
 		case FUNCTION:
-			checkIfFunctionIsMethod(node, (HashNode) node.getChild(1));
+			markFunctionAsMethodOrContinuation(node,
+					(HashNode) node.getChild(1));
 			return visitFunction((HashNode) node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1));
 		case RETURN:
-			validateReturn(node);
+			validateReturnAndYield(node);
 			return visitReturn(node, (HashNode) node.getChild(0));
 		case CONTINUE:
 			validateContinue(node);
@@ -93,9 +94,11 @@ public abstract class AstVisitor {
 			validateBreak(node);
 			return visitBreak(node);
 		case YIELD:
-			return visitYield(node);
+			validateReturnAndYield(node);
+			return visitYield(node, (HashNode) node.getChild(0));
 		case RESUME:
-			return visitResume(node);
+			return visitSwitch(node, (HashNode) node.getChild(0),
+					(HashNode) node.getChild(1));
 		case BLOCK:
 		case FUNCTIONBLOCK:
 			return visitBlock(node);
@@ -195,14 +198,13 @@ public abstract class AstVisitor {
 		return node;
 	}
 
-	protected HashNode visitResume(HashNode node) {
+	protected HashNode visitSwitch(HashNode node, HashNode continuation,
+			HashNode arg) {
 		return node;
 	}
 
-	private HashNode visitYield(HashNode node) {
-		throw new TreeValidationException(node.getLine(),
-				node.getCharPositionInLine(),
-				"Yield expression can only exist inside a function");
+	protected HashNode visitYield(HashNode node, HashNode yieldExpression) {
+		return node;
 	}
 
 	protected HashNode visitContinue(HashNode node) {
@@ -292,7 +294,7 @@ public abstract class AstVisitor {
 		return node;
 	}
 
-	private void validateReturn(HashNode node) {
+	private void validateReturnAndYield(HashNode node) {
 		// Return statement must be inside a function
 		boolean insideFunction = false;
 		Tree current = node;
@@ -301,7 +303,7 @@ public abstract class AstVisitor {
 		if (!insideFunction)
 			throw new TreeValidationException(node.getLine(),
 					node.getCharPositionInLine(),
-					"Return statement can only exist inside a function");
+					"Return statement/yield expression can only exist inside a function");
 	}
 
 	private void validateBreak(HashNode node) {
@@ -347,25 +349,31 @@ public abstract class AstVisitor {
 					"Assignment target must be an identifier, attribute or index");
 	}
 
-	private void checkIfFunctionIsMethod(HashNode node, HashNode block) {
+	private void markFunctionAsMethodOrContinuation(HashNode node,
+			HashNode block) {
 		// here if verify if the function body contains any reference to 'this'.
 		// if so, we mark the function as a method(it can only be invoked with
 		// the first implicit argument)
-		boolean found = searchThisExpression(block);
-		if (found)
+		boolean isMethod = searchExpressionType(block, THIS);
+		boolean returnsContinuation = searchExpressionType(block, YIELD);
+		if (isMethod)
 			node.setNodeData(HashNode.IS_METHOD, true);
+		if (returnsContinuation)
+			node.setNodeData(HashNode.RETURNS_CONTINUATION, true);
 	}
-
-	private boolean searchThisExpression(HashNode current) {
+	
+	private boolean searchExpressionType(HashNode current, int type) {
 		if (current.getType() == FUNCTION)
 			// we dont want to descend into closures
 			return false;
-		if (current.getType() == THIS)
+		if (current.getType() == type)
 			return true;
 		int len = current.getChildCount();
 		boolean rv = false;
 		for (int i = 0; !rv && i < len; i++)
-			rv = rv || searchThisExpression((HashNode) current.getChild(i));
+			rv = rv
+					|| searchExpressionType((HashNode) current.getChild(i),
+							type);
 		return rv;
 	}
 

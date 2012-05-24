@@ -47,7 +47,10 @@ public class OperandStack {
 		sb.append("[");
 		Node n = top;
 		while (n != null) {
-			sb.append(n.value.toString());
+			if (n.value != null)
+				sb.append(n.value.toString());
+			else
+				sb.append("null");
 			sb.append(", ");
 			n = n.previous;
 		}

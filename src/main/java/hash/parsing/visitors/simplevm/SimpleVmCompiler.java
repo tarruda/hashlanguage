@@ -9,6 +9,7 @@ import static hash.parsing.HashParser.NULL;
 import static hash.parsing.HashParser.RETURN;
 import hash.parsing.tree.HashNode;
 import hash.parsing.visitors.LiteralEvaluator;
+import hash.parsing.visitors.Result;
 import hash.simplevm.Code;
 import hash.simplevm.Instruction;
 import hash.simplevm.Instructions;
@@ -164,6 +165,22 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	}
 
 	@Override
+	protected HashNode visitSwitch(HashNode node, HashNode continuation,
+			HashNode arg) {
+		int pointer = (Integer) visit(continuation).getNodeData();
+		visit(arg);
+		code.add(Instructions.resume());
+		return new Result(pointer);
+	}
+
+	@Override
+	protected HashNode visitYield(HashNode node, HashNode yieldExpression) {
+		int pointer = (Integer) visit(yieldExpression).getNodeData();
+		code.add(Instructions.yield());
+		return new Result(pointer);
+	}
+
+	@Override
 	protected HashNode visitBreak(HashNode node) {
 		HashNode current = node;
 		while (current.getParent() != null) {
@@ -200,7 +217,8 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 				p = visit(child);
 				if (pointer == -1)
 					pointer = (Integer) p.getNodeData();
-				if (child.getType() == ASSIGN)
+				if (child.getType() == ASSIGN)// || child.getType() ==
+												// INVOCATION)
 					code.add(Instructions.pop());
 			}
 			return new Result(pointer);
@@ -246,14 +264,6 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		int pointer = (Integer) visit(throwableExpression).getNodeData();
 		code.add(Instructions.throwTop());
 		return new Result(pointer);
-	}
-
-	public void A(Integer x) {
-		try {
-			System.out.println(x.toString());
-		} finally {
-			System.err.println("a");
-		}
 	}
 
 	@Override
@@ -384,45 +394,21 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	@Override
 	protected HashNode visitFunction(HashNode node, HashNode parameters,
 			HashNode block) {
-		boolean isMethod = false;
-		isMethod = node.getNodeData(HashNode.IS_METHOD) == Boolean.TRUE;
+		boolean isMethod = node.getNodeData(HashNode.IS_METHOD) == Boolean.TRUE;
+		boolean returnsContinuation = node
+				.getNodeData(HashNode.RETURNS_CONTINUATION) == Boolean.TRUE;
 		int len = parameters.getChildCount();
 		List params = new ArrayList(len);
 		for (int i = 0; i < len; i++)
 			params.add(parameters.getChild(i).getText());
 		SimpleVmCompiler compiler = new SimpleVmCompiler();
-		List<HashNode> returnStatements = new ArrayList<HashNode>();
-		int blockLen = block.getChildCount();
-		for (int i = 0; i < blockLen; i++)
-			collectAllReturnStatements(returnStatements,
-					(HashNode) block.getChild(i));
-		JumpInstruction functionStart = Instructions.jump();
-		HashMap<HashNode, JumpInstruction> jumpsToReturnStatements = new HashMap<HashNode, JumpInstruction>();
-		compiler.code.add(functionStart);
-		for (HashNode hashNode : returnStatements) {
-			int pointer = (Integer) compiler.visit(
-					(HashNode) hashNode.getChild(0)).getNodeData();
-			compiler.code.add(Instructions.ret());
-			jumpsToReturnStatements.put(hashNode, Instructions.jump(pointer));
-		}
-		block.setNodeData(JUMPRETURN, jumpsToReturnStatements);
-		functionStart.setTarget((Integer) compiler.visit(block).getNodeData());
-		code.add(Instructions.pushFunction(params, compiler.code, isMethod));
+		setupReturns(block, compiler);
+		if (returnsContinuation)
+			code.add(Instructions.pushContinuationFactory(params,
+					compiler.code, isMethod));
+		else
+			code.add(Instructions.pushFunction(params, compiler.code, isMethod));
 		return new Result(code.size() - 1);
-	}
-
-	private void collectAllReturnStatements(List<HashNode> returnStatements,
-			HashNode current) {
-		if (current.getType() == FUNCTIONBLOCK)
-			return;
-		if (current.getType() == RETURN)
-			returnStatements.add(current);
-		else {
-			int len = current.getChildCount();
-			for (int i = 0; i < len; i++)
-				collectAllReturnStatements(returnStatements,
-						(HashNode) current.getChild(i));
-		}
 	}
 
 	@Override
@@ -545,4 +531,38 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		}
 		return null;
 	}
+
+	private void setupReturns(HashNode block, SimpleVmCompiler compiler) {
+		List<HashNode> returnStatements = new ArrayList<HashNode>();
+		int blockLen = block.getChildCount();
+		for (int i = 0; i < blockLen; i++)
+			collectAllReturnStatements(returnStatements,
+					(HashNode) block.getChild(i));
+		JumpInstruction functionStart = Instructions.jump();
+		HashMap<HashNode, JumpInstruction> jumpsToReturnStatements = new HashMap<HashNode, JumpInstruction>();
+		compiler.code.add(functionStart);
+		for (HashNode hashNode : returnStatements) {
+			int pointer = (Integer) compiler.visit(
+					(HashNode) hashNode.getChild(0)).getNodeData();
+			compiler.code.add(Instructions.ret());
+			jumpsToReturnStatements.put(hashNode, Instructions.jump(pointer));
+		}
+		block.setNodeData(JUMPRETURN, jumpsToReturnStatements);
+		functionStart.setTarget((Integer) compiler.visit(block).getNodeData());
+	}
+
+	private void collectAllReturnStatements(List<HashNode> returnStatements,
+			HashNode current) {
+		if (current.getType() == FUNCTIONBLOCK)
+			return;
+		if (current.getType() == RETURN)
+			returnStatements.add(current);
+		else {
+			int len = current.getChildCount();
+			for (int i = 0; i < len; i++)
+				collectAllReturnStatements(returnStatements,
+						(HashNode) current.getChild(i));
+		}
+	}
+
 }

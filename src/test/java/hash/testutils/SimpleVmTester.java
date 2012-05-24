@@ -19,21 +19,30 @@ public class SimpleVmTester {
 	}
 
 	public static Object eval(String code, Context context, Class exceptionClass) {
+		Throwable ex = null;
 		SimpleVmCompiler compiler = new SimpleVmCompiler();
 		ANTLRStringStream source = new ANTLRStringStream(code);
 		HashParser parser = ParserFactory.createParser(source);
 		program_return psrReturn = null;
+		Object rv = null;
 		try {
 			psrReturn = parser.program();
 			HashNode t = (HashNode) psrReturn.getTree();
 			compiler.visit(t);
 			Code c = compiler.getCode();
-			return SimpleVm
-					.execute(c.toArray(), c.getTryCatchBlocks(), context);
+			rv = SimpleVm.execute(c.toArray(), c.getTryCatchBlocks(), context);
 		} catch (Throwable e) {
-			if (exceptionClass != null && exceptionClass != e.getClass())
-				fail(e.getMessage());
-			return null;
+			ex = e;
 		}
+		if (exceptionClass != null) {
+			if (ex == null)
+				fail("Expecting exception");
+			else if (!exceptionClass.isAssignableFrom(ex.getClass()))
+				fail(String
+						.format("Incompatible exception type, expecting '%s', caught '%s'",
+								exceptionClass.getCanonicalName(), ex
+										.getClass().getCanonicalName()));
+		}
+		return rv;
 	}
 }

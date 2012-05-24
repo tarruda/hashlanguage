@@ -28,8 +28,9 @@ public class JumpInstruction extends Instruction {
 
 	@Override
 	public void exec(Context local, OperandStack operandStack,
-			InstructionPointer pointer) throws Throwable {
-		pointer.setNext(getTarget());
+			InstructionPointer pointer, ExecutionState functionReturn)
+			throws Throwable {
+		pointer.p = getTarget();
 	}
 
 	@Override

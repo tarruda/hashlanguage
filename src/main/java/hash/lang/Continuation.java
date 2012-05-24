@@ -2,5 +2,8 @@ package hash.lang;
 
 public interface Continuation {
 
-	Object resume(Object arg);
+	Object resume(Object arg) throws Throwable;	
+	
+	boolean isAlive();
+	
 }

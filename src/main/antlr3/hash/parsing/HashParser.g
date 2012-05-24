@@ -210,13 +210,13 @@ expression
   ;
   
 resumeExpression
-  : RESUME name=nameRef arg=expression 
-    -> ^(RESUME $name $arg)
+  : RESUME name=nameRef (arg=expression)? 
+    -> ^(RESUME $name {nodeOrNull(arg)})
   ;
   
 yieldExpression
-  : YIELD arg=expression
-    -> ^(YIELD $arg)
+  : YIELD (arg=expression)?
+    -> ^(YIELD {nodeOrNull(arg)})
   ;
 
 functionExpression

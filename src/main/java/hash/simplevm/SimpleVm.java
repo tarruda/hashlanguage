@@ -5,24 +5,35 @@ import hash.lang.Context;
 public class SimpleVm {
 
 	public static Object execute(Instruction[] instructions,
-			TryCatchBlock[] tryCatchBlocks, Context context) throws Throwable {
+			TryCatchBlock[] tryCatchBlocks, Context locals) throws Throwable {
+		return execute(instructions, tryCatchBlocks, locals,
+				new OperandStack(), new InstructionPointer());
+	}
+
+	static Object execute(Instruction[] instructions,
+			TryCatchBlock[] tryCatchBlocks, Context locals,
+			OperandStack operandStack, InstructionPointer ip)
+			throws Throwable {
 		int len = instructions.length;
-		OperandStack operandStack = new OperandStack();
-		InstructionPointer pointer = new InstructionPointer();
-		while (pointer.getCurrent() < len - 1) {
+		ExecutionState state = new ExecutionState();
+		while (!state.pause && !state.stop && ip.p < len) {
 			try {
-				instructions[pointer.getNext()].exec(context, operandStack,
-						pointer);
+				instructions[ip.p++].exec(locals, operandStack, ip,
+						state);
 			} catch (Throwable ex) {
 				boolean handled = false;
 				for (int i = 0; !handled && i < tryCatchBlocks.length; i++) {
-					handled = tryCatchBlocks[i].handle(operandStack, context,
-							pointer, ex);
+					handled = tryCatchBlocks[i].handle(operandStack, locals,
+							ip, ex);
 				}
 				if (!handled)
 					throw ex;
 			}
 		}
-		return operandStack.peek();
+		if (state.stop)
+			ip.p = len;
+		if (operandStack.size() > 0)
+			return operandStack.pop();
+		return null;
 	}
 }

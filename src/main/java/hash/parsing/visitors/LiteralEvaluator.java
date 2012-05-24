@@ -1,7 +1,6 @@
 package hash.parsing.visitors;
 
 import hash.parsing.tree.HashNode;
-import hash.parsing.visitors.simplevm.Result;
 
 public class LiteralEvaluator extends AstVisitor {
 	public void advance(Integer n) {

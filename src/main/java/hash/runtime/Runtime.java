@@ -1,6 +1,7 @@
 package hash.runtime;
 
 import hash.lang.Context;
+import hash.lang.Continuation;
 import hash.lang.Function;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
@@ -189,6 +190,12 @@ public class Runtime {
 			level--;
 		}
 		return c;
+	}
+
+	public static Object resumeContinuation(Object continuation, Object arg) throws Throwable {
+		if (!(continuation instanceof Continuation))
+			throw Err.illegalArg("Not a continuation");
+		return ((Continuation) continuation).resume(arg);
 	}
 
 }
