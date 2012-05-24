@@ -2,6 +2,7 @@ package hash.runtime;
 
 import hash.lang.Context;
 import hash.lang.Continuation;
+import hash.lang.ContinuationIterator;
 import hash.lang.Function;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
@@ -176,9 +177,11 @@ public class Runtime {
 			return new RuntimeException(throwable.toString());
 	}
 
-	public static Iterator getIterator(Object nodeData) {
-		if (nodeData instanceof Iterable)
-			return ((Iterable) nodeData).iterator();
+	public static Iterator getIterator(Object obj) {
+		if (obj instanceof Iterable)
+			return ((Iterable) obj).iterator();
+		else if(obj instanceof Continuation)
+			return new ContinuationIterator((Continuation) obj);
 		throw Err
 				.illegalArg("For loop cannot get an iterator from this object");
 	}

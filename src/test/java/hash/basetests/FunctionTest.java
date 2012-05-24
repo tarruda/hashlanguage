@@ -54,4 +54,10 @@ public abstract class FunctionTest extends AbstractCodeTest {
 		evaluate("resume g", IllegalStateException.class);
 	}
 
+	@Test
+	public void iterateContinuation() {
+		evaluate("gen=() { for (i=1;i<=5;i++)yield i };z=0;for(e in gen())z+=e");
+		assertEquals(15, context.get("z"));
+	}
+
 }
