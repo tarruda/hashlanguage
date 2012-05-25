@@ -1,4 +1,4 @@
-package hash.lang;
+package hash.runtime;
 
 import hash.runtime.functions.BuiltinFunction;
 import hash.util.Err;
@@ -9,9 +9,10 @@ import java.util.HashMap;
 public class HashContext extends HashMap implements Context {
 
 	private Context parent;
+	private Object lastEvaluationResult;
 
 	public HashContext() {
-		
+
 	}
 
 	public HashContext(Context parent) {
@@ -34,5 +35,13 @@ public class HashContext extends HashMap implements Context {
 
 	public void installBuiltin(BuiltinFunction f) {
 		put(f.getName(), f);
+	}
+
+	public Object getLastEvaluationResult() {
+		return lastEvaluationResult;
+	}
+
+	public void setLastEvaluationResult(Object value) {
+		lastEvaluationResult = value;
 	}
 }

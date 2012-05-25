@@ -1,8 +1,10 @@
-package hash.lang;
+package hash.runtime;
 
 public interface Continuation {
 
 	Object resume(Object arg) throws Throwable;	
+	
+	Object resume() throws Throwable;	
 	
 	boolean isAlive();
 	

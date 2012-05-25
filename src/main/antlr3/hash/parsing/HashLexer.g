@@ -26,7 +26,7 @@ WHILE: 'while';
 FOR: 'for';
 BREAK: 'break';
 YIELD: 'yield';
-RESUME: 'resume';
+JUMPTO: 'jumpto';
 CONTINUE: 'continue';
 DO: 'do';
 IN: 'in';

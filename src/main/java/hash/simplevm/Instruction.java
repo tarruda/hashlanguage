@@ -1,6 +1,6 @@
 package hash.simplevm;
 
-import hash.lang.Context;
+import hash.runtime.Context;
 
 public abstract class Instruction {
 	private String name;

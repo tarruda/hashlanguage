@@ -1,7 +1,5 @@
 package hash.runtime;
 
-import hash.lang.Context;
-import hash.lang.HashContext;
 import hash.runtime.functions.ClassFactory;
 import hash.runtime.functions.Import;
 

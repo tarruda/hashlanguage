@@ -2,18 +2,34 @@ package hash.parsing.visitors.simplevm;
 
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
+import static hash.parsing.HashParser.BINARY;
+import static hash.parsing.HashParser.BOOLEAN;
+import static hash.parsing.HashParser.FLOAT;
 import static hash.parsing.HashParser.FOREACH;
 import static hash.parsing.HashParser.FUNCTIONBLOCK;
+import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
+import static hash.parsing.HashParser.INTEGER;
+import static hash.parsing.HashParser.INVOCATION;
+import static hash.parsing.HashParser.JUMPTO;
+import static hash.parsing.HashParser.LIST;
+import static hash.parsing.HashParser.MAP;
+import static hash.parsing.HashParser.NAMEREF;
 import static hash.parsing.HashParser.NULL;
+import static hash.parsing.HashParser.REGEX;
 import static hash.parsing.HashParser.RETURN;
+import static hash.parsing.HashParser.SLICE;
+import static hash.parsing.HashParser.STRING;
+import static hash.parsing.HashParser.THIS;
+import static hash.parsing.HashParser.UNARY;
+import static hash.parsing.HashParser.YIELD;
 import hash.parsing.tree.HashNode;
 import hash.parsing.visitors.LiteralEvaluator;
 import hash.parsing.visitors.Result;
 import hash.simplevm.Code;
+import hash.simplevm.GotoInstruction;
 import hash.simplevm.Instruction;
 import hash.simplevm.Instructions;
-import hash.simplevm.JumpInstruction;
 import hash.util.Constants;
 import hash.util.Err;
 
@@ -25,9 +41,9 @@ import java.util.regex.Pattern;
 
 public class SimpleVmCompiler extends LiteralEvaluator {
 	private static final String FOREACH_NESTING = "ForeachNesting";
-	private static final String JUMPCONTINUE = "JumpContinue";
-	private static final String JUMPBREAK = "JumpBreak";
-	private static final String JUMPRETURN = "JumpReturn";
+	private static final String GOTOCONTINUE = "GoToContinue";
+	private static final String GOTOBREAK = "GoToBreak";
+	private static final String GOTORETURN = "GoToReturn";
 
 	private Code code;
 
@@ -42,10 +58,10 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	@Override
 	protected HashNode visitForeach(HashNode node, HashNode id,
 			HashNode iterable, HashNode action) {
-		JumpInstruction jumpEnd = Instructions.jump();
-		JumpInstruction jumpContinue = Instructions.jump();
-		node.setNodeData(JUMPCONTINUE, jumpContinue);
-		node.setNodeData(JUMPBREAK, jumpEnd);
+		GotoInstruction jumpEnd = Instructions.goTo();
+		GotoInstruction jumpContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, jumpContinue);
+		node.setNodeData(GOTOBREAK, jumpEnd);
 		int nestingLevel = 0;
 		HashNode current = node;
 		while (current.getParent() != null && nestingLevel == 0) {
@@ -63,7 +79,7 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		code.add(Instructions.iterator(varName));
 		code.add(Instructions.iteratorNext(varName, id.getText()));
 		int loopStart = code.size() - 1;
-		JumpInstruction endIfFalse = Instructions.jumpIfFalse();
+		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
 		visit(action);
 		code.add(jumpContinue);
@@ -77,20 +93,20 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	@Override
 	protected HashNode visitFor(HashNode node, HashNode init,
 			HashNode condition, HashNode update, HashNode action) {
-		JumpInstruction jumpEnd = Instructions.jump();
-		JumpInstruction jumpContinue = Instructions.jump();
-		node.setNodeData(JUMPCONTINUE, jumpContinue);
-		node.setNodeData(JUMPBREAK, jumpEnd);
+		GotoInstruction jumpEnd = Instructions.goTo();
+		GotoInstruction jumpContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, jumpContinue);
+		node.setNodeData(GOTOBREAK, jumpEnd);
 		int pointer = (Integer) visit(init).getNodeData();
 		code.add(Instructions.pop());
 		int loopStart = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
-		JumpInstruction endIfFalse = Instructions.jumpIfFalse();
+		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
 		visit(action);
 		int loopContinue = (Integer) visit(update).getNodeData();
 		code.add(Instructions.pop());
-		code.add(Instructions.jump(loopStart));
+		code.add(Instructions.goTo(loopStart));
 		int endPointer = code.size();
 		jumpEnd.setTarget(endPointer);
 		endIfFalse.setTarget(endPointer);
@@ -101,13 +117,13 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	@Override
 	protected HashNode visitWhile(HashNode node, HashNode condition,
 			HashNode action) {
-		JumpInstruction jumpBreak = Instructions.jump();
-		JumpInstruction jumpContinue = Instructions.jump();
-		node.setNodeData(JUMPCONTINUE, jumpContinue);
-		node.setNodeData(JUMPBREAK, jumpBreak);
+		GotoInstruction jumpBreak = Instructions.goTo();
+		GotoInstruction jumpContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, jumpContinue);
+		node.setNodeData(GOTOBREAK, jumpBreak);
 		int loopStart = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
-		JumpInstruction endIfFalse = Instructions.jumpIfFalse();
+		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
 		visit(action);
 		code.add(jumpContinue);
@@ -121,16 +137,16 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	@Override
 	protected HashNode visitDoWhile(HashNode node, HashNode condition,
 			HashNode action) {
-		JumpInstruction jumpEnd = Instructions.jump();
-		JumpInstruction jumpContinue = Instructions.jump();
-		node.setNodeData(JUMPCONTINUE, jumpContinue);
-		node.setNodeData(JUMPBREAK, jumpEnd);
+		GotoInstruction jumpEnd = Instructions.goTo();
+		GotoInstruction jumpContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, jumpContinue);
+		node.setNodeData(GOTOBREAK, jumpEnd);
 		int loopStart = (Integer) visit(action).getNodeData();
 		int loopContinue = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
-		JumpInstruction endIfFalse = Instructions.jumpIfFalse();
+		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
-		code.add(Instructions.jump(loopStart));
+		code.add(Instructions.goTo(loopStart));
 		int endPointer = code.size();
 		jumpEnd.setTarget(endPointer);
 		endIfFalse.setTarget(endPointer);
@@ -143,11 +159,11 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 			HashNode trueAction, HashNode falseAction) {
 		int pointer = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
-		JumpInstruction jumpElseEnd = Instructions.jumpIfFalse();
+		GotoInstruction jumpElseEnd = Instructions.goToIfFalse();
 		code.add(jumpElseEnd);
 		visit(trueAction);
 		if (falseAction.getType() != NULL) {
-			JumpInstruction jumpEnd = Instructions.jump();
+			GotoInstruction jumpEnd = Instructions.goTo();
 			code.add(jumpEnd);
 			int elsePointer = (Integer) visit(falseAction).getNodeData();
 			jumpElseEnd.setTarget(elsePointer);
@@ -159,17 +175,17 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 
 	@Override
 	protected HashNode visitReturn(HashNode node, HashNode returnExpression) {
-		Map<HashNode, JumpInstruction> returnJumps = getReturnJumps(node);
+		Map<HashNode, GotoInstruction> returnJumps = getReturnJumps(node);
 		code.add(returnJumps.get(node));
 		return new Result(code.size() - 1);
 	}
 
 	@Override
-	protected HashNode visitSwitch(HashNode node, HashNode continuation,
+	protected HashNode visitJump(HashNode node, HashNode continuation,
 			HashNode arg) {
 		int pointer = (Integer) visit(continuation).getNodeData();
 		visit(arg);
-		code.add(Instructions.resume());
+		code.add(Instructions.jump());
 		return new Result(pointer);
 	}
 
@@ -185,8 +201,8 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		HashNode current = node;
 		while (current.getParent() != null) {
 			current = (HashNode) current.getParent();
-			if (current.contains(JUMPBREAK)) {
-				code.add((Instruction) current.getNodeData(JUMPBREAK));
+			if (current.contains(GOTOBREAK)) {
+				code.add((Instruction) current.getNodeData(GOTOBREAK));
 				break;
 			}
 		}
@@ -198,8 +214,8 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		HashNode current = node;
 		while (current.getParent() != null) {
 			current = (HashNode) current.getParent();
-			if (current.contains(JUMPCONTINUE)) {
-				code.add((Instruction) current.getNodeData(JUMPCONTINUE));
+			if (current.contains(GOTOCONTINUE)) {
+				code.add((Instruction) current.getNodeData(GOTOCONTINUE));
 				break;
 			}
 		}
@@ -217,9 +233,30 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 				p = visit(child);
 				if (pointer == -1)
 					pointer = (Integer) p.getNodeData();
-				if (child.getType() == ASSIGN)// || child.getType() ==
-												// INVOCATION)
+				switch (child.getType()) {
+				case ASSIGN:
+				case INVOCATION:
+				case BINARY:
+				case UNARY:
+				case YIELD:
+				case JUMPTO:
+				case INCR:
+				case ATTRIBUTE:
+				case INDEX:
+				case SLICE:
+				case MAP:
+				case LIST:
+				case NAMEREF:
+				case THIS:
+				case REGEX:
+				case STRING:
+				case FLOAT:
+				case INTEGER:
+				case BOOLEAN:
+				case NULL:
 					code.add(Instructions.pop());
+				}
+
 			}
 			return new Result(pointer);
 		} catch (Throwable ex) {
@@ -270,20 +307,20 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	protected HashNode visitTryStatement(HashNode node, HashNode tryBlock,
 			HashNode catchBlocks, HashNode finallyBlock) {
 		int catchAllPointer = -1;
-		JumpInstruction tryCatchStart = Instructions.jump();
+		GotoInstruction tryCatchStart = Instructions.goTo();
 		code.add(tryCatchStart);
 		int pointer = code.size() - 1;
-		JumpInstruction tryCatchEnd = Instructions.jump();
-		JumpInstruction finallyStart = null;
+		GotoInstruction tryCatchEnd = Instructions.goTo();
+		GotoInstruction finallyStart = null;
 		if (finallyBlock.getType() != NULL) {
-			Map<HashNode, JumpInstruction> finallyReturnJumps = new HashMap<HashNode, JumpInstruction>();
-			Map<HashNode, JumpInstruction> returnJumps = getReturnJumps(node);
+			Map<HashNode, GotoInstruction> finallyReturnJumps = new HashMap<HashNode, GotoInstruction>();
+			Map<HashNode, GotoInstruction> returnJumps = getReturnJumps(node);
 			if (returnJumps != null) {
 				for (HashNode returnStmt : returnJumps.keySet()) {
 					// inline the finally block for each return statement
 					// these specialized copies will jump to the corresponding
 					// return statement after doing its job
-					finallyStart = Instructions.jump((Integer) visit(
+					finallyStart = Instructions.goTo((Integer) visit(
 							finallyBlock).getNodeData());
 					// jump to the actual return statement
 					code.add(returnJumps.get(returnStmt));
@@ -293,7 +330,7 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 			}
 			// inline the finally block that would normally execute if no
 			// flow control statements are executed
-			finallyStart = Instructions.jump((Integer) visit(finallyBlock)
+			finallyStart = Instructions.goTo((Integer) visit(finallyBlock)
 					.getNodeData());
 			code.add(tryCatchEnd);
 			// in the case exception is thrown and not catched, a catch-all
@@ -407,8 +444,8 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		SimpleVmCompiler compiler = new SimpleVmCompiler();
 		setupReturns(block, compiler);
 		if (returnsContinuation)
-			code.add(Instructions.pushContinuationFactory(params,
-					compiler.code, isMethod));
+			code.add(Instructions.pushTrampolineFactory(params, compiler.code,
+					isMethod));
 		else
 			code.add(Instructions.pushFunction(params, compiler.code, isMethod));
 		return new Result(code.size() - 1);
@@ -513,23 +550,23 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 	}
 
 	private void replaceReturnJumps(HashNode node,
-			Map<HashNode, JumpInstruction> value) {
+			Map<HashNode, GotoInstruction> value) {
 		HashNode current = node;
 		while (current.getParent() != null) {
 			current = (HashNode) current.getParent();
-			if (current.contains(JUMPRETURN)) {
-				current.setNodeData(JUMPRETURN, value);
+			if (current.contains(GOTORETURN)) {
+				current.setNodeData(GOTORETURN, value);
 			}
 		}
 	}
 
-	private Map<HashNode, JumpInstruction> getReturnJumps(HashNode node) {
+	private Map<HashNode, GotoInstruction> getReturnJumps(HashNode node) {
 		HashNode current = node;
 		while (current.getParent() != null) {
 			current = (HashNode) current.getParent();
-			if (current.contains(JUMPRETURN)) {
-				return (Map<HashNode, JumpInstruction>) current
-						.getNodeData(JUMPRETURN);
+			if (current.contains(GOTORETURN)) {
+				return (Map<HashNode, GotoInstruction>) current
+						.getNodeData(GOTORETURN);
 			}
 		}
 		return null;
@@ -541,16 +578,16 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		for (int i = 0; i < blockLen; i++)
 			collectAllReturnStatements(returnStatements,
 					(HashNode) block.getChild(i));
-		JumpInstruction functionStart = Instructions.jump();
-		HashMap<HashNode, JumpInstruction> jumpsToReturnStatements = new HashMap<HashNode, JumpInstruction>();
+		GotoInstruction functionStart = Instructions.goTo();
+		HashMap<HashNode, GotoInstruction> jumpsToReturnStatements = new HashMap<HashNode, GotoInstruction>();
 		compiler.code.add(functionStart);
 		for (HashNode hashNode : returnStatements) {
 			int pointer = (Integer) compiler.visit(
 					(HashNode) hashNode.getChild(0)).getNodeData();
 			compiler.code.add(Instructions.ret());
-			jumpsToReturnStatements.put(hashNode, Instructions.jump(pointer));
+			jumpsToReturnStatements.put(hashNode, Instructions.goTo(pointer));
 		}
-		block.setNodeData(JUMPRETURN, jumpsToReturnStatements);
+		block.setNodeData(GOTORETURN, jumpsToReturnStatements);
 		functionStart.setTarget((Integer) compiler.visit(block).getNodeData());
 	}
 

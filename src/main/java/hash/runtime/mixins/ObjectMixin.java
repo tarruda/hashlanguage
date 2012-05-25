@@ -3,6 +3,7 @@ package hash.runtime.mixins;
 import hash.runtime.Runtime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
+import hash.runtime.functions.UnaryOperator;
 import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
@@ -116,6 +117,17 @@ public class ObjectMixin extends Mixin {
 						&& ((Boolean) selfValue).booleanValue())
 					return self;
 				return other;
+			}
+		});
+		installMethod(new UnaryOperator("!") {
+			public Object invoke(Object... args) throws Throwable {
+				Check.numberOfArgs(args, 1);
+				Object self = args[0];
+				Object booleanValue = Runtime.invokeNormalMethod(self,
+						Constants.BOOLEAN_VALUE);
+				if (booleanValue == Boolean.TRUE)
+					return false;
+				return true;
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.BOOLEAN_VALUE) {

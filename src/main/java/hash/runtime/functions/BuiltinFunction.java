@@ -1,6 +1,6 @@
 package hash.runtime.functions;
 
-import hash.lang.Function;
+import hash.runtime.Function;
 
 public abstract class BuiltinFunction implements Function {
 

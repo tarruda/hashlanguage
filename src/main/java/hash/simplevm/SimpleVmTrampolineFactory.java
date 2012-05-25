@@ -1,15 +1,16 @@
 package hash.simplevm;
 
-import hash.lang.Context;
-import hash.lang.Function;
+import hash.runtime.Context;
 import hash.runtime.Factory;
+import hash.runtime.Function;
+import hash.runtime.Trampoline;
 import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;
 
 import java.util.List;
 
-class SimpleVmContinuationFactory implements Function {
+class SimpleVmTrampolineFactory implements Function {
 
 	private Context definingContext;
 	private List parameters;
@@ -17,7 +18,7 @@ class SimpleVmContinuationFactory implements Function {
 	private TryCatchBlock[] tryCatchBlocks;
 	private boolean isMethod;
 
-	public SimpleVmContinuationFactory(Context definingContext, List parameters,
+	public SimpleVmTrampolineFactory(Context definingContext, List parameters,
 			Code code, boolean isMethod) {
 		this.definingContext = definingContext;
 		this.parameters = parameters;
@@ -35,7 +36,7 @@ class SimpleVmContinuationFactory implements Function {
 		context.put(Constants.THIS, self);
 		for (int i = 0; i < parameters.size(); i++)
 			context.put(parameters.get(i), args[i + 1]);
-		return new SimpleVmContinuation(context, instructions,
-				tryCatchBlocks, new OperandStack(), new InstructionPointer());
+		return new Trampoline(new SimpleVmContinuation(context, instructions,
+				tryCatchBlocks, new OperandStack(context), new InstructionPointer()));
 	}
 }

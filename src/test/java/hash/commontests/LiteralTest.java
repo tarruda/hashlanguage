@@ -4,18 +4,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import hash.parsing.exceptions.ParsingException;
+import hash.runtime.Context;
+import hash.runtime.Factory;
 import hash.testutils.SimpleVmTester;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class LiteralTest {
 
+	private Context context;
+
 	private Object evaluate(String code) {
-		return SimpleVmTester.eval(code, null);
+		return SimpleVmTester.eval(code, context);
 	}
 
 	private Object evaluate(String code, Class expectedException) {
-		return SimpleVmTester.eval(code, null, expectedException);
+		return SimpleVmTester.eval(code, context, expectedException);
+	}
+
+	@Before
+	public void setup() {
+		context = Factory.createContext();
 	}
 
 	@Test

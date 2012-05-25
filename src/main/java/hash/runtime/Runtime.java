@@ -1,9 +1,5 @@
 package hash.runtime;
 
-import hash.lang.Context;
-import hash.lang.Continuation;
-import hash.lang.ContinuationIterator;
-import hash.lang.Function;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.UnaryOperator;
 import hash.util.Check;
@@ -180,7 +176,7 @@ public class Runtime {
 	public static Iterator getIterator(Object obj) {
 		if (obj instanceof Iterable)
 			return ((Iterable) obj).iterator();
-		else if(obj instanceof Continuation)
+		else if (obj instanceof Continuation)
 			return new ContinuationIterator((Continuation) obj);
 		throw Err
 				.illegalArg("For loop cannot get an iterator from this object");
@@ -195,10 +191,11 @@ public class Runtime {
 		return c;
 	}
 
-	public static Object resumeContinuation(Object continuation, Object arg) throws Throwable {
-		if (!(continuation instanceof Continuation))
-			throw Err.illegalArg("Not a continuation");
-		return ((Continuation) continuation).resume(arg);
+	public static Object jumpTo(Object obj, Object arg)
+			throws Throwable {
+		if (obj instanceof Continuation)
+			return new Jump((Continuation) obj, arg);
+		throw Err.illegalArg("Not a continuation");
 	}
 
 }

@@ -1,6 +1,6 @@
 package hash.simplevm;
 
-import hash.lang.Context;
+import hash.runtime.Context;
 import hash.runtime.Runtime;
 
 class TryCatchBlock {

@@ -1,20 +1,20 @@
 package hash.simplevm;
 
-import hash.lang.Context;
+import hash.runtime.Context;
 
-public class JumpInstruction extends Instruction {
+public class GotoInstruction extends Instruction {
 	protected int target;
 
-	public JumpInstruction(String name) {
+	public GotoInstruction(String name) {
 		super(name);
 	}
 
-	public JumpInstruction() {
+	public GotoInstruction() {
 		this(Integer.MAX_VALUE);
 	}
 
-	public JumpInstruction(int target) {
-		super("jump");
+	public GotoInstruction(int target) {
+		super("goto");
 		this.target = target;
 	}
 
@@ -28,9 +28,9 @@ public class JumpInstruction extends Instruction {
 
 	@Override
 	public void exec(Context local, OperandStack operandStack,
-			InstructionPointer pointer, ExecutionState functionReturn)
+			InstructionPointer ip, ExecutionState functionReturn)
 			throws Throwable {
-		pointer.p = getTarget();
+		ip.p = getTarget();
 	}
 
 	@Override

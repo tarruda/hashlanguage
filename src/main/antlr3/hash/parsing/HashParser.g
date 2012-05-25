@@ -185,7 +185,7 @@ breakStatement
   ;    
                     
 expression
-  : resumeExpression
+  : jumpExpression
   | yieldExpression
   | functionExpression
   | incOrDecExpression     
@@ -209,9 +209,9 @@ expression
     )? 
   ;
   
-resumeExpression
-  : RESUME name=nameRef (arg=expression)? 
-    -> ^(RESUME $name {nodeOrNull(arg)})
+jumpExpression
+  : JUMPTO name=nameRef (arg=expression)? 
+    -> ^(JUMPTO $name {nodeOrNull(arg)})
   ;
   
 yieldExpression

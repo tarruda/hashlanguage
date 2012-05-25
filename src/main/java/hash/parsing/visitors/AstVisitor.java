@@ -18,12 +18,12 @@ import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
 import static hash.parsing.HashParser.INTEGER;
 import static hash.parsing.HashParser.INVOCATION;
+import static hash.parsing.HashParser.JUMPTO;
 import static hash.parsing.HashParser.LIST;
 import static hash.parsing.HashParser.MAP;
 import static hash.parsing.HashParser.NAMEREF;
 import static hash.parsing.HashParser.NULL;
 import static hash.parsing.HashParser.REGEX;
-import static hash.parsing.HashParser.RESUME;
 import static hash.parsing.HashParser.RETURN;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
@@ -96,8 +96,8 @@ public abstract class AstVisitor {
 		case YIELD:
 			validateReturnAndYield(node);
 			return visitYield(node, (HashNode) node.getChild(0));
-		case RESUME:
-			return visitSwitch(node, (HashNode) node.getChild(0),
+		case JUMPTO:
+			return visitJump(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1));
 		case BLOCK:
 		case FUNCTIONBLOCK:
@@ -198,8 +198,7 @@ public abstract class AstVisitor {
 		return node;
 	}
 
-	protected HashNode visitSwitch(HashNode node, HashNode continuation,
-			HashNode arg) {
+	protected HashNode visitJump(HashNode node, HashNode target, HashNode arg) {
 		return node;
 	}
 
@@ -355,25 +354,27 @@ public abstract class AstVisitor {
 		// if so, we mark the function as a method(it can only be invoked with
 		// the first implicit argument)
 		boolean isMethod = searchExpressionType(block, THIS);
-		boolean returnsContinuation = searchExpressionType(block, YIELD);
+		boolean returnsContinuation = searchExpressionType(block, YIELD, JUMPTO);
 		if (isMethod)
 			node.setNodeData(HashNode.IS_METHOD, true);
 		if (returnsContinuation)
 			node.setNodeData(HashNode.RETURNS_CONTINUATION, true);
 	}
-	
-	private boolean searchExpressionType(HashNode current, int type) {
+
+	private boolean searchExpressionType(HashNode current, int... types) {
 		if (current.getType() == FUNCTION)
 			// we dont want to descend into closures
 			return false;
-		if (current.getType() == type)
-			return true;
+		for (int i = 0; i < types.length; i++) {
+			if (current.getType() == types[i])
+				return true;
+		}
 		int len = current.getChildCount();
 		boolean rv = false;
 		for (int i = 0; !rv && i < len; i++)
 			rv = rv
 					|| searchExpressionType((HashNode) current.getChild(i),
-							type);
+							types);
 		return rv;
 	}
 

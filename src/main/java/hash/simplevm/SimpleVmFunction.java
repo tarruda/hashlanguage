@@ -1,8 +1,8 @@
 package hash.simplevm;
 
-import hash.lang.Context;
-import hash.lang.Function;
+import hash.runtime.Context;
 import hash.runtime.Factory;
+import hash.runtime.Function;
 import hash.util.Check;
 import hash.util.Constants;
 import hash.util.Err;

@@ -1,7 +1,7 @@
 package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
-import hash.lang.Context;
+import hash.runtime.Context;
 import hash.runtime.Factory;
 
 import java.util.List;
@@ -24,9 +24,8 @@ public abstract class BinaryAndUnaryExpressionTest extends AbstractCodeTest {
 	public void identifier() {
 		context.put("x", 255);
 		context.put("y", "Str");
-		assertEquals(255, evaluate("x"));
-		evaluate("y*=5");
-		assertEquals("StrStrStrStrStr", evaluate("y"));
+		assertEquals(255, evaluate("x"));	
+		assertEquals("StrStrStrStrStr", evaluate("y*=5"));
 		assertEquals("StrStrStrStrStrStrStrStrStrStr", evaluate("2 * y"));
 	}
 
@@ -43,16 +42,16 @@ public abstract class BinaryAndUnaryExpressionTest extends AbstractCodeTest {
 
 	@Test
 	public void assignments() {
-		assertEquals(5, evaluate("x = 5;x"));		
-		assertEquals(10, evaluate("x+=5;x"));
-		assertEquals(30, evaluate("x*=3;x"));
-		assertEquals(0, evaluate("x%=3;x"));
-		assertEquals(1, evaluate("++x;x"));
-		assertEquals(2, evaluate("++x;x"));
+		assertEquals(5, evaluate("x = 5"));		
+		assertEquals(10, evaluate("x+=5"));
+		assertEquals(30, evaluate("x*=3"));
+		assertEquals(0, evaluate("x%=3"));
+		assertEquals(1, evaluate("++x"));
+		assertEquals(2, evaluate("++x"));
 		assertEquals(2, evaluate("x++"));
 		assertEquals(3, evaluate("x++"));
 		assertEquals(4, evaluate("x++"));
-		assertEquals(5, evaluate("z = y = x;z"));
+		assertEquals(5, evaluate("z = y = x"));
 		assertEquals(5, evaluate("y"));
 		assertEquals(5, evaluate("z"));
 	}

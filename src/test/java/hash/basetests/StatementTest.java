@@ -3,9 +3,9 @@ package hash.basetests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import hash.lang.Context;
-import hash.lang.Function;
+import hash.runtime.Context;
 import hash.runtime.Factory;
+import hash.runtime.Function;
 
 import org.junit.Before;
 import org.junit.Test;

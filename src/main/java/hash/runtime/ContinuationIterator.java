@@ -1,4 +1,4 @@
-package hash.lang;
+package hash.runtime;
 
 import hash.util.Err;
 
@@ -18,7 +18,7 @@ public class ContinuationIterator implements Iterator {
 
 	public Object next() {
 		try {
-			return continuation.resume(null);
+			return continuation.resume();
 		} catch (Throwable e) {
 			throw Err.ex(e);
 		}

@@ -1,6 +1,6 @@
 package hash;
 
-import hash.lang.Function;
+import hash.runtime.Function;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

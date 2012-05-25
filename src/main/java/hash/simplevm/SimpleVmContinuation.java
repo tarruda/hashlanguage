@@ -1,7 +1,7 @@
 package hash.simplevm;
 
-import hash.lang.Context;
-import hash.lang.Continuation;
+import hash.runtime.Context;
+import hash.runtime.Continuation;
 import hash.util.Err;
 
 class SimpleVmContinuation implements Continuation {
@@ -12,7 +12,8 @@ class SimpleVmContinuation implements Continuation {
 	private OperandStack operandStack;
 	private InstructionPointer ip;
 	private Object next;
-	private boolean hasNext;
+	private boolean hasNext = true;
+	private boolean started = false;
 
 	public SimpleVmContinuation(Context locals, Instruction[] instructions,
 			TryCatchBlock[] tryCatchBlocks, OperandStack operandStack,
@@ -22,10 +23,17 @@ class SimpleVmContinuation implements Continuation {
 		this.tryCatchBlocks = tryCatchBlocks;
 		this.operandStack = operandStack;
 		this.ip = ip;
-		resume(null);
+	}
+
+	public Object resume() throws Throwable {
+		return resume(null);
 	}
 
 	public Object resume(Object arg) throws Throwable {
+		if (!started) {
+			started = true;
+			resume();
+		}
 		if (ip.p >= instructions.length)
 			if (hasNext) {
 				hasNext = false;
@@ -37,14 +45,14 @@ class SimpleVmContinuation implements Continuation {
 		Object retVal = SimpleVm.execute(instructions, tryCatchBlocks, locals,
 				operandStack, ip);
 		while (!(retVal instanceof FunctionReturn)
-				&& ip.p < instructions.length)
+ 				&& ip.p < instructions.length)
 			retVal = SimpleVm.execute(instructions, tryCatchBlocks, locals,
 					operandStack, ip);
 		if (retVal instanceof FunctionReturn) {
 			next = ((FunctionReturn) retVal).value;
 			hasNext = true;
 		} else
-			hasNext = false;		
+			hasNext = false;
 		return rv;
 	}
 

@@ -1,7 +1,7 @@
 package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
-import hash.lang.Context;
+import hash.runtime.Context;
 import hash.runtime.Factory;
 import hash.runtime.JvmBridge;
 

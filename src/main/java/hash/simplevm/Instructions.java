@@ -1,6 +1,6 @@
 package hash.simplevm;
 
-import hash.lang.Context;
+import hash.runtime.Context;
 import hash.runtime.Factory;
 import hash.runtime.Runtime;
 
@@ -69,13 +69,13 @@ public class Instructions {
 		};
 	}
 
-	public static Instruction pushContinuationFactory(final List params,
+	public static Instruction pushTrampolineFactory(final List params,
 			final Code code, final boolean isMethod) {
 		return new Instruction("pushContinuationFactory") {
 			public void exec(Context local, OperandStack operandStack,
 					InstructionPointer pointer, ExecutionState state) {
-				operandStack.push(new SimpleVmContinuationFactory(local,
-						params, code, isMethod));
+				operandStack.push(new SimpleVmTrampolineFactory(local, params,
+						code, isMethod));
 			}
 		};
 	}
@@ -250,8 +250,8 @@ public class Instructions {
 		};
 	}
 
-	public static JumpInstruction jumpIfFalse() {
-		return new JumpInstruction("jumpIfFalse") {
+	public static GotoInstruction goToIfFalse() {
+		return new GotoInstruction("goToIfFalse") {
 			@Override
 			public void exec(Context local, OperandStack operandStack,
 					InstructionPointer pointer, ExecutionState state) {
@@ -262,12 +262,12 @@ public class Instructions {
 		};
 	}
 
-	public static JumpInstruction jump(int pointer) {
-		return new JumpInstruction(pointer);
+	public static GotoInstruction goTo(int pointer) {
+		return new GotoInstruction(pointer);
 	}
 
-	public static JumpInstruction jump() {
-		return new JumpInstruction();
+	public static GotoInstruction goTo() {
+		return new GotoInstruction();
 	}
 
 	public static Instruction iterator(final String varName) {
@@ -314,15 +314,16 @@ public class Instructions {
 		};
 	}
 
-	public static Instruction resume() {
-		return new Instruction("resume") {
+	public static Instruction jump() {
+		return new Instruction("jump") {
 			public void exec(Context local, OperandStack operandStack,
 					InstructionPointer pointer, ExecutionState state)
 					throws Throwable {
+				state.pause = true;
 				Object arg = operandStack.pop();
 				Object continuation = operandStack.pop();
-				operandStack
-						.push(Runtime.resumeContinuation(continuation, arg));
+				operandStack.push(new FunctionReturn(Runtime
+						.jumpTo(continuation, arg)));
 			}
 		};
 	}
