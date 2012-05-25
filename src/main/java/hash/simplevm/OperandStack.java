@@ -10,14 +10,13 @@ public class OperandStack {
 	private Node top;
 	private Context locals;
 
-	
 	public OperandStack(Context locals) {
 		this.locals = locals;
 	}
 
-	public void push(Object obj) {		
+	public void push(Object obj) {
 		top = new Node(obj, top);
-		size++;
+		size++;		
 	}
 
 	public Object peek() {
@@ -32,7 +31,7 @@ public class OperandStack {
 		Node rv = top;
 		top = rv.previous;
 		size--;
-		locals.setLastEvaluationResult(rv.value);			
+		locals.setLastEvaluationResult(rv.value);
 		return rv.value;
 	}
 

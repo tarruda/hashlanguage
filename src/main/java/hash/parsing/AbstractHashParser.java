@@ -62,12 +62,16 @@ public abstract class AbstractHashParser extends Parser {
 		return getTreeAdaptor().create(HashParser.NULL, "null");
 	}
 
-	protected Object select(block_return b, statement_return s) {
-		if (b != null)
+	protected Object block(block_return b, statement_return s) {
+		TreeAdaptor adaptor = getTreeAdaptor();
+		if (b != null)			
 			return b.tree;
-		if (s != null)
-			return s.tree;
-		return getTreeAdaptor().create(HashParser.NULL, "null");
+		if (s != null) {			
+			Object rv = adaptor.create(HashParser.BLOCK, "Statement");
+			adaptor.addChild(rv, s.tree);
+			return rv;
+		}
+		return adaptor.create(HashParser.NULL, "null");
 	}
 
 	protected String getContainsId() {

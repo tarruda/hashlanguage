@@ -111,31 +111,31 @@ ifStatement
       | ts=statement
       )
   )
-    -> ^(IF["if"] $cond {select(tb,ts)} {select(fb,fs)})  
+    -> ^(IF["if"] $cond {block(tb,ts)} {block(fb,fs)})  
   ;
     
 forStatement
  : (FOR LROUND IDENTIFIER IN) =>
     t=FOR LROUND id=IDENTIFIER IN iterable=expression RROUND
       ((LCURLY) => b=block|s=statement)
-    -> ^(FOREACH[$t, "for each"] $id $iterable {select(b,s)})   
+    -> ^(FOREACH[$t, "for each"] $id $iterable {block(b,s)})   
  |  FOR LROUND 
     (init=expression)? SCOLON (cond=expression)? SCOLON (u=expression)?
     RROUND
       ((LCURLY) => b=block|s=statement)
-    -> ^(FOR["for"] {nodeOrNull(init)} {nodeOrNull(cond)} {nodeOrNull(u)} {select(b,s)})
+    -> ^(FOR["for"] {nodeOrNull(init)} {nodeOrNull(cond)} {nodeOrNull(u)} {block(b,s)})
  ;
   
 whileStatement
   : WHILE LROUND cond=expression RROUND
       ((LCURLY) => b=block|s=statement)
-    -> ^(WHILE["while"] $cond {select(b,s)})
+    -> ^(WHILE["while"] $cond {block(b,s)})
   ;  
 
 doWhileStatement
   : DO ((LCURLY) => b=block|s=statement)
     statementSeparator* WHILE LROUND cond=expression RROUND
-    -> ^(DO["do while"] $cond {select(b,s)})
+    -> ^(DO["do while"] $cond {block(b,s)})
   ;
             
 tryStatement
