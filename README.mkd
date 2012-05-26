@@ -1,0 +1,31 @@
+Hash Programming Language
+-------------------------
+
+Scripting language for the JVM with the following characteristics:
+
+- C style syntax
+- Semicolons or linefeeds can be used to terminate statements
+- Variables don't need to be declared
+- All operators are overloadable  
+- Dynamic typing
+- No reflection/invokedynamic is used for interfacing with java code.
+  Instead of reflection, 'Bridge classes' are generated at runtime that 
+  will acomplish the job much faster.
+- Classes/functions are objects
+- Classes can easily be created/modified at runtime allowing easy meta-programming
+- Coroutines(implemented using generators and trampoline objects)
+- Simple REPL interpreter
+
+
+Using the REPL:
+
+```bash
+$ mvn test -Prepl
+```
+
+Todo:
+
+- Compile to JVM bytecode(for now a very simple vm is used for interpreting an
+  internal format)
+- Allow java to invoke hash code
+  
