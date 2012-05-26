@@ -12,7 +12,7 @@ public class Main {
 				System.out, System.err);
 		System.out.print("Hash REPL interpreter");
 		while (true) {			
-			System.out.print("\n> ");
+			System.out.print("\n#> ");
 			interpreter.rep(locals);			
 		}
 	}

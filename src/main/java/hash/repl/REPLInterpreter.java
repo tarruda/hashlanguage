@@ -25,15 +25,18 @@ public class REPLInterpreter {
 
 	public void rep(Context locals) {
 		HashParser parser = ParserFactory.createParser(tokenSource);
+		parser.setErr(err);
 		HashNode tree = null;
+		Code code = null;
 		try {
 			tree = (HashNode) parser.program().getTree();
+			Compiler c = new Compiler();
+			c.visit(tree);
+			code = c.getCode();
 		} catch (Exception e) {
 			e.printStackTrace(err);
+			return;
 		}
-		Compiler c = new Compiler();
-		c.visit(tree);
-		Code code = c.getCode();
 		try {
 			SimpleVm.execute(code.getInstructions(), code.getTryCatchBlocks(),
 					locals);

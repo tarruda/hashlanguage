@@ -36,7 +36,7 @@ tokens {
 
 
 program
-  : statements EOF!      
+  : statements? EOF!      
   ;
         
 block
