@@ -6,15 +6,15 @@ public class SimpleVm {
 
 	public static Object execute(Instruction[] instructions,
 			TryCatchBlock[] tryCatchBlocks, Context locals) throws Throwable {
-		return execute(instructions, tryCatchBlocks, locals, new OperandStack(
-				locals), new InstructionPointer());
+		return execute(instructions, tryCatchBlocks, locals,
+				new OperandStack(), new InstructionPointer());
 	}
 
 	static Object execute(Instruction[] instructions,
 			TryCatchBlock[] tryCatchBlocks, Context locals,
 			OperandStack operandStack, InstructionPointer ip) throws Throwable {
 		int len = instructions.length;
-		ExecutionState state = new ExecutionState();
+		State state = new State();
 		while (!state.pause && !state.stop && ip.p < len) {
 			try {
 				instructions[ip.p++].exec(locals, operandStack, ip, state);

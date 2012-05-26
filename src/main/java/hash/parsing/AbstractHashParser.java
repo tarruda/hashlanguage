@@ -36,7 +36,6 @@ public abstract class AbstractHashParser extends Parser {
 	@Override
 	public void displayRecognitionError(String[] tokenNames,
 			RecognitionException e) {
-		super.displayRecognitionError(tokenNames, e);
 		throw new ParsingException(e);
 	}
 
@@ -64,9 +63,9 @@ public abstract class AbstractHashParser extends Parser {
 
 	protected Object block(block_return b, statement_return s) {
 		TreeAdaptor adaptor = getTreeAdaptor();
-		if (b != null)			
+		if (b != null)
 			return b.tree;
-		if (s != null) {			
+		if (s != null) {
 			Object rv = adaptor.create(HashParser.BLOCK, "Statement");
 			adaptor.addChild(rv, s.tree);
 			return rv;

@@ -5,9 +5,9 @@ import hash.parsing.HashParser;
 import hash.parsing.HashParser.program_return;
 import hash.parsing.ParserFactory;
 import hash.parsing.tree.HashNode;
-import hash.parsing.visitors.simplevm.SimpleVmCompiler;
 import hash.runtime.Context;
 import hash.simplevm.Code;
+import hash.simplevm.Compiler;
 import hash.simplevm.SimpleVm;
 
 import org.antlr.runtime.ANTLRStringStream;
@@ -20,7 +20,7 @@ public class SimpleVmTester {
 
 	public static Object eval(String code, Context context, Class exceptionClass) {
 		Throwable ex = null;
-		SimpleVmCompiler compiler = new SimpleVmCompiler();
+		Compiler compiler = new Compiler();
 		ANTLRStringStream source = new ANTLRStringStream(code);
 		HashParser parser = ParserFactory.createParser(source);
 		program_return psrReturn = null;		
@@ -29,7 +29,7 @@ public class SimpleVmTester {
 			HashNode t = (HashNode) psrReturn.getTree();
 			compiler.visit(t);
 			Code c = compiler.getCode();
-			SimpleVm.execute(c.toArray(), c.getTryCatchBlocks(), context);
+			SimpleVm.execute(c.getInstructions(), c.getTryCatchBlocks(), context);
 		} catch (Throwable e) {
 			ex = e;
 		}
@@ -43,6 +43,6 @@ public class SimpleVmTester {
 										.getClass().getCanonicalName()));
 		} else if (ex != null)
 			throw new RuntimeException(ex);
-		return context.getLastEvaluationResult();
+		return context.restore();
 	}
 }

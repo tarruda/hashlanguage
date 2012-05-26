@@ -21,7 +21,7 @@ public class Code {
 		return instructions.size();
 	}
 
-	public Instruction[] toArray() {
+	public Instruction[] getInstructions() {
 		Instruction[] rv = new Instruction[instructions.size()];
 		instructions.toArray(rv);
 		return rv;

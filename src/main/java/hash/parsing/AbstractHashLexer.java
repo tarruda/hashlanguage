@@ -60,7 +60,6 @@ public abstract class AbstractHashLexer extends Lexer {
 	@Override
 	public void displayRecognitionError(String[] tokenNames,
 			RecognitionException e) {
-		// super.displayRecognitionError(tokenNames, e);
 		throw new ParsingException(e);
 	}
 

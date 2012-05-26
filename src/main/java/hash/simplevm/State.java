@@ -1,6 +1,6 @@
 package hash.simplevm;
 
-class ExecutionState {
+class State {
 
 	public boolean stop;
 

@@ -10,10 +10,12 @@ public abstract class Instruction {
 	}
 
 	public abstract void exec(Context local, OperandStack operandStack,
-			InstructionPointer pointer, ExecutionState functionReturn) throws Throwable;
+			InstructionPointer pointer, State functionReturn) throws Throwable;
 
 	@Override
 	public String toString() {
 		return name;
 	}
+
+	
 }

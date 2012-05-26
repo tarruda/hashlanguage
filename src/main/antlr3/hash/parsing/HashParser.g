@@ -8,7 +8,7 @@ options {
 }
 
 tokens {
-    // imaginary tokens for the AST
+    // imaginary tokens for the AST    
     INCR;    
     BINARY;
     UNARY;
@@ -27,7 +27,7 @@ tokens {
     FUNCTIONBLOCK;
     FUNCTION;
     FOREACH; 
-    NAMEREF; 
+    NAMEREF;    
 }
 
 @header {

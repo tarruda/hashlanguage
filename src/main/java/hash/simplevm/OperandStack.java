@@ -1,18 +1,11 @@
 package hash.simplevm;
 
-import hash.runtime.Context;
-
 import java.util.EmptyStackException;
 
 public class OperandStack {
 
 	private int size = 0;
 	private Node top;
-	private Context locals;
-
-	public OperandStack(Context locals) {
-		this.locals = locals;
-	}
 
 	public void push(Object obj) {
 		top = new Node(obj, top);
@@ -31,7 +24,6 @@ public class OperandStack {
 		Node rv = top;
 		top = rv.previous;
 		size--;
-		locals.setLastEvaluationResult(rv.value);
 		return rv.value;
 	}
 

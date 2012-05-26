@@ -22,7 +22,7 @@ class SimpleVmTrampolineFactory implements Function {
 			Code code, boolean isMethod) {
 		this.definingContext = definingContext;
 		this.parameters = parameters;
-		this.instructions = code.toArray();
+		this.instructions = code.getInstructions();
 		this.tryCatchBlocks = code.getTryCatchBlocks();
 		this.isMethod = isMethod;
 	}
@@ -37,6 +37,6 @@ class SimpleVmTrampolineFactory implements Function {
 		for (int i = 0; i < parameters.size(); i++)
 			context.put(parameters.get(i), args[i + 1]);
 		return new Trampoline(new SimpleVmContinuation(context, instructions,
-				tryCatchBlocks, new OperandStack(context), new InstructionPointer()));
+				tryCatchBlocks, new OperandStack(), new InstructionPointer()));
 	}
 }

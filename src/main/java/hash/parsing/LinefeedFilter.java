@@ -58,6 +58,7 @@ public class LinefeedFilter implements TokenSource {
 		if (queue.size() > 0)
 			return getNext();
 		return Token.EOF_TOKEN;
+
 	}
 
 	private Token getNext() {
@@ -77,7 +78,7 @@ public class LinefeedFilter implements TokenSource {
 		case CLASS:
 			forwardIgnoringWsUntil(LCURLY);
 			return;
-		case FOR:			
+		case FOR:
 		case WHILE:
 			forWhileStmt(terminatePreviousStatements);
 			break;
@@ -115,8 +116,8 @@ public class LinefeedFilter implements TokenSource {
 		roundBraces(false);
 		ignoreFollowingWhitespaces();
 		if (!parseCompoundStatement())
-			parseUntil(SCOLON, LINE, FOR, DO, WHILE, IF, TRY, FUNCTION,
-					CLASS, RCURLY);
+			parseUntil(SCOLON, LINE, FOR, DO, WHILE, IF, TRY, FUNCTION, CLASS,
+					RCURLY);
 		if (queue.peekLast().getType() == RCURLY)
 			addTerminator();
 	}
@@ -148,7 +149,7 @@ public class LinefeedFilter implements TokenSource {
 		}
 		if (queue.peekLast().getType() == RCURLY)
 			addTerminator();
-	}	
+	}
 
 	private void doWhileStmt(boolean terminatePreviousStatements) {
 		if (terminatePreviousStatements)
@@ -203,7 +204,7 @@ public class LinefeedFilter implements TokenSource {
 	}
 
 	private void addTerminator() {
-		Token next = input.get(input.index());
+		Token next = input.LT(1);
 		CommonToken t = new CommonToken(SCOLON, next.getText());
 		t.setLine(next.getLine());
 		t.setCharPositionInLine(next.getCharPositionInLine());
@@ -279,7 +280,7 @@ public class LinefeedFilter implements TokenSource {
 	}
 
 	private void forward() {
-		queue.add(input.get(input.index()));
+		queue.add(input.LT(1));
 		input.consume();
 	}
 

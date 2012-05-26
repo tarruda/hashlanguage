@@ -28,7 +28,7 @@ public class GotoInstruction extends Instruction {
 
 	@Override
 	public void exec(Context local, OperandStack operandStack,
-			InstructionPointer ip, ExecutionState functionReturn)
+			InstructionPointer ip, State functionReturn)
 			throws Throwable {
 		ip.p = getTarget();
 	}

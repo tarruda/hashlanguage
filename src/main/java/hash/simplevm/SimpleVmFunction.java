@@ -33,7 +33,7 @@ class SimpleVmFunction implements Function {
 		context.put(Constants.THIS, self);
 		for (int i = 0; i < parameters.size(); i++)
 			context.put(parameters.get(i), args[i + 1]);
-		Object retVal = SimpleVm.execute(code.toArray(),
+		Object retVal = SimpleVm.execute(code.getInstructions(),
 				code.getTryCatchBlocks(), context);
 		if (retVal instanceof FunctionReturn)
 			return ((FunctionReturn) retVal).value;

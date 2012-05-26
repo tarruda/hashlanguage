@@ -37,11 +37,11 @@ public class HashContext extends HashMap implements Context {
 		put(f.getName(), f);
 	}
 
-	public Object getLastEvaluationResult() {
+	public Object restore() {
 		return lastEvaluationResult;
 	}
 
-	public void setLastEvaluationResult(Object value) {
+	public void save(Object value) {
 		lastEvaluationResult = value;
 	}
 }

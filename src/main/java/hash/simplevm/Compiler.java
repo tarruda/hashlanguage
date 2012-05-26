@@ -1,4 +1,4 @@
-package hash.parsing.visitors.simplevm;
+package hash.simplevm;
 
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
@@ -26,10 +26,6 @@ import static hash.parsing.HashParser.YIELD;
 import hash.parsing.tree.HashNode;
 import hash.parsing.visitors.LiteralEvaluator;
 import hash.parsing.visitors.Result;
-import hash.simplevm.Code;
-import hash.simplevm.GotoInstruction;
-import hash.simplevm.Instruction;
-import hash.simplevm.Instructions;
 import hash.util.Constants;
 import hash.util.Err;
 
@@ -39,16 +35,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class SimpleVmCompiler extends LiteralEvaluator {
+public class Compiler extends LiteralEvaluator {
 	private static final String FOREACH_NESTING = "ForeachNesting";
 	private static final String GOTOCONTINUE = "GoToContinue";
 	private static final String GOTOBREAK = "GoToBreak";
 	private static final String GOTORETURN = "GoToReturn";
 
 	private Code code;
+	private boolean function;
 
-	public SimpleVmCompiler() {
+	public Compiler() {
+		this(false);
+	}
+
+	public Compiler(boolean function) {
 		code = new Code();
+		this.function = function;
 	}
 
 	public Code getCode() {
@@ -254,9 +256,13 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 				case INTEGER:
 				case BOOLEAN:
 				case NULL:
-					code.add(Instructions.pop());
+					if (function)
+						code.add(Instructions.pop());
+					else
+						// if not inside a function, store the last expression
+						// result
+						code.add(Instructions.save());
 				}
-
 			}
 			return new Result(pointer);
 		} catch (Throwable ex) {
@@ -441,7 +447,7 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		List params = new ArrayList(len);
 		for (int i = 0; i < len; i++)
 			params.add(parameters.getChild(i).getText());
-		SimpleVmCompiler compiler = new SimpleVmCompiler();
+		Compiler compiler = new Compiler(true);
 		setupReturns(block, compiler);
 		if (returnsContinuation)
 			code.add(Instructions.pushTrampolineFactory(params, compiler.code,
@@ -572,7 +578,7 @@ public class SimpleVmCompiler extends LiteralEvaluator {
 		return null;
 	}
 
-	private void setupReturns(HashNode block, SimpleVmCompiler compiler) {
+	private void setupReturns(HashNode block, Compiler compiler) {
 		List<HashNode> returnStatements = new ArrayList<HashNode>();
 		int blockLen = block.getChildCount();
 		for (int i = 0; i < blockLen; i++)

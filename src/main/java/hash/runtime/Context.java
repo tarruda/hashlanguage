@@ -9,7 +9,7 @@ public interface Context extends Map {
 	
 	void installBuiltin(BuiltinFunction f);
 	
-	Object getLastEvaluationResult();
+	Object restore();
 	
-	void setLastEvaluationResult(Object value);
+	void save(Object value);
 }
