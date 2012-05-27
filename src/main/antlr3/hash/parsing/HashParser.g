@@ -54,7 +54,7 @@ statements
   ;
   
 statementSeparator
-  : (LINE|SCOLON)
+  : (LINE|SCOLON|REPL)
   ;
 
 statement

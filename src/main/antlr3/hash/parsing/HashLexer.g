@@ -5,6 +5,10 @@ options {
    superClass = AbstractHashLexer;
 }
 
+tokens {
+  REPL; // used only by the interactive interpreter
+}
+
 @header {
 package hash.parsing;
 }

@@ -3,6 +3,7 @@ package hash.parsing;
 import static hash.parsing.HashParser.NAMEREF;
 import hash.parsing.HashParser.block_return;
 import hash.parsing.HashParser.statement_return;
+import hash.parsing.exceptions.ParsingException;
 import hash.util.Constants;
 
 import java.io.PrintStream;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.ParserRuleReturnScope;
+import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
@@ -35,6 +37,14 @@ public abstract class AbstractHashParser extends Parser {
 	@Override
 	public void emitErrorMessage(String msg) {
 		err.println(msg);
+	}
+
+	@Override
+	public void displayRecognitionError(String[] tokenNames,
+			RecognitionException e) {
+		String hdr = getErrorHeader(e);
+		String msg = getErrorMessage(e, tokenNames);
+		throw new ParsingException(hdr + " " + msg);
 	}
 
 	public abstract TreeAdaptor getTreeAdaptor();

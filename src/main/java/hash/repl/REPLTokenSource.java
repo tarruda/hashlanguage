@@ -1,7 +1,6 @@
 package hash.repl;
 
-import static hash.parsing.HashLexer.LINE;
-import static hash.parsing.HashLexer.SCOLON;
+import static hash.parsing.HashLexer.REPL;
 import hash.parsing.ParserFactory;
 import hash.util.Err;
 
@@ -55,12 +54,12 @@ public class REPLTokenSource implements TokenSource {
 					break;
 				}
 				TokenSource innerSource = ParserFactory
-						.createLexer(new ANTLRStringStream(inputBuffer
+						.createReplLexer(new ANTLRStringStream(inputBuffer
 								.toString()));
 				Token t = innerSource.nextToken();
 				int type = t.getType();
 				while (type != Token.EOF) {
-					if (type == SCOLON || type == LINE)
+					if (type == REPL)
 						completedStatement = true;
 					tempBuffer.add(t);
 					t = innerSource.nextToken();

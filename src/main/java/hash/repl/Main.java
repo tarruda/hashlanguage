@@ -11,8 +11,9 @@ public class Main {
 		REPLInterpreter interpreter = new REPLInterpreter(System.in,
 				System.out, System.err);
 		System.out.print("Hash REPL interpreter");
-		while (true) {			
-			System.out.print("\n#> ");
+		while (true) {	
+			System.out.println();
+			System.out.print("#> ");
 			interpreter.rep(locals);			
 		}
 	}
