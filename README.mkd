@@ -1,9 +1,6 @@
-Hash Programming Language
-=========================
+## Hash Programming Language
 
-### Description
-
-Scripting language for the JVM with the following characteristics:
+##### Scripting language for the JVM with the following characteristics:
 
 - C style syntax
 - Semicolons or linefeeds can be used to terminate statements
@@ -18,23 +15,17 @@ Scripting language for the JVM with the following characteristics:
 - Coroutines(implemented using generators and trampoline objects)
 - Simple REPL interpreter
 
+##### Configuration for eclipse development(need to have the ANTLRIDE plugin installed/configured):
 
-### Configuration for eclipse development(need to have the ANTLRIDE plugin installed/configured):
+    mvn eclipse:configure-workspace -Declipse.workspace=<path to your workspace>
+    mvn eclipse:eclipse # (Creates eclipse project)
 
-```bash
-$ mvn eclipse:configure-workspace -Declipse.workspace=<path to your workspace>
-$ mvn eclipse:eclipse # (Creates eclipse project)
-```
+##### Using the REPL interpreter:
 
-### Using the REPL interpreter:
+    mvn test -Prepl
 
-```bash
-$ mvn test -Prepl
-```
-
-### Todo:
+##### Todo:
 
 - Compile to JVM bytecode(for now a very simple vm is used for interpreting an
   internal format)
 - Allow java to invoke hash code
-  
