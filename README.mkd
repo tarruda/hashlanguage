@@ -1,5 +1,7 @@
 Hash Programming Language
--------------------------
+=========================
+
+### Description
 
 Scripting language for the JVM with the following characteristics:
 
@@ -17,13 +19,20 @@ Scripting language for the JVM with the following characteristics:
 - Simple REPL interpreter
 
 
-Using the REPL:
+### Configuration for eclipse development(need to have the ANTLRIDE plugin installed/configured):
+
+```bash
+$ mvn eclipse:configure-workspace -Declipse.workspace=<path to your workspace>
+$ mvn eclipse:eclipse # (Creates eclipse project)
+```
+
+### Using the REPL interpreter:
 
 ```bash
 $ mvn test -Prepl
 ```
 
-Todo:
+### Todo:
 
 - Compile to JVM bytecode(for now a very simple vm is used for interpreting an
   internal format)
