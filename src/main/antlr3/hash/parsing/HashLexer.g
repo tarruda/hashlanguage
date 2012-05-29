@@ -95,6 +95,7 @@ INC: '++';
 DEC: '--';
 PLUS: '+';
 MINUS: '-';
+LAMBDA: '=>';
 USHR: '>>>';
 SHR: '>>';
 SHL: '<<';
@@ -113,7 +114,7 @@ ASSIGN: '=';
 OR: '||';
 AND: '&&';
 NOT: '!';
-
+QMARK: '?';
 
 IDENTIFIER: LETTER (LETTER|DEC_DIGIT)*;
 

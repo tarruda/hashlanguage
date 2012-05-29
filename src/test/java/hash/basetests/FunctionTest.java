@@ -9,7 +9,16 @@ import org.junit.Test;
 
 public abstract class FunctionTest extends AbstractCodeTest {
 
-	
+	@Test
+	public void lambdaExpressions() {
+		evaluate("l=()=>10");
+		assertEquals(10, evaluate("l()"));
+		evaluate("f = (n) => n == 1 ? 1 : n * f(n - 1)");
+		assertEquals(6, evaluate("f(3)"));
+		assertEquals(120, evaluate("f(5)"));
+		assertEquals(720, evaluate("f(6)"));
+	}
+
 	@Test
 	public void simpleFunctionReturn() {
 		evaluate("f=()\n{\ng=()\n{;return 15.5;}\nreturn g()}");

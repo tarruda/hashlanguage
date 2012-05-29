@@ -2,6 +2,7 @@ package hash.simplevm;
 
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
+import static hash.parsing.HashParser.CONDITIONAL;
 import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BOOLEAN;
 import static hash.parsing.HashParser.FLOAT;
@@ -60,10 +61,10 @@ public class Compiler extends LiteralEvaluator {
 	@Override
 	protected HashNode visitForeach(HashNode node, HashNode id,
 			HashNode iterable, HashNode action) {
-		GotoInstruction jumpEnd = Instructions.goTo();
-		GotoInstruction jumpContinue = Instructions.goTo();
-		node.setNodeData(GOTOCONTINUE, jumpContinue);
-		node.setNodeData(GOTOBREAK, jumpEnd);
+		GotoInstruction gotoBreak = Instructions.goTo();
+		GotoInstruction gotoContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, gotoContinue);
+		node.setNodeData(GOTOBREAK, gotoBreak);
 		int nestingLevel = 0;
 		HashNode current = node;
 		while (current.getParent() != null && nestingLevel == 0) {
@@ -84,21 +85,21 @@ public class Compiler extends LiteralEvaluator {
 		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
 		visit(action);
-		code.add(jumpContinue);
+		code.add(gotoContinue);
 		int endPointer = code.size();
-		jumpEnd.setTarget(endPointer);
+		gotoBreak.setTarget(endPointer);
 		endIfFalse.setTarget(endPointer);
-		jumpContinue.setTarget(loopStart);
+		gotoContinue.setTarget(loopStart);
 		return new Result(pointer);
 	}
 
 	@Override
 	protected HashNode visitFor(HashNode node, HashNode init,
 			HashNode condition, HashNode update, HashNode action) {
-		GotoInstruction jumpEnd = Instructions.goTo();
-		GotoInstruction jumpContinue = Instructions.goTo();
-		node.setNodeData(GOTOCONTINUE, jumpContinue);
-		node.setNodeData(GOTOBREAK, jumpEnd);
+		GotoInstruction gotoBreak = Instructions.goTo();
+		GotoInstruction gotoContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, gotoContinue);
+		node.setNodeData(GOTOBREAK, gotoBreak);
 		int pointer = (Integer) visit(init).getNodeData();
 		code.add(Instructions.pop());
 		int loopStart = (Integer) visit(condition).getNodeData();
@@ -110,39 +111,39 @@ public class Compiler extends LiteralEvaluator {
 		code.add(Instructions.pop());
 		code.add(Instructions.goTo(loopStart));
 		int endPointer = code.size();
-		jumpEnd.setTarget(endPointer);
+		gotoBreak.setTarget(endPointer);
 		endIfFalse.setTarget(endPointer);
-		jumpContinue.setTarget(loopContinue);
+		gotoContinue.setTarget(loopContinue);
 		return new Result(pointer);
 	}
 
 	@Override
 	protected HashNode visitWhile(HashNode node, HashNode condition,
 			HashNode action) {
-		GotoInstruction jumpBreak = Instructions.goTo();
-		GotoInstruction jumpContinue = Instructions.goTo();
-		node.setNodeData(GOTOCONTINUE, jumpContinue);
-		node.setNodeData(GOTOBREAK, jumpBreak);
+		GotoInstruction gotoBreak = Instructions.goTo();
+		GotoInstruction gotoContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, gotoContinue);
+		node.setNodeData(GOTOBREAK, gotoBreak);
 		int loopStart = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
 		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
 		visit(action);
-		code.add(jumpContinue);
+		code.add(gotoContinue);
 		int endPointer = code.size();
-		jumpBreak.setTarget(endPointer);
+		gotoBreak.setTarget(endPointer);
 		endIfFalse.setTarget(endPointer);
-		jumpContinue.setTarget(loopStart);
+		gotoContinue.setTarget(loopStart);
 		return new Result(loopStart);
 	}
 
 	@Override
 	protected HashNode visitDoWhile(HashNode node, HashNode condition,
 			HashNode action) {
-		GotoInstruction jumpEnd = Instructions.goTo();
-		GotoInstruction jumpContinue = Instructions.goTo();
-		node.setNodeData(GOTOCONTINUE, jumpContinue);
-		node.setNodeData(GOTOBREAK, jumpEnd);
+		GotoInstruction gotoBreak = Instructions.goTo();
+		GotoInstruction gotoContinue = Instructions.goTo();
+		node.setNodeData(GOTOCONTINUE, gotoContinue);
+		node.setNodeData(GOTOBREAK, gotoBreak);
 		int loopStart = (Integer) visit(action).getNodeData();
 		int loopContinue = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
@@ -150,9 +151,9 @@ public class Compiler extends LiteralEvaluator {
 		code.add(endIfFalse);
 		code.add(Instructions.goTo(loopStart));
 		int endPointer = code.size();
-		jumpEnd.setTarget(endPointer);
+		gotoBreak.setTarget(endPointer);
 		endIfFalse.setTarget(endPointer);
-		jumpContinue.setTarget(loopContinue);
+		gotoContinue.setTarget(loopContinue);
 		return new Result(loopStart);
 	}
 
@@ -238,6 +239,7 @@ public class Compiler extends LiteralEvaluator {
 				switch (child.getType()) {
 				case ASSIGN:
 				case INVOCATION:
+				case CONDITIONAL:
 				case BINARY:
 				case UNARY:
 				case YIELD:
@@ -376,6 +378,21 @@ public class Compiler extends LiteralEvaluator {
 		if (finallyStart != null)
 			code.addTryCatchBlock(tryStart, tryEnd, catchAllPointer, null);
 
+		return new Result(pointer);
+	}
+
+	@Override
+	protected HashNode visitConditionalExpression(HashNode node,
+			HashNode condition, HashNode trueValue, HashNode falseValue) {
+		int pointer = (Integer) visit(condition).getNodeData();
+		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
+		GotoInstruction gotoFalse = Instructions.goToIfFalse();
+		GotoInstruction gotoEnd = Instructions.goTo();
+		code.add(gotoFalse);
+		visit(trueValue);
+		code.add(gotoEnd);
+		gotoFalse.setTarget((Integer) visit(falseValue).getNodeData());
+		gotoEnd.setTarget(code.size());
 		return new Result(pointer);
 	}
 

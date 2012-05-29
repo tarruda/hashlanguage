@@ -6,7 +6,6 @@ import org.junit.Test;
 
 public abstract class PrimaryExpressionTest extends AbstractCodeTest {
 
-	
 	@Test
 	public void numberToString() {
 		assertEquals("5", evaluate("5.toString()"));
@@ -93,7 +92,7 @@ public abstract class PrimaryExpressionTest extends AbstractCodeTest {
 
 	@Test
 	public void constructingInstances() {
-		evaluate("import java.lang.Integer");		
+		evaluate("import java.lang.Integer");
 		assertEquals(5, evaluate("new Integer('5')"));
 	}
 
@@ -137,5 +136,11 @@ public abstract class PrimaryExpressionTest extends AbstractCodeTest {
 				+ "\n      rv = n * 1\n      return rv * name\n    }    \n"
 				+ "    return calc(1) * 2\n\n\n  }\n}");
 		assertEquals("abcabc", evaluate("o.duplicateWord('abc')"));
+	}
+
+	@Test
+	public void conditionalExpressions() {
+		assertEquals(5, evaluate("true ? 5 : 10"));
+		assertEquals(10, evaluate("false ? 5 : 10"));
 	}
 }

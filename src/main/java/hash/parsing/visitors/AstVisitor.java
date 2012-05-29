@@ -9,6 +9,7 @@ import static hash.parsing.HashParser.BREAK;
 import static hash.parsing.HashParser.CONTINUE;
 import static hash.parsing.HashParser.DO;
 import static hash.parsing.HashParser.FLOAT;
+import static hash.parsing.HashParser.CONDITIONAL;
 import static hash.parsing.HashParser.FOR;
 import static hash.parsing.HashParser.FOREACH;
 import static hash.parsing.HashParser.FUNCTION;
@@ -109,6 +110,10 @@ public abstract class AstVisitor {
 		case INCR:
 			return visitEvalAndIncrement(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1));
+		case CONDITIONAL:
+			return visitConditionalExpression(node,
+					(HashNode) node.getChild(0), (HashNode) node.getChild(1),
+					(HashNode) node.getChild(2));
 		case BINARY:
 			return visitBinaryExpression(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1));
@@ -221,6 +226,11 @@ public abstract class AstVisitor {
 
 	protected HashNode visitEvalAndIncrement(HashNode node, HashNode target,
 			HashNode assignment) {
+		return node;
+	}
+
+	protected HashNode visitConditionalExpression(HashNode node,
+			HashNode condition, HashNode trueValue, HashNode falseValue) {
 		return node;
 	}
 

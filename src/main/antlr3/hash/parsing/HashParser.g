@@ -27,7 +27,8 @@ tokens {
     FUNCTIONBLOCK;
     FUNCTION;
     FOREACH; 
-    NAMEREF;    
+    NAMEREF;
+    CONDITIONAL; 
 }
 
 @header {
@@ -187,8 +188,10 @@ breakStatement
 expression
   : jumpExpression
   | yieldExpression
-  | functionExpression
-  | incOrDecExpression     
+  | (LROUND (IDENTIFIER (COMMA IDENTIFIER)*)? RROUND LCURLY) => functionExpression
+  | (LROUND (IDENTIFIER (COMMA IDENTIFIER)*)? RROUND LAMBDA) => lambdaExpression
+  | incOrDecExpression  
+  | (disjunction QMARK) => conditionalExpression
   | (l=disjunction -> $l)
     ( 
       o=ASSIGN r=expression -> ^($o $l $r)
@@ -206,9 +209,9 @@ expression
     | o=SHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>"] $l $r))
     | o=INC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "+"] $l INTEGER["1"])))
     | o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
-    )? 
+    )?   
   ;
-  
+
 jumpExpression
   : JUMPTO name=nameRef (arg=expression)? 
     -> ^(JUMPTO $name {nodeOrNull(arg)})
@@ -221,12 +224,24 @@ yieldExpression
 
 functionExpression
   : l=LROUND (params+=IDENTIFIER (COMMA params+=IDENTIFIER)*)? RROUND b=block 
-      -> ^(FUNCTION[$l, "Function"] {stringList($params)} {functionBlock(b)} )
+        -> ^(FUNCTION[$l, "Function"] {stringList($params)} {functionBlock(b)} )
+  ;
+  
+lambdaExpression
+  : l=LROUND (params+=IDENTIFIER (COMMA params+=IDENTIFIER)*)? RROUND 
+      t=LAMBDA e=expression
+        -> ^(FUNCTION[$l, "Lambda"] {stringList($params)} 
+              ^(FUNCTIONBLOCK ^(RETURN[$t, "=>"] $e)))
   ;
   
 incOrDecExpression
   : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
   | o=DEC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   
+  ;
+  
+conditionalExpression
+  : c=disjunction o=QMARK te=expression COLON fe=expression 
+      -> ^(CONDITIONAL[$o] $c $te $fe)
   ;
   
 disjunction
@@ -296,7 +311,7 @@ invert
   : (o=NOT|o=BIT_NOT) op=invert -> ^(UNARY[$o] $op)
   | primary
   ;
-  
+ 
 primary
   : (atom -> atom)
     (
