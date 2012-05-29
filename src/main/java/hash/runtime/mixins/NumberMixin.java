@@ -1,6 +1,6 @@
 package hash.runtime.mixins;
 
-import hash.runtime.Runtime;
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.functions.UnaryOperator;
@@ -12,9 +12,8 @@ import hash.util.Types;
 @SuppressWarnings("serial")
 public class NumberMixin extends Mixin {
 
-	public static final NumberMixin INSTANCE = new NumberMixin();
-
-	private NumberMixin() {
+	public NumberMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BuiltinMethod(Constants.BOOLEAN_VALUE) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 1);
@@ -66,7 +65,7 @@ public class NumberMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				if (other.getClass() == String.class)
-					return Runtime.invokeBinaryOperator(op, other, self);
+					return runtime.invokeBinaryOperator(op, other, self);
 				if (!(other instanceof Number))
 					throw Err.binaryOperatorNotImplemented(op, self, other);
 				Number rv = ((Number) self).doubleValue()

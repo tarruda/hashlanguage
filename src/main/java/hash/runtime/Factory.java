@@ -1,8 +1,5 @@
 package hash.runtime;
 
-import hash.runtime.functions.ClassFactory;
-import hash.runtime.functions.Import;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,14 +23,17 @@ public class Factory {
 		return new ArrayList(initialCapacity);
 	}
 
+	public static Module createModule() {
+		return new HashModule();
+	}
+
 	public static Context createContext() {
-		HashContext rv = new HashContext();
-		rv.installBuiltin(new Import());
-		rv.installBuiltin(new ClassFactory());
-		return rv;
+		return new HashContext();
 	}
 
 	public static Context createContext(Context parent) {
-		return new HashContext(parent);
+		HashContext rv = new HashContext();
+		rv.setParent(parent);
+		return rv;
 	}
 }

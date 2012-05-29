@@ -1,6 +1,6 @@
 package hash.runtime.mixins;
 
-import hash.runtime.Runtime;
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.functions.UnaryOperator;
@@ -10,10 +10,9 @@ import hash.util.Err;
 
 @SuppressWarnings("serial")
 public class ObjectMixin extends Mixin {
-
-	public static final ObjectMixin INSTANCE = new ObjectMixin();
-
-	private ObjectMixin() {
+	
+	public ObjectMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BinaryOperator("==") {
 			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 2);
@@ -21,7 +20,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object comparisonResult = null;
 				try {
-					comparisonResult = Runtime.invokeNormalMethod(self,
+					comparisonResult = runtime.invokeNormalMethod(self,
 							Constants.COMPARE_TO, other);
 				} catch (Exception e) {
 					return self.equals(other);
@@ -38,7 +37,7 @@ public class ObjectMixin extends Mixin {
 				Object other = args[1];
 				Object comparisonResult = null;
 				try {
-					comparisonResult = Runtime.invokeNormalMethod(self,
+					comparisonResult = runtime.invokeNormalMethod(self,
 							Constants.COMPARE_TO, other);
 				} catch (Exception e) {
 					return !self.equals(other);
@@ -54,7 +53,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Runtime.invokeNormalMethod(self,
+				comparisonResult = runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
@@ -67,7 +66,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Runtime.invokeNormalMethod(self,
+				comparisonResult = runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
@@ -80,7 +79,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Runtime.invokeNormalMethod(self,
+				comparisonResult = runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
@@ -93,7 +92,7 @@ public class ObjectMixin extends Mixin {
 				Object self = args[0];
 				Object other = args[1];
 				Object comparisonResult = null;
-				comparisonResult = Runtime.invokeNormalMethod(self,
+				comparisonResult = runtime.invokeNormalMethod(self,
 						Constants.COMPARE_TO, other);
 				if (!(comparisonResult instanceof Integer))
 					throw Err.invalidComparisonResult();
@@ -111,7 +110,7 @@ public class ObjectMixin extends Mixin {
 				Check.numberOfArgs(args, 2);
 				Object self = args[0];
 				Object other = args[1];
-				Object selfValue = Runtime.invokeNormalMethod(self,
+				Object selfValue = runtime.invokeNormalMethod(self,
 						Constants.BOOLEAN_VALUE);
 				if (selfValue.getClass() == Boolean.class
 						&& ((Boolean) selfValue).booleanValue())
@@ -123,7 +122,7 @@ public class ObjectMixin extends Mixin {
 			public Object invoke(Object... args) throws Throwable {
 				Check.numberOfArgs(args, 1);
 				Object self = args[0];
-				Object booleanValue = Runtime.invokeNormalMethod(self,
+				Object booleanValue = runtime.invokeNormalMethod(self,
 						Constants.BOOLEAN_VALUE);
 				if (booleanValue == Boolean.TRUE)
 					return false;
@@ -138,12 +137,12 @@ public class ObjectMixin extends Mixin {
 		installMethod(new BuiltinMethod(Constants.GET_ATTRIBUTE) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
-				return Runtime.lookup(args[0], args[1]);
+				return runtime.lookup(args[0], args[1]);
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
 			public Object invoke(Object... args) throws Throwable {
-				return Runtime.invokeNormalMethod(args[0],
+				return runtime.invokeNormalMethod(args[0],
 						Constants.GET_ATTRIBUTE);
 			}
 		});

@@ -1,24 +1,14 @@
 package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
-import hash.runtime.Context;
-import hash.runtime.Factory;
 
 import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.RecognitionException;
-import org.junit.Before;
 import org.junit.Test;
 
 public abstract class BinaryAndUnaryExpressionTest extends AbstractCodeTest {
-
-	protected Context context;
-
-	@Before
-	public void setup() {
-		context = Factory.createContext();
-	}
 
 	@Test
 	public void identifier() {

@@ -2,23 +2,14 @@ package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import hash.runtime.Context;
-import hash.runtime.Factory;
 
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public abstract class FunctionTest extends AbstractCodeTest {
 
-	protected Context context;
-
-	@Before
-	public void setup() {
-		context = Factory.createContext();
-	}
-
+	
 	@Test
 	public void simpleFunctionReturn() {
 		evaluate("f=()\n{\ng=()\n{;return 15.5;}\nreturn g()}");

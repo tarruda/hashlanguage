@@ -1,7 +1,7 @@
 package hash.simplevm;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.Context;
-import hash.runtime.Runtime;
 
 class TryCatchBlock {
 
@@ -18,13 +18,13 @@ class TryCatchBlock {
 		this.exceptionTypeId = exceptionTypeId;
 	}
 
-	public boolean handle(OperandStack operandStack, Context local,
-			InstructionPointer pointer, Throwable ex) {
+	public boolean handle(AppRuntime runtime, OperandStack operandStack,
+			Context local, InstructionPointer pointer, Throwable ex) {
 		int p = pointer.p - 1;// where the exception ocurred
 		if (p > tryEnd || p < tryStart)
 			return false;
 		if (exceptionTypeId != null
-				&& !Runtime.isInstance(ex, local.get(exceptionTypeId)))
+				&& !runtime.isInstance(ex, local.get(exceptionTypeId)))
 			return false;
 		pointer.p = catchPointer;
 		operandStack.push(ex);

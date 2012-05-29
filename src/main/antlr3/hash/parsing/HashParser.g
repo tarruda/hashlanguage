@@ -38,11 +38,11 @@ tokens {
 program
   : statements? EOF!      
   ;
-        
+                                            
 block
   : LCURLY statements? RCURLY -> statements
-  ;
-    
+  ;  
+                
 statements
   : statementSeparator*
     s+=statement 

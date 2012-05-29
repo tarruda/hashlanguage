@@ -1,6 +1,5 @@
 package hash.runtime;
 
-import hash.runtime.functions.BuiltinFunction;
 import hash.util.Err;
 
 import java.util.HashMap;
@@ -11,16 +10,12 @@ public class HashContext extends HashMap implements Context {
 	private Context parent;
 	private Object lastEvaluationResult;
 
-	public HashContext() {
-
-	}
-
-	public HashContext(Context parent) {
-		this.parent = parent;
-	}
-
 	public Context getParent() {
 		return parent;
+	}
+
+	public void setParent(Context parent) {
+		this.parent = parent;
 	}
 
 	@Override
@@ -33,10 +28,6 @@ public class HashContext extends HashMap implements Context {
 		return super.get(key);
 	}
 
-	public void installBuiltin(BuiltinFunction f) {
-		put(f.getName(), f);
-	}
-
 	public Object restore() {
 		return lastEvaluationResult;
 	}
@@ -44,4 +35,5 @@ public class HashContext extends HashMap implements Context {
 	public void save(Object value) {
 		lastEvaluationResult = value;
 	}
+
 }

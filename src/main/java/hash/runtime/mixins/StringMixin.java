@@ -1,5 +1,6 @@
 package hash.runtime.mixins;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.operations.Common;
@@ -11,9 +12,8 @@ import hash.util.Err;
 @SuppressWarnings("serial")
 public class StringMixin extends Mixin {
 
-	public static final StringMixin INSTANCE = new StringMixin();
-
-	private StringMixin() {
+	public StringMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BuiltinMethod(Constants.BOOLEAN_VALUE) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 1);

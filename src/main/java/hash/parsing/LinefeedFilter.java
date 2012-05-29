@@ -29,12 +29,13 @@ import org.antlr.runtime.TokenSource;
 import org.antlr.runtime.TokenStream;
 
 /**
- * Filter responsible to select when to ignore/include linefeeds as statement
+ * Filter responsible to select when to ignore linefeeds as statement
  * terminators. This class does minor parsing of lexer input in order to make
  * its decisions.
  * 
  * This class main purpose is keeping the parser grammar simple while
- * maintaining the language with a easy javascript-like syntax.
+ * maintaining the language with a easy javascript-like syntax. It also adds
+ * special tokens that helps determining when a statement has ended in REPL
  * 
  * @author Thiago de Arruda
  * 
@@ -63,7 +64,7 @@ public class LinefeedFilter implements TokenSource {
 			return getNext();
 		if (eof())
 			return Token.EOF_TOKEN;
-		parse(true, true);
+		parse(true);
 		repl();
 		if (queue.size() > 0)
 			return getNext();
@@ -97,8 +98,7 @@ public class LinefeedFilter implements TokenSource {
 		return null;
 	}
 
-	private void parse(boolean considerLinefeeds,
-			boolean terminatePreviousStatements) {
+	private void parse(boolean considerLinefeeds) {
 		int tokenType = la();
 		switch (tokenType) {
 		case FUNCTION:
@@ -114,19 +114,19 @@ public class LinefeedFilter implements TokenSource {
 		case FOR:
 		case WHILE:
 			compoundStatement = true;
-			forWhileStmt(terminatePreviousStatements);
+			forWhileStmt();
 			break;
 		case IF:
 			compoundStatement = true;
-			ifStmt(terminatePreviousStatements);
+			ifStmt();
 			break;
 		case DO:
 			compoundStatement = true;
-			doWhileStmt(terminatePreviousStatements);
+			doWhileStmt();
 			break;
 		case TRY:
 			compoundStatement = true;
-			tryStmt(terminatePreviousStatements);
+			tryStmt();
 			curlyBraces(true);
 			break;
 		case LCURLY:
@@ -149,33 +149,24 @@ public class LinefeedFilter implements TokenSource {
 		}
 	}
 
-	private void forWhileStmt(boolean terminatePreviousStatements) {
-		if (terminatePreviousStatements)
-			terminatePreviousStatement();
+	private void forWhileStmt() {
 		forward();
 		forwardIgnoringWsUntil(LROUND);
 		roundBraces(false);
 		ignoreFollowingWhitespaces();
 		if (!parseCompoundStatement())
-			parseUntil(SCOLON, LINE, FOR, DO, WHILE, IF, TRY, FUNCTION, CLASS,
-					RCURLY);
+			parseUntil(SCOLON, LINE, RCURLY);
 		if (queue.peekLast().getType() == RCURLY)
 			addTerminator();
 	}
 
-	private void ifStmt(boolean terminatePreviousStatements) {
-		if (terminatePreviousStatements)
-			terminatePreviousStatement();
+	private void ifStmt() {
 		forward();
 		forwardIgnoringWsUntil(LROUND);
 		roundBraces(false);
 		ignoreFollowingWhitespaces();
 		if (!parseCompoundStatement()) {
-			forwardIgnoringWsUntil(SCOLON, LINE, ELSE);
-			if (la() == ELSE)
-				// the statement wasnt terminated
-				addTerminator();
-			ignoreFollowingWhitespaces();
+			forwardIgnoringWsUntil(SCOLON, LINE);
 			forward();
 		}
 		if (nextNonWhitespaceTokenIs(ELSE)) {
@@ -185,16 +176,13 @@ public class LinefeedFilter implements TokenSource {
 		if (queue.peekLast().getType() == ELSE) {
 			ignoreFollowingWhitespaces();
 			if (!parseCompoundStatement())
-				parseUntil(SCOLON, LINE, FOR, DO, WHILE, IF, TRY, FUNCTION,
-						CLASS, RCURLY);
+				parseUntil(SCOLON, LINE, RCURLY);
 		}
 		if (queue.peekLast().getType() == RCURLY)
 			addTerminator();
 	}
 
-	private void doWhileStmt(boolean terminatePreviousStatements) {
-		if (terminatePreviousStatements)
-			terminatePreviousStatement();
+	private void doWhileStmt() {
 		forward();
 		ignoreFollowingWhitespaces();
 		if (!parseCompoundStatement())
@@ -205,7 +193,7 @@ public class LinefeedFilter implements TokenSource {
 		addTerminator();
 	}
 
-	private void tryStmt(boolean terminatePreviousStatements) {
+	private void tryStmt() {
 		forwardIgnoringWsUntil(LCURLY);
 		curlyBraces(true);
 		// find catch or finally
@@ -242,7 +230,7 @@ public class LinefeedFilter implements TokenSource {
 			case TRY:
 			case FUNCTION:
 			case CLASS:
-				parse(true, false);
+				parse(true);
 				rv = true;
 			}
 		}
@@ -257,34 +245,12 @@ public class LinefeedFilter implements TokenSource {
 		queue.add(t);
 	}
 
-	private void terminatePreviousStatement() {
-		// terminates the previous statement if needed
-		boolean terminateLastStatement = true;
-		Token last = queue.peekLast();
-		if (last == null)
-			last = lastToken;
-		switch (last.getType()) {
-		case SCOLON:
-		case LINE:
-			terminateLastStatement = false;
-		}
-		if (terminateLastStatement)
-			addTerminator();
-	}
-
 	private void curlyBraces(boolean considerLinefeeds) {
-		// if (!considerLinefeeds
-		// && (queue.size() > 0 && queue.peekLast().getType() == RROUND)
-		// || lastToken.getType() == RROUND)
-		// // The only way a left curly can appear after a closing round brace
-		// // is in a function expression or if/for/while statement, so we
-		// // force the filter to consider line feeds at this point
-		// considerLinefeeds = true;
 		forward();
 		while (la() != RCURLY) {
 			if (eof())
 				break;
-			parse(considerLinefeeds, true);
+			parse(considerLinefeeds);
 		}
 		forward();
 	}
@@ -294,7 +260,7 @@ public class LinefeedFilter implements TokenSource {
 		while (la() != RSQUARE) {
 			if (eof())
 				break;
-			parse(considerLinefeeds, true);
+			parse(considerLinefeeds);
 		}
 		forward();
 	}
@@ -304,7 +270,7 @@ public class LinefeedFilter implements TokenSource {
 		while (la() != RROUND) {
 			if (eof())
 				break;
-			parse(considerLinefeeds, true);
+			parse(considerLinefeeds);
 		}
 		forward();
 		if (nextNonWhitespaceTokenIs(LCURLY)) {
@@ -341,7 +307,7 @@ public class LinefeedFilter implements TokenSource {
 			if (!matched || actualType == Token.EOF)
 				break;
 			if (actualType != WS)
-				parse(true, true);
+				parse(true);
 			else
 				input.consume();
 		}

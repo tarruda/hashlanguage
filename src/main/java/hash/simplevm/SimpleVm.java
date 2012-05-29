@@ -1,28 +1,30 @@
 package hash.simplevm;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.Context;
 
 public class SimpleVm {
 
-	public static Object execute(Instruction[] instructions,
+	public static Object execute(AppRuntime runtime, Instruction[] instructions,
 			TryCatchBlock[] tryCatchBlocks, Context locals) throws Throwable {
-		return execute(instructions, tryCatchBlocks, locals,
+		return execute(runtime, instructions, tryCatchBlocks, locals,
 				new OperandStack(), new InstructionPointer());
 	}
 
-	static Object execute(Instruction[] instructions,
+	static Object execute(AppRuntime runtime, Instruction[] instructions,
 			TryCatchBlock[] tryCatchBlocks, Context locals,
 			OperandStack operandStack, InstructionPointer ip) throws Throwable {
 		int len = instructions.length;
 		State state = new State();
 		while (!state.pause && !state.stop && ip.p < len) {
 			try {
-				instructions[ip.p++].exec(locals, operandStack, ip, state);
+				instructions[ip.p++]
+						.exec(runtime, locals, operandStack, ip, state);
 			} catch (Throwable ex) {
 				boolean handled = false;
 				for (int i = 0; !handled && i < tryCatchBlocks.length; i++) {
-					handled = tryCatchBlocks[i].handle(operandStack, locals,
-							ip, ex);
+					handled = tryCatchBlocks[i].handle(runtime, operandStack,
+							locals, ip, ex);
 				}
 				if (!handled)
 					throw ex;

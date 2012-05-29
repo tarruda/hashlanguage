@@ -3,22 +3,13 @@ package hash.basetests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import hash.runtime.Context;
-import hash.runtime.Factory;
 import hash.runtime.Function;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public abstract class StatementTest extends AbstractCodeTest {
 
-	protected Context context;
-
-	@Before
-	public void setup() {
-		context = Factory.createContext();
-	}
-
+	
 	@Test
 	public void functionStatement() {
 		evaluate("function\n f1\n  (\nn){return n}");
@@ -120,7 +111,7 @@ public abstract class StatementTest extends AbstractCodeTest {
 
 	@Test
 	public void elseif() {
-		evaluate("f=(x){if(x>10)return x else if(x>5) return x+5 else return x+10}");
+		evaluate("f=(x){if(x>10)return x\n else if(x>5) return x+5; else return x+10}");
 		assertEquals(11, evaluate("f(11)"));
 		assertEquals(15, evaluate("f(10)"));
 		assertEquals(14, evaluate("f(9)"));
@@ -146,34 +137,34 @@ public abstract class StatementTest extends AbstractCodeTest {
 
 	@Test
 	public void forStmt() {
-		evaluate("z=0 for (i=0;i<10;i++) z+=i");
+		evaluate("z=0; for (i=0;i<10;i++) z+=i");
 		assertEquals(45, context.get("z"));
 	}
 
 	@Test
 	public void nestedFor() {
-		evaluate("z=0 for(i=0;i<10;i++)for(j=0;j<10;j++)for(k=0;k<10;k++)"
+		evaluate("z=0; for(i=0;i<10;i++)for(j=0;j<10;j++)for(k=0;k<10;k++)"
 				+ "z+=i");
 		assertEquals(4500, context.get("z"));
 	}
 
 	@Test
 	public void whileStmt() {
-		evaluate("i=0 while (i<100) i++");
+		evaluate("i=0; while (i<100) i++");
 		assertEquals(100, context.get("i"));
 	}
 
 	@Test
 	public void whileBlock() {
-		evaluate("i=100 while (i<100){y=i; y*=2}");
+		evaluate("i=100; while (i<100){y=i; y*=2}");
 		assertEquals(100, context.get("i"));
 		assertFalse(context.containsKey("y"));
 	}
 
 	@Test
 	public void nestedWhiles() {
-		evaluate("n=i=0 while (i<10){j=0 while(j<10)"
-				+ " {k=0 while(k<10){k++;n++}j++}i++}");
+		evaluate("n=i=0; while (i<10){j=0; while(j<10)"
+				+ " {k=0; while(k<10){k++;n++}j++}i++}");
 		assertEquals(1000, context.get("n"));
 	}
 
@@ -192,24 +183,24 @@ public abstract class StatementTest extends AbstractCodeTest {
 
 	@Test
 	public void foreachStmt() {
-		evaluate("s=0 for (i in [1,2,3,4]) s+=i");
+		evaluate("s=0; for (i in [1,2,3,4]) s+=i");
 		assertEquals(10, context.get("s"));
 	}
 
 	@Test
 	public void nestedLoops() {
-		evaluate("i=0 do while(i<10000) do for(j=0;j<10001;j++){i++} while(i<10000)"
+		evaluate("i=0; do while(i<10000) do for(j=0;j<10001;j++){i++} while(i<10000)"
 				+ "  while (i<10000)");
 		assertEquals(10001, context.get("i"));
 	}
 
 	@Test
 	public void loopBreak() {
-		evaluate("i=0 while(i<10) if(i>5)break else i++");
+		evaluate("i=0; while(i<10) if(i>5)break; else i++");
 		assertEquals(6, context.get("i"));
-		evaluate("i=0 do if(i==0)break else i++ while(i<10)");
+		evaluate("i=0; do if(i==0)break; else i++ while(i<10)");
 		assertEquals(0, context.get("i"));
-		evaluate("l=[1,2,3,4];l2=[]for (i in l) if(i==3)break else l2.add(i)");
+		evaluate("l=[1,2,3,4];l2=[];for (i in l) if(i==3)break; else l2.add(i)");
 		assertEquals("[1, 2]", context.get("l2").toString());
 		evaluate("for(i=10;i>0;i--) if(i==5)break");
 		assertEquals(5, context.get("i"));
@@ -217,11 +208,11 @@ public abstract class StatementTest extends AbstractCodeTest {
 
 	@Test
 	public void loopContinue() {
-		evaluate("l=[];i=0 while(i<10) {i++ if(i%2==0)continue; l.add(i)}");
+		evaluate("l=[];i=0; while(i<10) {i++; if(i%2==0)continue\n l.add(i)}");
 		assertEquals("[1, 3, 5, 7, 9]", context.get("l").toString());
-		evaluate("j=i=0 do {i++ if(i%3!=0)continue;j++}while(i<10)");
+		evaluate("j=i=0; do {i++; if(i%3!=0)continue;j++}while(i<10)");
 		assertEquals(3, context.get("j"));
-		evaluate("l=[1,2,3,4];l2=[]for (i in l){ if(i<3)continue; l2.add(i)}");
+		evaluate("l=[1,2,3,4];l2=[];for (i in l){ if(i<3)continue; l2.add(i)}");
 		assertEquals("[3, 4]", context.get("l2").toString());
 		evaluate("for(i=0;i<=10;i++) {if(i<10)continue;i+=10}");
 		assertEquals(21, context.get("i"));

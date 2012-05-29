@@ -1,6 +1,6 @@
 package hash.runtime.mixins;
 
-import hash.runtime.Runtime;
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.util.Check;
@@ -11,9 +11,9 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public class MapMixin extends Mixin {
 
-	public static final MapMixin INSTANCE = new MapMixin();
-
-	private MapMixin() {
+	
+	public MapMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BinaryOperator("contains") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);
@@ -42,13 +42,13 @@ public class MapMixin extends Mixin {
 		});
 		installMethod(new BuiltinMethod(Constants.SET_INDEX) {
 			public Object invoke(Object... args) throws Throwable {
-				return Runtime.invokeNormalMethod(args[0],
+				return runtime.invokeNormalMethod(args[0],
 						Constants.SET_ATTRIBUTE);
 			}
 		});
 		installMethod(new BuiltinMethod(Constants.DEL_INDEX) {
 			public Object invoke(Object... args) throws Throwable {
-				return Runtime.invokeNormalMethod(args[0],
+				return runtime.invokeNormalMethod(args[0],
 						Constants.DEL_ATTRIBUTE);
 			}
 		});

@@ -1,5 +1,6 @@
 package hash.runtime.mixins;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.operations.StringOperations;
 import hash.util.Check;
@@ -8,9 +9,8 @@ import hash.util.Err;
 @SuppressWarnings("serial")
 public class CharacterMixin extends Mixin {
 
-	public static final CharacterMixin INSTANCE = new CharacterMixin();
-
-	private CharacterMixin() {		
+	public CharacterMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BinaryOperator("+") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);

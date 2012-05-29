@@ -91,7 +91,7 @@
                   <arguments>
                     <argument>-classpath</argument>
                     <classpath/>
-                    <argument>hash.repl.Main</argument>
+                    <argument>hash.Main</argument>
                   </arguments>
                 </configuration>
               </execution>

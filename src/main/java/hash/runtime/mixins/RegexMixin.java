@@ -1,5 +1,6 @@
 package hash.runtime.mixins;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BinaryOperator;
 import hash.util.Check;
 import hash.util.Err;
@@ -9,9 +10,8 @@ import java.util.regex.Pattern;
 @SuppressWarnings("serial")
 public class RegexMixin extends Mixin {
 
-	public static final RegexMixin INSTANCE = new RegexMixin();
-
-	private RegexMixin() {
+	public RegexMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BinaryOperator("=~") {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);

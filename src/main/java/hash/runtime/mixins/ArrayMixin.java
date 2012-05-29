@@ -1,5 +1,6 @@
 package hash.runtime.mixins;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.operations.ArrayOperations;
 import hash.util.Check;
@@ -11,9 +12,8 @@ import java.lang.reflect.Array;
 @SuppressWarnings("serial")
 public class ArrayMixin extends Mixin {
 
-	public static final ArrayMixin INSTANCE = new ArrayMixin();
-
-	private ArrayMixin() {
+	public ArrayMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BuiltinMethod(Constants.GET_INDEX) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);

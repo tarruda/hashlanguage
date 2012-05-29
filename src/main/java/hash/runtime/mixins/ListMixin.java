@@ -1,5 +1,6 @@
 package hash.runtime.mixins;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.functions.BinaryOperator;
 import hash.runtime.functions.BuiltinMethod;
 import hash.runtime.operations.Common;
@@ -13,9 +14,8 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class ListMixin extends Mixin {
 
-	public static final ListMixin INSTANCE = new ListMixin();
-
-	private ListMixin() {
+	public ListMixin(AppRuntime r) {
+		super(r);
 		installMethod(new BinaryOperator(Constants.CONTAINS) {
 			public Object invoke(Object... args) {
 				Check.numberOfArgs(args, 2);

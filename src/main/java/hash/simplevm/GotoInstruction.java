@@ -1,5 +1,6 @@
 package hash.simplevm;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.Context;
 
 public class GotoInstruction extends Instruction {
@@ -27,8 +28,8 @@ public class GotoInstruction extends Instruction {
 	}
 
 	@Override
-	public void exec(Context local, OperandStack operandStack,
-			InstructionPointer ip, State functionReturn)
+	public void exec(AppRuntime runtime, Context local,
+			OperandStack operandStack, InstructionPointer ip, State functionReturn)
 			throws Throwable {
 		ip.p = getTarget();
 	}

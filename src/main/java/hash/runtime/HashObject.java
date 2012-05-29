@@ -28,7 +28,15 @@ public class HashObject extends HashMap {
 		return isa;
 	}
 
-	public void setIsa(HashObject value) {
-		isa = value;
+	public void setIsa(HashObject isa) {
+		this.isa = isa;
+	}
+
+	@Override
+	public Object clone() {
+		HashObject rv = (HashObject) super.clone();
+		if (this.isa != null)
+			rv.setIsa((HashObject) this.isa.clone());
+		return rv;
 	}
 }

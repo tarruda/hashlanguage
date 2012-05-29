@@ -1,11 +1,13 @@
 package hash.simplevm;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.Context;
 import hash.runtime.Continuation;
 import hash.util.Err;
 
 class SimpleVmContinuation implements Continuation {
 
+	private AppRuntime runtime;
 	private Context locals;
 	private Instruction[] instructions;
 	private TryCatchBlock[] tryCatchBlocks;
@@ -15,9 +17,10 @@ class SimpleVmContinuation implements Continuation {
 	private boolean hasNext = true;
 	private boolean started = false;
 
-	public SimpleVmContinuation(Context locals, Instruction[] instructions,
+	public SimpleVmContinuation(AppRuntime runtime, Context locals, Instruction[] instructions,
 			TryCatchBlock[] tryCatchBlocks, OperandStack operandStack,
 			InstructionPointer ip) throws Throwable {
+		this.runtime = runtime;
 		this.locals = locals;
 		this.instructions = instructions;
 		this.tryCatchBlocks = tryCatchBlocks;
@@ -42,11 +45,11 @@ class SimpleVmContinuation implements Continuation {
 				throw Err.illegalState("Function has finished its execution");
 		Object rv = next;
 		operandStack.push(arg);
-		Object retVal = SimpleVm.execute(instructions, tryCatchBlocks, locals,
+		Object retVal = SimpleVm.execute(runtime, instructions, tryCatchBlocks, locals,
 				operandStack, ip);
 		while (!(retVal instanceof FunctionReturn)
  				&& ip.p < instructions.length)
-			retVal = SimpleVm.execute(instructions, tryCatchBlocks, locals,
+			retVal = SimpleVm.execute(runtime, instructions, tryCatchBlocks, locals,
 					operandStack, ip);
 		if (retVal instanceof FunctionReturn) {
 			next = ((FunctionReturn) retVal).value;

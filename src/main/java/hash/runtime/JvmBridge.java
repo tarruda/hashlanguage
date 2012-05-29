@@ -9,17 +9,6 @@ import hash.jvm.MethodGenerator;
 import hash.jvm.StaticMethodInvocation;
 import hash.jvm.VirtualMachineCodeFactory;
 import hash.runtime.functions.JavaMethod;
-import hash.runtime.mixins.ArrayMixin;
-import hash.runtime.mixins.BooleanMixin;
-import hash.runtime.mixins.CharacterMixin;
-import hash.runtime.mixins.FloatMixin;
-import hash.runtime.mixins.IntegerMixin;
-import hash.runtime.mixins.ListMixin;
-import hash.runtime.mixins.MapMixin;
-import hash.runtime.mixins.NumberMixin;
-import hash.runtime.mixins.ObjectMixin;
-import hash.runtime.mixins.RegexMixin;
-import hash.runtime.mixins.StringMixin;
 import hash.util.Constants;
 import hash.util.Err;
 
@@ -30,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.objectweb.asm.Opcodes;
 
@@ -46,34 +33,18 @@ public class JvmBridge extends ClassLoader implements Opcodes {
 	public static final JvmBridge INSTANCE = new JvmBridge();
 
 	private final HashMap<Class<?>, HashObject> classMap;
-	private final HashMap<Class<?>, Map[]> classMixins;
+
 	private final VirtualMachineCodeFactory f = VirtualMachineCodeFactory.Instance;
 
 	private JvmBridge() {
 		classMap = new HashMap<Class<?>, HashObject>();
-		classMixins = new HashMap<Class<?>, Map[]>();
-		classMixins.put(Object.class, new Map[] { ObjectMixin.INSTANCE });
-		classMixins.put(Boolean.class, new Map[] { BooleanMixin.INSTANCE });
-		classMixins.put(Number.class, new Map[] { NumberMixin.INSTANCE });
-		classMixins.put(Character.class, new Map[] { IntegerMixin.INSTANCE,
-				CharacterMixin.INSTANCE });
-		classMixins.put(Byte.class, new Map[] { IntegerMixin.INSTANCE });
-		classMixins.put(Short.class, new Map[] { IntegerMixin.INSTANCE });
-		classMixins.put(Integer.class, new Map[] { IntegerMixin.INSTANCE });
-		classMixins.put(Long.class, new Map[] { IntegerMixin.INSTANCE });
-		classMixins.put(Float.class, new Map[] { FloatMixin.INSTANCE });
-		classMixins.put(Double.class, new Map[] { FloatMixin.INSTANCE });
-		classMixins.put(String.class, new Map[] { StringMixin.INSTANCE });
-		classMixins.put(List.class, new Map[] { ListMixin.INSTANCE });
-		classMixins.put(Map.class, new Map[] { MapMixin.INSTANCE });
-		classMixins.put(Pattern.class, new Map[] { RegexMixin.INSTANCE });
-		HashObject klass = getAdapterFor(HashObject.class);
+		HashObject klass = getWrapperFor(HashObject.class);
 		klass.remove("setIsa");
 		klass.remove("getIsa");
 		klass.remove(Constants.CONSTRUCTOR);
 	}
 
-	public HashObject getAdapterFor(Class<?> cls) {
+	public HashObject getWrapperFor(Class<?> cls) {
 		if (!classMap.containsKey(cls))
 			synchronized (classMap) {
 				if (!classMap.containsKey(cls))
@@ -128,27 +99,6 @@ public class JvmBridge extends ClassLoader implements Opcodes {
 				throw new RuntimeException(e);
 			}
 		}
-
-		// If mixins have been defined for this class or any of its interfaces,
-		// the time to merge is now. Begin by merging the interfaces mixins, so
-		// classes mixins can override them
-		Class<?>[] interfaces = klass.getInterfaces();
-		for (Class<?> i : interfaces) {
-			Map[] interfaceMixins = classMixins.get(i);
-			if (interfaceMixins != null)
-				for (Map mixin : interfaceMixins)
-					for (Object key : mixin.keySet())
-						hashClass.put(key, mixin.get(key));
-		}
-		Map[] mixins = classMixins.get(klass);
-		if (mixins != null)
-			for (Map mixin : mixins)
-				for (Object key : mixin.keySet())
-					hashClass.put(key, mixin.get(key));
-		// If this is an array class, explicitly merge the array mixin
-		if (klass.isArray())
-			for (Object key : ArrayMixin.INSTANCE.keySet())
-				hashClass.put(key, ArrayMixin.INSTANCE.get(key));
 
 		// if there is a superclass, then it must have already been loaded
 		if (superclass != null)

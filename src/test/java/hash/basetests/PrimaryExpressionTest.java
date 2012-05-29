@@ -1,22 +1,12 @@
 package hash.basetests;
 
 import static org.junit.Assert.assertEquals;
-import hash.runtime.Context;
-import hash.runtime.Factory;
-import hash.runtime.JvmBridge;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public abstract class PrimaryExpressionTest extends AbstractCodeTest {
 
-	protected Context context;
-
-	@Before
-	public void setup() {
-		context = Factory.createContext();
-	}
-
+	
 	@Test
 	public void numberToString() {
 		assertEquals("5", evaluate("5.toString()"));
@@ -103,7 +93,7 @@ public abstract class PrimaryExpressionTest extends AbstractCodeTest {
 
 	@Test
 	public void constructingInstances() {
-		context.put("Integer", JvmBridge.INSTANCE.getAdapterFor(Integer.class));
+		evaluate("import java.lang.Integer");		
 		assertEquals(5, evaluate("new Integer('5')"));
 	}
 

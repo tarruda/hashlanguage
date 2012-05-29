@@ -3,6 +3,7 @@ package hash.commontests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import hash.basetests.AbstractCodeTest;
 import hash.parsing.exceptions.ParsingException;
 import hash.runtime.Context;
 import hash.runtime.Factory;
@@ -16,11 +17,12 @@ public class LiteralTest {
 	private Context context;
 
 	private Object evaluate(String code) {
-		return SimpleVmTester.eval(code, context);
+		return SimpleVmTester.eval(AbstractCodeTest.testRuntime, code, context);
 	}
 
 	private Object evaluate(String code, Class expectedException) {
-		return SimpleVmTester.eval(code, context, expectedException);
+		return SimpleVmTester.eval(AbstractCodeTest.testRuntime, code, context,
+				expectedException);
 	}
 
 	@Before

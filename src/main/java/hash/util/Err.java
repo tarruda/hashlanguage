@@ -10,6 +10,16 @@ public class Err {
 		return new RuntimeException(msg);
 	}
 
+	public static RuntimeException ex(String msg, Throwable cause) {
+		return new RuntimeException(msg, cause);
+	}
+
+	public static RuntimeException importError(String importName,
+			Throwable cause) {
+		return new RuntimeException(String.format("Cannot import '%s'",
+				importName), cause);
+	}
+
 	public static RuntimeException binaryOperatorNotImplemented(
 			String operator, Object leftOperand, Object rightOperand) {
 		return new RuntimeException(

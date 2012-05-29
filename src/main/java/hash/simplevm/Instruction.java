@@ -1,5 +1,6 @@
 package hash.simplevm;
 
+import hash.runtime.AppRuntime;
 import hash.runtime.Context;
 
 public abstract class Instruction {
@@ -9,13 +10,12 @@ public abstract class Instruction {
 		this.name = name;
 	}
 
-	public abstract void exec(Context local, OperandStack operandStack,
-			InstructionPointer pointer, State functionReturn) throws Throwable;
+	public abstract void exec(AppRuntime runtime, Context local,
+			OperandStack operandStack, InstructionPointer pointer, State functionReturn) throws Throwable;
 
 	@Override
 	public String toString() {
 		return name;
 	}
 
-	
 }
