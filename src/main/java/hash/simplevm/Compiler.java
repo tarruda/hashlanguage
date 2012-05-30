@@ -67,20 +67,16 @@ public class Compiler extends LiteralEvaluator {
 		node.setNodeData(GOTOCONTINUE, gotoContinue);
 		node.setNodeData(GOTOBREAK, gotoBreak);
 		int pointer = code.size();
-		if (init != null) {
-			pointer = (Integer) visit(init).getNodeData();
-			code.add(Instructions.pop());
-		}
+		if (init != null) 
+			pointer = (Integer) visit(init).getNodeData();			
 		int loopStart = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
 		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
 		visit(action);
 		int loopContinue = code.size();
-		if (update != null) {
-			loopContinue = (Integer) visit(update).getNodeData();
-			code.add(Instructions.pop());
-		}
+		if (update != null)
+			loopContinue = (Integer) visit(update).getNodeData();		
 		code.add(Instructions.goTo(loopStart));
 		int endPointer = code.size();
 		gotoBreak.setTarget(endPointer);

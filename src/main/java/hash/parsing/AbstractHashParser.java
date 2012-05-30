@@ -80,7 +80,7 @@ public abstract class AbstractHashParser extends Parser {
 		}
 		return adaptor.create(HashParser.NULL, "null");
 	}
-
+	
 	protected String getContainsId() {
 		return Constants.CONTAINS;
 	}

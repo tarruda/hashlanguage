@@ -14,6 +14,7 @@ import static hash.parsing.HashParser.FOR;
 import static hash.parsing.HashParser.FOREACH;
 import static hash.parsing.HashParser.FUNCTION;
 import static hash.parsing.HashParser.FUNCTIONBLOCK;
+import static hash.parsing.HashParser.IDENTIFIER;
 import static hash.parsing.HashParser.IF;
 import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
@@ -37,6 +38,7 @@ import static hash.parsing.HashParser.UNPACK_ASSIGN;
 import static hash.parsing.HashParser.WHILE;
 import static hash.parsing.HashParser.YIELD;
 import hash.parsing.exceptions.TreeValidationException;
+import hash.parsing.tree.CommonHashAdaptor;
 import hash.parsing.tree.CommonHashNode;
 import hash.parsing.tree.HashNode;
 import hash.parsing.tree.RuntimeInvocation;
@@ -69,8 +71,10 @@ public abstract class AstVisitor {
 			return visitForeach(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1), (HashNode) node.getChild(2));
 		case FOR:
-			return visitLoop(node, (HashNode) node.getChild(0),
-					(HashNode) node.getChild(1), (HashNode) node.getChild(2),
+			return visitLoop(node,
+					CommonHashAdaptor.createBlock(node.getChild(0)),
+					(HashNode) node.getChild(1),
+					CommonHashAdaptor.createBlock(node.getChild(2)),
 					(HashNode) node.getChild(3));
 		case WHILE:
 			return visitLoop(node, null, (HashNode) node.getChild(0), null,
@@ -147,6 +151,7 @@ public abstract class AstVisitor {
 		case LIST:
 			return visitList(node);
 		case NAMEREF:
+		case IDENTIFIER:
 			return visitNameReference(node);
 		case THIS:
 			return visitThis(node);
@@ -194,12 +199,20 @@ public abstract class AstVisitor {
 				iterable));
 		HashNode condition = new RuntimeInvocation(
 				RuntimeInvocation.ITERATOR_HASNEXT, iteratorVar);
-		HashNode setNext = new CommonHashNode(ASSIGN);
-		setNext.addChild(new CommonHashNode(NAMEREF, foreachControl.getText()));
+		HashNode setNext = null;
+		if (foreachControl.getChildCount() == 0) {
+			setNext = new CommonHashNode(ASSIGN);
+			setNext.addChild(new CommonHashNode(NAMEREF, foreachControl
+					.getText()));
+		} else {
+			setNext = new CommonHashNode(UNPACK_ASSIGN);
+			setNext.addChild(foreachControl);
+		}
 		setNext.addChild(new RuntimeInvocation(RuntimeInvocation.ITERATOR_NEXT,
 				iteratorVar));
 		action.insertChild(0, setNext);
-		return visitLoop(node, init, condition, null, action);
+		return visitLoop(node, CommonHashAdaptor.createBlock(init), condition,
+				null, action);
 	}
 
 	protected HashNode visitDoWhile(HashNode node, HashNode condition,

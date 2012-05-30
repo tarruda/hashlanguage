@@ -9,7 +9,7 @@ public class OperandStack {
 
 	public void push(Object obj) {
 		top = new Node(obj, top);
-		size++;		
+		size++;
 	}
 
 	public Object peek() {

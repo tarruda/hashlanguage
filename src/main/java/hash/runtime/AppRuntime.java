@@ -346,6 +346,8 @@ public class AppRuntime {
 			return ((Iterable) obj).iterator();
 		else if (obj instanceof Continuation)
 			return new ContinuationIterator((Continuation) obj);
+		else if (obj instanceof Map)
+			return new MapIterator((Map) obj);
 		throw Err
 				.illegalArg("For loop cannot get an iterator from this object");
 	}

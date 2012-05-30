@@ -3,13 +3,15 @@ package hash.basetests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
 import hash.runtime.Function;
 
 import org.junit.Test;
 
 public abstract class StatementTest extends AbstractCodeTest {
 
-	
 	@Test
 	public void functionStatement() {
 		evaluate("function\n f1\n  (\nn){return n}");
@@ -185,6 +187,14 @@ public abstract class StatementTest extends AbstractCodeTest {
 	public void foreachStmt() {
 		evaluate("s=0; for (i in [1,2,3,4]) s+=i");
 		assertEquals(10, context.get("s"));
+	}
+
+	@Test
+	public void foreachUnpack() {
+		List l = (List) evaluate("l=[];m={name:'hash', type:'language'}; "
+				+ "for (k,v in m)l.add(k+':'+v);l");
+		assertEquals("name:hash", l.get(0));
+		assertEquals("type:language", l.get(1));
 	}
 
 	@Test
