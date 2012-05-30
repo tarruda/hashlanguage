@@ -48,8 +48,7 @@ import org.antlr.runtime.tree.Tree;
 
 /**
  * Base for all classes that need to do something with the AST. It can be used
- * for translation, transformation, analysis, compilation, execution or any
- * other processing of the AST.
+ * for translation, analysis, compilation or any other processing of the AST.
  * 
  * The 'visit' method will validate tree structure and delegate further
  * processing to the specialized visitor methods.
@@ -80,7 +79,8 @@ public abstract class AstVisitor {
 			return visitLoop(node, null, (HashNode) node.getChild(0), null,
 					(HashNode) node.getChild(1));
 		case DO:
-			return visitDoWhile(node, (HashNode) node.getChild(0),
+			return visitLoop(node, (HashNode) node.getChild(1),
+					(HashNode) node.getChild(0), null,
 					(HashNode) node.getChild(1));
 		case IF:
 			return visitIf(node, (HashNode) node.getChild(0),
@@ -214,12 +214,7 @@ public abstract class AstVisitor {
 		return visitLoop(node, CommonHashAdaptor.createBlock(init), condition,
 				null, action);
 	}
-
-	protected HashNode visitDoWhile(HashNode node, HashNode condition,
-			HashNode action) {
-		return node;
-	}
-
+	
 	protected HashNode visitIf(HashNode node, HashNode condition,
 			HashNode trueAction, HashNode falseAction) {
 		return node;

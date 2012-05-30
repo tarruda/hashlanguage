@@ -86,26 +86,6 @@ public class Compiler extends LiteralEvaluator {
 	}
 
 	@Override
-	protected HashNode visitDoWhile(HashNode node, HashNode condition,
-			HashNode action) {
-		GotoInstruction gotoBreak = Instructions.goTo();
-		GotoInstruction gotoContinue = Instructions.goTo();
-		node.setNodeData(GOTOCONTINUE, gotoContinue);
-		node.setNodeData(GOTOBREAK, gotoBreak);
-		int loopStart = (Integer) visit(action).getNodeData();
-		int loopContinue = (Integer) visit(condition).getNodeData();
-		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
-		GotoInstruction endIfFalse = Instructions.goToIfFalse();
-		code.add(endIfFalse);
-		code.add(Instructions.goTo(loopStart));
-		int endPointer = code.size();
-		gotoBreak.setTarget(endPointer);
-		endIfFalse.setTarget(endPointer);
-		gotoContinue.setTarget(loopContinue);
-		return new Result(loopStart);
-	}
-
-	@Override
 	protected HashNode visitIf(HashNode node, HashNode condition,
 			HashNode trueAction, HashNode falseAction) {
 		int pointer = (Integer) visit(condition).getNodeData();
