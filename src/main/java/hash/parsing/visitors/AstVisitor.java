@@ -6,10 +6,10 @@ import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BLOCK;
 import static hash.parsing.HashParser.BOOLEAN;
 import static hash.parsing.HashParser.BREAK;
+import static hash.parsing.HashParser.CONDITIONAL;
 import static hash.parsing.HashParser.CONTINUE;
 import static hash.parsing.HashParser.DO;
 import static hash.parsing.HashParser.FLOAT;
-import static hash.parsing.HashParser.CONDITIONAL;
 import static hash.parsing.HashParser.FOR;
 import static hash.parsing.HashParser.FOREACH;
 import static hash.parsing.HashParser.FUNCTION;
@@ -32,10 +32,13 @@ import static hash.parsing.HashParser.THIS;
 import static hash.parsing.HashParser.THROW;
 import static hash.parsing.HashParser.TRY;
 import static hash.parsing.HashParser.UNARY;
+import static hash.parsing.HashParser.UNPACK_ASSIGN;
 import static hash.parsing.HashParser.WHILE;
 import static hash.parsing.HashParser.YIELD;
 import hash.parsing.exceptions.TreeValidationException;
+import hash.parsing.tree.CommonHashNode;
 import hash.parsing.tree.HashNode;
+import hash.util.Err;
 
 import org.antlr.runtime.tree.Tree;
 
@@ -106,6 +109,9 @@ public abstract class AstVisitor {
 		case ASSIGN:
 			validateAssignment(node);
 			return visitAssignment(node, (HashNode) node.getChild(0),
+					(HashNode) node.getChild(1));
+		case UNPACK_ASSIGN:
+			return visitUnpackAssign(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1));
 		case INCR:
 			return visitEvalAndIncrement(node, (HashNode) node.getChild(0),
@@ -224,6 +230,24 @@ public abstract class AstVisitor {
 		return node;
 	}
 
+	protected final HashNode visitUnpackAssign(HashNode node,
+			HashNode targetList, HashNode expression) {
+		int childCount = targetList.getChildCount();
+		HashNode firstTarget = (HashNode) targetList.getChild(0);
+		HashNode rv = visitAssignment(null, firstTarget, expression);		
+		for (int i = childCount - 1; i >= 0; i--) {
+			HashNode target = (HashNode) targetList.getChild(i);
+			HashNode index = new CommonHashNode(INDEX);
+			HashNode indexNo = new CommonHashNode(INTEGER);		
+			index.addChild(firstTarget);
+			index.addChild(indexNo);
+			indexNo.setText(Integer.toHexString(i));
+			visitAssignment(null, target, index);
+			pop();
+		}
+		return rv;
+	}
+
 	protected HashNode visitEvalAndIncrement(HashNode node, HashNode target,
 			HashNode assignment) {
 		return node;
@@ -301,6 +325,10 @@ public abstract class AstVisitor {
 
 	protected HashNode visitNull(HashNode node) {
 		return node;
+	}
+
+	protected void pop() {
+		throw Err.notImplemented();
 	}
 
 	private void validateReturnAndYield(HashNode node) {

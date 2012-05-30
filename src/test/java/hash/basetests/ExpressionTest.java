@@ -8,13 +8,13 @@ import java.util.Map;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
 
-public abstract class BinaryAndUnaryExpressionTest extends AbstractCodeTest {
+public abstract class ExpressionTest extends AbstractCodeTest {
 
 	@Test
 	public void identifier() {
 		context.put("x", 255);
 		context.put("y", "Str");
-		assertEquals(255, evaluate("x"));	
+		assertEquals(255, evaluate("x"));
 		assertEquals("StrStrStrStrStr", evaluate("y*=5"));
 		assertEquals("StrStrStrStrStrStrStrStrStrStr", evaluate("2 * y"));
 	}
@@ -32,7 +32,7 @@ public abstract class BinaryAndUnaryExpressionTest extends AbstractCodeTest {
 
 	@Test
 	public void assignments() {
-		assertEquals(5, evaluate("x = 5"));		
+		assertEquals(5, evaluate("x = 5"));
 		assertEquals(10, evaluate("x+=5"));
 		assertEquals(30, evaluate("x*=3"));
 		assertEquals(0, evaluate("x%=3"));
@@ -44,6 +44,17 @@ public abstract class BinaryAndUnaryExpressionTest extends AbstractCodeTest {
 		assertEquals(5, evaluate("z = y = x"));
 		assertEquals(5, evaluate("y"));
 		assertEquals(5, evaluate("z"));
+	}
+
+	@Test
+	public void unpackAssignments() {
+		List l = (List) evaluate("x,y,z = [1,2,3]");
+		assertEquals(1, l.get(0));
+		assertEquals(2, l.get(1));
+		assertEquals(3, l.get(2));
+		assertEquals(1, context.get("x"));
+		assertEquals(2, context.get("y"));
+		assertEquals(3, context.get("z"));
 	}
 
 	@Test

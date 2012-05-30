@@ -1,10 +1,10 @@
 package hash.simplevm;
 
-import hash.basetests.BinaryAndUnaryExpressionTest;
+import hash.basetests.ExpressionTest;
 import hash.testutils.SimpleVmTester;
 
-public class BinaryAndUnaryExpressionSimpleVmTest extends
-		BinaryAndUnaryExpressionTest {
+public class ExpressionSimpleVmTest extends
+		ExpressionTest {
 
 	@Override
 	protected Object evaluate(String code) {

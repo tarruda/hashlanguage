@@ -3,6 +3,7 @@ package hash.parsing.tree;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
@@ -19,6 +20,10 @@ public class CommonHashNode extends CommonTree implements HashNode {
 
 	public CommonHashNode(Token t) {
 		super(t);
+	}
+
+	public CommonHashNode(int type) {
+		super(new CommonToken(type));
 	}
 
 	public Object getNodeData(Object key) {

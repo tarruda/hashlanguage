@@ -2,9 +2,10 @@ package hash.simplevm;
 
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
-import static hash.parsing.HashParser.CONDITIONAL;
+import static hash.parsing.HashParser.UNPACK_ASSIGN;
 import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BOOLEAN;
+import static hash.parsing.HashParser.CONDITIONAL;
 import static hash.parsing.HashParser.FLOAT;
 import static hash.parsing.HashParser.FOREACH;
 import static hash.parsing.HashParser.FUNCTIONBLOCK;
@@ -246,6 +247,7 @@ public class Compiler extends LiteralEvaluator {
 				case JUMPTO:
 				case INCR:
 				case ATTRIBUTE:
+				case UNPACK_ASSIGN:
 				case INDEX:
 				case SLICE:
 				case MAP:
@@ -570,6 +572,11 @@ public class Compiler extends LiteralEvaluator {
 	protected HashNode visitNull(HashNode node) {
 		code.add(Instructions.push(super.visitNull(node).getNodeData()));
 		return new Result(code.size() - 1);
+	}
+	
+	@Override
+	protected void pop() {
+		code.add(Instructions.pop());
 	}
 
 	private void replaceReturnJumps(HashNode node,

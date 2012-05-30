@@ -29,6 +29,7 @@ tokens {
     FOREACH; 
     NAMEREF;
     CONDITIONAL; 
+    UNPACK_ASSIGN;
 }
 
 @header {
@@ -190,26 +191,11 @@ expression
   | yieldExpression
   | (LROUND (IDENTIFIER (COMMA IDENTIFIER)*)? RROUND LCURLY) => functionExpression
   | (LROUND (IDENTIFIER (COMMA IDENTIFIER)*)? RROUND LAMBDA) => lambdaExpression
-  | incOrDecExpression  
   | (disjunction QMARK) => conditionalExpression
-  | (l=disjunction -> $l)
-    ( 
-      o=ASSIGN r=expression -> ^($o $l $r)
-    | o=PLUS_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l $r))
-    | o=MINUS_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l $r))
-    | o=MUL_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "*"] $l $r))
-    | o=DIV_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "/"] $l $r))
-    | o=MOD_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "\%"] $l $r))
-    | o=POW_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "**"] $l $r))
-    | o=AND_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "&"] $l $r))
-    | o=OR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "|"] $l $r))
-    | o=XOR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "^"] $l $r))
-    | o=SHL_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "<<"] $l $r))
-    | o=USHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>>"] $l $r))
-    | o=SHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>"] $l $r))
-    | o=INC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "+"] $l INTEGER["1"])))
-    | o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
-    )?   
+  | (assignmentTarget assignmentOperator) => assignmentExpression  
+  | (primary (INC|DEC)) => evaluateAndInc
+  | incAndEvaluate  
+  | disjunction
   ;
 
 jumpExpression
@@ -233,17 +219,64 @@ lambdaExpression
         -> ^(FUNCTION[$l, "Lambda"] {stringList($params)} 
               ^(FUNCTIONBLOCK ^(RETURN[$t, "=>"] $e)))
   ;
-  
-incOrDecExpression
-  : o=INC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
-  | o=DEC l=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   
-  ;
-  
+ 
 conditionalExpression
   : c=disjunction o=QMARK te=expression COLON fe=expression 
       -> ^(CONDITIONAL[$o] $c $te $fe)
   ;
   
+assignmentOperator
+  : ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MUL_ASSIGN | DIV_ASSIGN | MOD_ASSIGN
+  | POW_ASSIGN | AND_ASSIGN | OR_ASSIGN | XOR_ASSIGN | SHL_ASSIGN | USHR_ASSIGN
+  | SHR_ASSIGN
+  ;
+  
+assignmentExpression
+  : (primary COMMA) =>
+    t=targetList o=ASSIGN r=expression -> ^(UNPACK_ASSIGN[$o] $t $r)
+  | (l=primary -> $l)
+    ( 
+      o=ASSIGN r=expression -> ^($o $l $r)
+    | o=PLUS_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l $r))
+    | o=MINUS_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l $r))
+    | o=MUL_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "*"] $l $r))
+    | o=DIV_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "/"] $l $r))
+    | o=MOD_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "\%"] $l $r))
+    | o=POW_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "**"] $l $r))
+    | o=AND_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "&"] $l $r))
+    | o=OR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "|"] $l $r))
+    | o=XOR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "^"] $l $r))
+    | o=SHL_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "<<"] $l $r))
+    | o=USHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>>"] $l $r))
+    | o=SHR_ASSIGN r=expression -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, ">>"] $l $r))
+    )
+  ;
+  
+assignmentTarget
+  : (primary COMMA) => targetList
+  | primary 
+  ;
+  
+targetList
+  : s=primary (COMMA primary)* COMMA? 
+     -> ^(LIST[$s.start, "Targets"] primary+)     
+  ;
+  
+target
+  : primary
+  ;
+  
+incAndEvaluate
+  : o=INC l=primary -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "+"] $l INTEGER["1"]))   
+  | o=DEC l=primary -> ^(ASSIGN[$o, "="] $l ^(BINARY[$o, "-"] $l INTEGER["1"]))   
+  ;
+  
+evaluateAndInc
+  : (primary INC) => l=primary o=INC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "+"] $l INTEGER["1"])))
+  | l=primary o=DEC-> ^(INCR[$o] $l ^(ASSIGN[$o,"="] $l ^(BINARY[$o, "-"] $l INTEGER["1"])))
+  ;
+
+
 disjunction
   : (l=conjunction -> $l) 
     (o=OR r=conjunction -> ^(BINARY[$o] $disjunction $r))* 
