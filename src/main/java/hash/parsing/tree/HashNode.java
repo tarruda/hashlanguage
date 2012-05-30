@@ -19,4 +19,6 @@ public interface HashNode extends Tree {
 	void setText(String text);
 
 	boolean contains(Object key);
+	
+	void insertChild(int i, Object t);
 }

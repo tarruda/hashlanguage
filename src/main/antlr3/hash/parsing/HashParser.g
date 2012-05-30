@@ -18,6 +18,7 @@ tokens {
     INTEGER;
     BOOLEAN;
     INVOCATION;
+    RUNTIME_INVOCATION;
     NEWINSTANCE;
     LIST;
     ATTRIBUTE;
@@ -117,16 +118,26 @@ ifStatement
   ;
     
 forStatement
- : (FOR LROUND IDENTIFIER IN) =>
-    t=FOR LROUND id=IDENTIFIER IN iterable=expression RROUND
+ : (FOR LROUND foreachControl IN) =>
+    t=FOR LROUND c=foreachControl IN iterable=expression RROUND
       ((LCURLY) => b=block|s=statement)
-    -> ^(FOREACH[$t, "for each"] $id $iterable {block(b,s)})   
+    -> ^(FOREACH[$t, "for each"] $c $iterable {block(b,s)})   
  |  FOR LROUND 
     (init=expression)? SCOLON (cond=expression)? SCOLON (u=expression)?
     RROUND
       ((LCURLY) => b=block|s=statement)
     -> ^(FOR["for"] {nodeOrNull(init)} {nodeOrNull(cond)} {nodeOrNull(u)} {block(b,s)})
  ;
+ 
+foreachControl
+  : (IDENTIFIER COMMA) => varList
+  | IDENTIFIER
+  ;
+  
+varList
+  : vars+=IDENTIFIER (COMMA vars+=IDENTIFIER)* COMMA?
+    -> ^({getTokenList($vars)})
+  ;
   
 whileStatement
   : WHILE LROUND cond=expression RROUND

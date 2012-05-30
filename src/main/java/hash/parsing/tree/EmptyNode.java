@@ -12,7 +12,7 @@ import org.antlr.runtime.tree.Tree;
  * @author Thiago de Arruda
  * 
  */
-public class EmptyNode implements Tree, HashNode {
+public class EmptyNode implements HashNode {
 
 	public Tree getChild(int i) {
 		throw Err.notImplemented();
@@ -136,6 +136,10 @@ public class EmptyNode implements Tree, HashNode {
 	}
 
 	public boolean contains(Object key) {
+		throw Err.notImplemented();
+	}
+
+	public void insertChild(int i, Object t) {
 		throw Err.notImplemented();
 	}
 }

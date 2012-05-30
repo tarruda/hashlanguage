@@ -2,12 +2,10 @@ package hash.simplevm;
 
 import static hash.parsing.HashParser.ASSIGN;
 import static hash.parsing.HashParser.ATTRIBUTE;
-import static hash.parsing.HashParser.UNPACK_ASSIGN;
 import static hash.parsing.HashParser.BINARY;
 import static hash.parsing.HashParser.BOOLEAN;
 import static hash.parsing.HashParser.CONDITIONAL;
 import static hash.parsing.HashParser.FLOAT;
-import static hash.parsing.HashParser.FOREACH;
 import static hash.parsing.HashParser.FUNCTIONBLOCK;
 import static hash.parsing.HashParser.INCR;
 import static hash.parsing.HashParser.INDEX;
@@ -24,8 +22,10 @@ import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.THIS;
 import static hash.parsing.HashParser.UNARY;
+import static hash.parsing.HashParser.UNPACK_ASSIGN;
 import static hash.parsing.HashParser.YIELD;
 import hash.parsing.tree.HashNode;
+import hash.parsing.tree.RuntimeInvocation;
 import hash.parsing.visitors.LiteralEvaluator;
 import hash.parsing.visitors.Result;
 import hash.util.Constants;
@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Compiler extends LiteralEvaluator {
-	private static final String FOREACH_NESTING = "ForeachNesting";
+
 	private static final String GOTOCONTINUE = "GoToContinue";
 	private static final String GOTOBREAK = "GoToBreak";
 	private static final String GOTORETURN = "GoToReturn";
@@ -60,82 +60,33 @@ public class Compiler extends LiteralEvaluator {
 	}
 
 	@Override
-	protected HashNode visitForeach(HashNode node, HashNode id,
-			HashNode iterable, HashNode action) {
-		GotoInstruction gotoBreak = Instructions.goTo();
-		GotoInstruction gotoContinue = Instructions.goTo();
-		node.setNodeData(GOTOCONTINUE, gotoContinue);
-		node.setNodeData(GOTOBREAK, gotoBreak);
-		int nestingLevel = 0;
-		HashNode current = node;
-		while (current.getParent() != null && nestingLevel == 0) {
-			// Find if this is a nested foreach. If so, the variable that will
-			// store the iterator must be diferent than the one used by the
-			// parent foreach. For disambiguating we append the nesting level
-			// to the variable name
-			current = (HashNode) current.getParent();
-			if (current.getType() == FOREACH)
-				nestingLevel = (Integer) current.getNodeData(FOREACH_NESTING) + 1;
-		}
-		node.setNodeData(FOREACH_NESTING, nestingLevel);
-		String varName = "**iter**" + nestingLevel;
-		int pointer = (Integer) visit(iterable).getNodeData();
-		code.add(Instructions.iterator(varName));
-		code.add(Instructions.iteratorNext(varName, id.getText()));
-		int loopStart = code.size() - 1;
-		GotoInstruction endIfFalse = Instructions.goToIfFalse();
-		code.add(endIfFalse);
-		visit(action);
-		code.add(gotoContinue);
-		int endPointer = code.size();
-		gotoBreak.setTarget(endPointer);
-		endIfFalse.setTarget(endPointer);
-		gotoContinue.setTarget(loopStart);
-		return new Result(pointer);
-	}
-
-	@Override
-	protected HashNode visitFor(HashNode node, HashNode init,
+	protected HashNode visitLoop(HashNode node, HashNode init,
 			HashNode condition, HashNode update, HashNode action) {
 		GotoInstruction gotoBreak = Instructions.goTo();
 		GotoInstruction gotoContinue = Instructions.goTo();
 		node.setNodeData(GOTOCONTINUE, gotoContinue);
 		node.setNodeData(GOTOBREAK, gotoBreak);
-		int pointer = (Integer) visit(init).getNodeData();
-		code.add(Instructions.pop());
+		int pointer = code.size();
+		if (init != null) {
+			pointer = (Integer) visit(init).getNodeData();
+			code.add(Instructions.pop());
+		}
 		int loopStart = (Integer) visit(condition).getNodeData();
 		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
 		GotoInstruction endIfFalse = Instructions.goToIfFalse();
 		code.add(endIfFalse);
 		visit(action);
-		int loopContinue = (Integer) visit(update).getNodeData();
-		code.add(Instructions.pop());
+		int loopContinue = code.size();
+		if (update != null) {
+			loopContinue = (Integer) visit(update).getNodeData();
+			code.add(Instructions.pop());
+		}
 		code.add(Instructions.goTo(loopStart));
 		int endPointer = code.size();
 		gotoBreak.setTarget(endPointer);
 		endIfFalse.setTarget(endPointer);
 		gotoContinue.setTarget(loopContinue);
 		return new Result(pointer);
-	}
-
-	@Override
-	protected HashNode visitWhile(HashNode node, HashNode condition,
-			HashNode action) {
-		GotoInstruction gotoBreak = Instructions.goTo();
-		GotoInstruction gotoContinue = Instructions.goTo();
-		node.setNodeData(GOTOCONTINUE, gotoContinue);
-		node.setNodeData(GOTOBREAK, gotoBreak);
-		int loopStart = (Integer) visit(condition).getNodeData();
-		code.add(Instructions.invokeMethod(Constants.BOOLEAN_VALUE, false));
-		GotoInstruction endIfFalse = Instructions.goToIfFalse();
-		code.add(endIfFalse);
-		visit(action);
-		code.add(gotoContinue);
-		int endPointer = code.size();
-		gotoBreak.setTarget(endPointer);
-		endIfFalse.setTarget(endPointer);
-		gotoContinue.setTarget(loopStart);
-		return new Result(loopStart);
 	}
 
 	@Override
@@ -494,6 +445,20 @@ public class Compiler extends LiteralEvaluator {
 	}
 
 	@Override
+	protected HashNode visitRuntimeInvocation(RuntimeInvocation node) {
+		HashNode[] args = node.getArgs();
+		int pointer = -1;
+		for (HashNode arg : args) {
+			if (pointer == -1)
+				pointer = (Integer) visit(arg).getNodeData();
+			else
+				visit(arg);
+		}
+		code.add(Instructions.runtimeInvoke(node.getRuntimeMethod()));
+		return new Result(pointer);
+	}
+
+	@Override
 	protected HashNode visitMap(HashNode node) {
 		int len = node.getChildCount();
 		int pointer = -1;
@@ -573,7 +538,7 @@ public class Compiler extends LiteralEvaluator {
 		code.add(Instructions.push(super.visitNull(node).getNodeData()));
 		return new Result(code.size() - 1);
 	}
-	
+
 	@Override
 	protected void pop() {
 		code.add(Instructions.pop());

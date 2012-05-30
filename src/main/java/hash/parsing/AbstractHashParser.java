@@ -168,4 +168,12 @@ public abstract class AbstractHashParser extends Parser {
 		return rv;
 	}
 
+	protected Object getTokenList(List vars) {
+		TreeAdaptor adaptor = getTreeAdaptor();
+		Tree rv = (Tree) adaptor.create(HashParser.LIST, "Vars");
+		for (Object tok : vars) 
+			rv.addChild((Tree) adaptor.create((Token) tok));		
+		return rv;
+	}
+
 }

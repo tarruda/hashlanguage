@@ -350,6 +350,14 @@ public class AppRuntime {
 				.illegalArg("For loop cannot get an iterator from this object");
 	}
 
+	public Object iteratorNext(Object obj) {
+		return ((Iterator) obj).next();
+	}
+
+	public boolean iteratorHasNext(Object obj) {
+		return ((Iterator) obj).hasNext();
+	}
+
 	public Context getContext(int level, Context current) {
 		Context c = current;
 		while (level > 0 && c.getParent() != null) {

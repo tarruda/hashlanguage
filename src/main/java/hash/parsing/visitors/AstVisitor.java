@@ -26,6 +26,7 @@ import static hash.parsing.HashParser.NAMEREF;
 import static hash.parsing.HashParser.NULL;
 import static hash.parsing.HashParser.REGEX;
 import static hash.parsing.HashParser.RETURN;
+import static hash.parsing.HashParser.RUNTIME_INVOCATION;
 import static hash.parsing.HashParser.SLICE;
 import static hash.parsing.HashParser.STRING;
 import static hash.parsing.HashParser.THIS;
@@ -38,6 +39,7 @@ import static hash.parsing.HashParser.YIELD;
 import hash.parsing.exceptions.TreeValidationException;
 import hash.parsing.tree.CommonHashNode;
 import hash.parsing.tree.HashNode;
+import hash.parsing.tree.RuntimeInvocation;
 import hash.util.Err;
 
 import org.antlr.runtime.tree.Tree;
@@ -58,6 +60,7 @@ import org.antlr.runtime.tree.Tree;
  * 
  */
 public abstract class AstVisitor {
+	private static final String FOREACH_NESTING = "ForeachNesting";
 
 	public final HashNode visit(HashNode node) {
 		int nodeType = node.getType();
@@ -66,11 +69,11 @@ public abstract class AstVisitor {
 			return visitForeach(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1), (HashNode) node.getChild(2));
 		case FOR:
-			return visitFor(node, (HashNode) node.getChild(0),
+			return visitLoop(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1), (HashNode) node.getChild(2),
 					(HashNode) node.getChild(3));
 		case WHILE:
-			return visitWhile(node, (HashNode) node.getChild(0),
+			return visitLoop(node, null, (HashNode) node.getChild(0), null,
 					(HashNode) node.getChild(1));
 		case DO:
 			return visitDoWhile(node, (HashNode) node.getChild(0),
@@ -137,6 +140,8 @@ public abstract class AstVisitor {
 		case INVOCATION:
 			return visitInvocation(node, (HashNode) node.getChild(0),
 					(HashNode) node.getChild(1));
+		case RUNTIME_INVOCATION:
+			return visitRuntimeInvocation((RuntimeInvocation) node);
 		case MAP:
 			return visitMap(node);
 		case LIST:
@@ -162,19 +167,39 @@ public abstract class AstVisitor {
 		}
 	}
 
-	protected HashNode visitForeach(HashNode node, HashNode id,
-			HashNode iterable, HashNode action) {
-		return node;
-	}
-
-	protected HashNode visitFor(HashNode node, HashNode init,
+	protected HashNode visitLoop(HashNode node, HashNode init,
 			HashNode condition, HashNode update, HashNode action) {
 		return node;
 	}
 
-	protected HashNode visitWhile(HashNode node, HashNode condition,
-			HashNode action) {
-		return node;
+	protected final HashNode visitForeach(HashNode node,
+			HashNode foreachControl, HashNode iterable, HashNode action) {
+		int nestingLevel = 0;
+		HashNode current = node;
+		while (current.getParent() != null && nestingLevel == 0) {
+			// Find if this is a nested foreach. If so, the variable that will
+			// store the iterator must be diferent than the one used by the
+			// parent foreach. For disambiguating we append the nesting level
+			// to the variable name
+			current = (HashNode) current.getParent();
+			if (current.getType() == FOREACH)
+				nestingLevel = (Integer) current.getNodeData(FOREACH_NESTING) + 1;
+		}
+		node.setNodeData(FOREACH_NESTING, nestingLevel);
+		String varName = "**iter**" + nestingLevel;
+		HashNode iteratorVar = new CommonHashNode(NAMEREF, varName);
+		HashNode init = new CommonHashNode(ASSIGN);
+		init.addChild(iteratorVar);
+		init.addChild(new RuntimeInvocation(RuntimeInvocation.GET_ITERATOR,
+				iterable));
+		HashNode condition = new RuntimeInvocation(
+				RuntimeInvocation.ITERATOR_HASNEXT, iteratorVar);
+		HashNode setNext = new CommonHashNode(ASSIGN);
+		setNext.addChild(new CommonHashNode(NAMEREF, foreachControl.getText()));
+		setNext.addChild(new RuntimeInvocation(RuntimeInvocation.ITERATOR_NEXT,
+				iteratorVar));
+		action.insertChild(0, setNext);
+		return visitLoop(node, init, condition, null, action);
 	}
 
 	protected HashNode visitDoWhile(HashNode node, HashNode condition,
@@ -234,11 +259,11 @@ public abstract class AstVisitor {
 			HashNode targetList, HashNode expression) {
 		int childCount = targetList.getChildCount();
 		HashNode firstTarget = (HashNode) targetList.getChild(0);
-		HashNode rv = visitAssignment(null, firstTarget, expression);		
+		HashNode rv = visitAssignment(null, firstTarget, expression);
 		for (int i = childCount - 1; i >= 0; i--) {
 			HashNode target = (HashNode) targetList.getChild(i);
 			HashNode index = new CommonHashNode(INDEX);
-			HashNode indexNo = new CommonHashNode(INTEGER);		
+			HashNode indexNo = new CommonHashNode(INTEGER);
 			index.addChild(firstTarget);
 			index.addChild(indexNo);
 			indexNo.setText(Integer.toHexString(i));
@@ -269,6 +294,10 @@ public abstract class AstVisitor {
 
 	protected HashNode visitInvocation(HashNode node, HashNode target,
 			HashNode args) {
+		return node;
+	}
+
+	protected HashNode visitRuntimeInvocation(RuntimeInvocation node) {
 		return node;
 	}
 

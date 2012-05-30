@@ -25,6 +25,12 @@ public class CommonHashNode extends CommonTree implements HashNode {
 	public CommonHashNode(int type) {
 		super(new CommonToken(type));
 	}
+	
+	public CommonHashNode(int type, String text) {
+		super(new CommonToken(type));
+		setText(text);
+	}
+
 
 	public Object getNodeData(Object key) {
 		if (nodeInfo == null)

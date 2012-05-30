@@ -1,10 +1,13 @@
 package hash.simplevm;
 
+import static hash.parsing.tree.RuntimeInvocation.GET_ITERATOR;
+import static hash.parsing.tree.RuntimeInvocation.ITERATOR_HASNEXT;
+import static hash.parsing.tree.RuntimeInvocation.ITERATOR_NEXT;
 import hash.runtime.AppRuntime;
 import hash.runtime.Context;
 import hash.runtime.Factory;
+import hash.util.Err;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -82,8 +85,8 @@ public class Instructions {
 		return new Instruction("pushContinuationFactory") {
 			public void exec(AppRuntime runtime, Context locals,
 					OperandStack stack, InstructionPointer ip, State state) {
-				stack.push(new SimpleVmTrampolineFactory(runtime, locals, params, code,
-						isMethod));
+				stack.push(new SimpleVmTrampolineFactory(runtime, locals,
+						params, code, isMethod));
 			}
 		};
 	}
@@ -93,7 +96,8 @@ public class Instructions {
 		return new Instruction("pushFunction") {
 			public void exec(AppRuntime runtime, Context locals,
 					OperandStack stack, InstructionPointer ip, State state) {
-				stack.push(new SimpleVmFunction(runtime, locals, params, code, isMethod));
+				stack.push(new SimpleVmFunction(runtime, locals, params, code,
+						isMethod));
 			}
 		};
 	}
@@ -274,25 +278,46 @@ public class Instructions {
 		return new GotoInstruction();
 	}
 
-	public static Instruction iterator(final String varName) {
-		return new Instruction("iterator") {
-			public void exec(AppRuntime runtime, Context locals,
-					OperandStack stack, InstructionPointer ip, State state) {
-				locals.put(varName, runtime.getIterator(stack.pop()));
-			}
-		};
-	}
+//	public static Instruction iterator(final String varName) {
+//		return new Instruction("iterator") {
+//			public void exec(AppRuntime runtime, Context locals,
+//					OperandStack stack, InstructionPointer ip, State state) {
+//				locals.put(varName, runtime.getIterator(stack.pop()));
+//			}
+//		};
+//	}
+//
+//	public static Instruction iteratorNext(final String varName,
+//			final String currentItemName) {
+//		return new Instruction("iteratorNext") {
+//			public void exec(AppRuntime runtime, Context locals,
+//					OperandStack stack, InstructionPointer ip, State state) {
+//				Iterator it = (Iterator) locals.get(varName);
+//				boolean hasNext = it.hasNext();
+//				if (hasNext)
+//					locals.put(currentItemName, it.next());
+//				stack.push(hasNext);
+//			}
+//		};
+//	}
 
-	public static Instruction iteratorNext(final String varName,
-			final String currentItemName) {
-		return new Instruction("iteratorNext") {
+	public static Instruction runtimeInvoke(final int type) {
+		return new Instruction("runtimeInvoke") {
 			public void exec(AppRuntime runtime, Context locals,
 					OperandStack stack, InstructionPointer ip, State state) {
-				Iterator it = (Iterator) locals.get(varName);
-				boolean hasNext = it.hasNext();
-				if (hasNext)
-					locals.put(currentItemName, it.next());
-				stack.push(hasNext);
+				switch (type) {
+				case GET_ITERATOR:
+					stack.push(runtime.getIterator(stack.pop()));
+					break;
+				case ITERATOR_HASNEXT:
+					stack.push(runtime.iteratorHasNext(stack.pop()));
+					break;
+				case ITERATOR_NEXT:
+					stack.push(runtime.iteratorNext(stack.pop()));
+					break;
+				default:
+					throw Err.ex("Invalid runtime operation");
+				}
 			}
 		};
 	}

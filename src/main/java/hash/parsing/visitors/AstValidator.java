@@ -77,8 +77,8 @@ public class AstValidator extends AstVisitor {
 	protected HashNode visitMap(HashNode node) {
 		int len = node.getChildCount();
 		for (int i = 0; i < len; i++) {
-			visit((HashNode)node.getChild(i));
-			visit((HashNode)node.getChild(i));
+			visit((HashNode) node.getChild(i));
+			visit((HashNode) node.getChild(i));
 		}
 		return node;
 	}
@@ -87,7 +87,7 @@ public class AstValidator extends AstVisitor {
 	protected HashNode visitList(HashNode node) {
 		int len = node.getChildCount();
 		for (int i = 0; i < len; i++)
-			visit((HashNode)node.getChild(i));
+			visit((HashNode) node.getChild(i));
 		return node;
 	}
 
