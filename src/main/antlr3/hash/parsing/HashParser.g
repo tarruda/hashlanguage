@@ -34,9 +34,8 @@ tokens {
 }
 
 @header {
-    package hash.parsing;
+    package org.hashlang.parsing;
 }
-
 
 program
   : statements? EOF!      
