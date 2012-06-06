@@ -4,7 +4,7 @@
   <groupId>org.hashlang</groupId>
   <artifactId>hash</artifactId>
   <name>Hash programming language</name>
-  <version>0.1-SNAPSHOT-1</version>
+  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>http://sourceforge.net/p/hashlanguage</url>
   <properties>
@@ -48,6 +48,30 @@
           <execution>
             <goals>
               <goal>antlr</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>

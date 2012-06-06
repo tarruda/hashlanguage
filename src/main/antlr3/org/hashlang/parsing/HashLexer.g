@@ -48,8 +48,8 @@ StringBuilder sb = new StringBuilder();
   '/'{sb.append("/");}
   ( options {greedy=false;}:
     (
-      '\\/' {sb.append("/");}
-    | REGEXCHAR[sb]     
+      REGEXCHAR[sb]  
+    | '\\/' {sb.append("/");}          
     )
   )* 
   '/'{sb.append("/");}
@@ -58,8 +58,7 @@ StringBuilder sb = new StringBuilder();
   ;
 
 fragment REGEXCHAR[StringBuilder sb]
-  :
-  c=~('\\'|'/'|'\n') {sb.appendCodePoint($c);}  
+  : c=~('/'|'\n') {sb.appendCodePoint($c);}  
   ;
 
 //
@@ -160,8 +159,8 @@ StringBuilder sb = new StringBuilder();
   '"'
   ( options {greedy=false;}:
     (
-	    ESC_SEQ[sb]
-	  | DQCHAR[sb]	   
+      DQCHAR[sb]
+	  | ESC_SEQ[sb]	   	   
     )
   )* 
   '"'
@@ -176,8 +175,8 @@ StringBuilder sb = new StringBuilder();
   '\''
   ( options {greedy=false;}:
     (
-      ESC_SEQ[sb]
-    | SQCHAR[sb]     
+      SQCHAR[sb]
+    | ESC_SEQ[sb]          
     )
   )* 
   '\''

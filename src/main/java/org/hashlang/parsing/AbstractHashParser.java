@@ -13,7 +13,6 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.runtime.tree.TreeAdaptor;
-import org.hashlang.parsing.HashParser;
 import org.hashlang.parsing.HashParser.block_return;
 import org.hashlang.parsing.HashParser.statement_return;
 import org.hashlang.parsing.exceptions.ParsingException;

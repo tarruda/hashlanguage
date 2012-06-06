@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-
 import org.hashlang.runtime.Function;
 import org.junit.Test;
 

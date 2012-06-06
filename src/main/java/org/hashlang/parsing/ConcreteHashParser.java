@@ -3,7 +3,6 @@ package org.hashlang.parsing;
 
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
-import org.hashlang.parsing.HashParser;
 import org.hashlang.parsing.tree.CommonHashAdaptor;
 
 public class ConcreteHashParser extends HashParser {
